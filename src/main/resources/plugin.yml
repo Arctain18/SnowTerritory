@@ -17,11 +17,19 @@ commands:
     usage: /reloadeditor
     permission: mmoitemseditor.reload
     permission-message: 您没有权限使用此命令！
+  itemid:
+    description: 查看手中物品的MMOItems ID
+    usage: /itemid
+    permission: mmoitemseditor.itemid
+    permission-message: 您没有权限使用此命令！
 permissions:
   mmoitemseditor.edit:
     description: 允许使用物品编辑功能
     default: op
   mmoitemseditor.reload:
     description: 允许重载插件配置
+    default: op
+  mmoitemseditor.itemid:
+    description: 允许查看物品ID
     default: op
 
