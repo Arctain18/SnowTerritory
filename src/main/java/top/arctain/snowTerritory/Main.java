@@ -1,8 +1,6 @@
 package top.arctain.snowTerritory;
 
-import top.arctain.snowTerritory.commands.EditCommand;
-import top.arctain.snowTerritory.commands.ReloadCommand;
-import top.arctain.snowTerritory.commands.ItemIdCommand;
+import top.arctain.snowTerritory.commands.SnowTerritoryCommand;
 import top.arctain.snowTerritory.config.PluginConfig;
 import top.arctain.snowTerritory.listeners.GUIListener;
 import top.arctain.snowTerritory.listeners.ItemEditListener;
@@ -29,29 +27,15 @@ public class Main extends JavaPlugin {
         this.pluginConfig = new PluginConfig(this);
         pluginConfig.loadConfig();
 
-        // 注册命令
-        org.bukkit.command.PluginCommand editCommand = getServer().getPluginCommand("edititem");
-        if (editCommand != null) {
-            editCommand.setExecutor(new EditCommand(this, pluginConfig));
-            getLogger().info("命令 'edititem' 已注册");
+        // 注册主命令
+        org.bukkit.command.PluginCommand mainCommand = getServer().getPluginCommand("snowterritory");
+        if (mainCommand != null) {
+            SnowTerritoryCommand commandExecutor = new SnowTerritoryCommand(this, pluginConfig);
+            mainCommand.setExecutor(commandExecutor);
+            mainCommand.setTabCompleter(commandExecutor);
+            getLogger().info("命令 'snowterritory' (别名: st) 已注册");
         } else {
-            getLogger().warning("命令 'edititem' 未在 plugin.yml 中注册！");
-        }
-
-        org.bukkit.command.PluginCommand reloadCommand = getServer().getPluginCommand("reloadeditor");
-        if (reloadCommand != null) {
-            reloadCommand.setExecutor(new ReloadCommand(this, pluginConfig));
-            getLogger().info("命令 'reloadeditor' 已注册");
-        } else {
-            getLogger().warning("命令 'reloadeditor' 未在 plugin.yml 中注册！");
-        }
-
-        org.bukkit.command.PluginCommand itemIdCommand = getServer().getPluginCommand("itemid");
-        if (itemIdCommand != null) {
-            itemIdCommand.setExecutor(new ItemIdCommand());
-            getLogger().info("命令 'itemid' 已注册");
-        } else {
-            getLogger().warning("命令 'itemid' 未在 plugin.yml 中注册！");
+            getLogger().warning("命令 'snowterritory' 未在 plugin.yml 中注册！");
         }
 
         // 注册监听器

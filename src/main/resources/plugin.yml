@@ -7,22 +7,15 @@ website: www.arctain.top
 depend: [ MMOItems ]
 softdepend: [ Vault, PlayerPoints ]
 commands:
-  edititem:
-    description: 打开物品强化编辑界面
-    usage: /edititem
-    permission: mmoitemseditor.edit
-    permission-message: 您没有权限使用此命令！
-  reloadeditor:
-    description: 重载插件配置
-    usage: /reloadeditor
-    permission: mmoitemseditor.reload
-    permission-message: 您没有权限使用此命令！
-  itemid:
-    description: 查看手中物品的MMOItems ID
-    usage: /itemid
-    permission: mmoitemseditor.itemid
-    permission-message: 您没有权限使用此命令！
+  snowterritory:
+    description: SnowTerritory 主命令
+    usage: /snowterritory <子命令>
+    aliases: [st]
+    permission: mmoitemseditor.use
 permissions:
+  mmoitemseditor.use:
+    description: 允许使用 SnowTerritory 命令
+    default: op
   mmoitemseditor.edit:
     description: 允许使用物品编辑功能
     default: op
