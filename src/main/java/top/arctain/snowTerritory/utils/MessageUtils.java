@@ -169,9 +169,9 @@ public class MessageUtils {
     public static void sendHelp(CommandSender sender) {
         String title = getMessage("help.title", "SnowTerritory 命令帮助");
         sendTitle(sender, title);
-        sendConfigRaw(sender, "help.reinforce", "&e/snowterritory reinforce &7- &f打开物品强化界面 (可简写: &e/st r&f)");
-        sendConfigRaw(sender, "help.reload", "&e/snowterritory reload &7- &f重载插件配置 (可简写: &e/st reload&f)");
-        sendConfigRaw(sender, "help.checkid", "&e/snowterritory checkID &7- &f查看手中物品的MMOItems ID (可简写: &e/st checkID&f)");
+        sendConfigRaw(sender, "help.reinforce", "&e/snowterritory reinforce &7- &f打开物品强化界面");
+        sendConfigRaw(sender, "help.reload", "&e/snowterritory reload &7- &f重载插件配置");
+        sendConfigRaw(sender, "help.checkid", "&e/snowterritory checkID &7- &f查看手中物品的MMOItems ID");
         sendSeparator(sender);
     }
 
@@ -276,14 +276,13 @@ public class MessageUtils {
      */
     public static void sendItemInfo(Player player, String type, String id) {
         String title = getMessage("item.info-title", "物品信息");
-        sendTitle(player, title);
+        sendRaw(player, title);
+        sendSeparator(player);
         String typeMsg = getMessage("item.info-type", "&6物品类型: &f{type}", "type", type);
         sendRaw(player, typeMsg);
         String idMsg = getMessage("item.info-id", "&6物品 ID: &e&l{id}", "id", id);
         sendRaw(player, idMsg);
-        sendRaw(player, "");
-        String hintMsg = getMessage("item.info-hint", "&bℹ &f提示: 物品ID为 &e{id}", "id", id);
-        sendRaw(player, hintMsg);
+        sendSeparator(player);
     }
 
     /**
@@ -294,9 +293,9 @@ public class MessageUtils {
         String bold = consoleBoldEnabled ? ANSI_BOLD : "";
         String reset = consoleBoldEnabled ? ANSI_RESET : "";
         plugin.getLogger().info(bold + "╔══════════════════════════════════════╗" + reset);
-        plugin.getLogger().info(bold + "║     SnowTerritory 插件已启用          ║" + reset);
-        plugin.getLogger().info(bold + "║     版本: " + plugin.getPluginMeta().getVersion() + "                    ║" + reset);
-        plugin.getLogger().info(bold + "║     作者: " + String.join(", ", plugin.getPluginMeta().getAuthors()) + "              ║" + reset);
+        plugin.getLogger().info(bold + "      SnowTerritory 插件已启用          " + reset);
+        plugin.getLogger().info(bold + "      版本: " + plugin.getPluginMeta().getVersion() + "                    " + reset);
+        plugin.getLogger().info(bold + "      作者: " + String.join(", ", plugin.getPluginMeta().getAuthors()) + "              " + reset);
         plugin.getLogger().info(bold + "╚══════════════════════════════════════╝" + reset);
     }
 
@@ -315,11 +314,56 @@ public class MessageUtils {
     // ========== 工具方法 ==========
 
     /**
-     * 转换颜色代码（& 转换为 ChatColor）
+     * 转换颜色代码（支持传统颜色代码和16进制颜色）
+     * 
+     * 支持格式：
+     * - 传统颜色代码: &a (绿色), &l (粗体), &r (重置) 等
+     * - 16进制颜色: &{#FFFFFF} 或 <#FFFFFF>
+     * 
+     * 示例：
+     * - "&aHello &{#FF0000}World" → 绿色Hello + 红色World
+     * - "<#00FF00>Green Text" → 绿色文本
+     * 
+     * @param text 包含颜色代码的文本
+     * @return 转换后的文本（可直接发送给玩家）
      */
     public static String colorize(String text) {
         if (text == null) return "";
+        
+        // 先处理16进制颜色格式（转换为Minecraft原生格式）
+        text = processHexColors(text);
+        
+        // 然后处理传统颜色代码（&a, &l 等）
         return ChatColor.translateAlternateColorCodes('&', text);
+    }
+    
+    /**
+     * 处理16进制颜色格式
+     * 
+     * 支持的格式：
+     * - &{#FFFFFF} → 转换为 &x&F&F&F&F&F&F
+     * - <#FFFFFF> → 转换为 &x&F&F&F&F&F&F
+     * 
+     * Minecraft 1.16+ 使用 &x&R&R&G&G&B&B 格式表示16进制颜色
+     * 其中每个字符前都需要 & 符号
+     * 
+     * @param text 包含16进制颜色代码的文本
+     * @return 转换后的文本
+     */
+    private static String processHexColors(String text) {
+        if (text == null || text.isEmpty()) return text;
+        
+        // 处理 &{#RRGGBB} 格式
+        // 示例: &{#FF0000} → &x&F&F&0&0&0&0 (红色)
+        text = text.replaceAll("&\\{#([0-9A-Fa-f])([0-9A-Fa-f])([0-9A-Fa-f])([0-9A-Fa-f])([0-9A-Fa-f])([0-9A-Fa-f])\\}", 
+            "&x&$1&$2&$3&$4&$5&$6");
+        
+        // 处理 <#RRGGBB> 格式
+        // 示例: <#00FF00> → &x&0&0&F&F&0&0 (绿色)
+        text = text.replaceAll("<#([0-9A-Fa-f])([0-9A-Fa-f])([0-9A-Fa-f])([0-9A-Fa-f])([0-9A-Fa-f])([0-9A-Fa-f])>", 
+            "&x&$1&$2&$3&$4&$5&$6");
+        
+        return text;
     }
 
     /**

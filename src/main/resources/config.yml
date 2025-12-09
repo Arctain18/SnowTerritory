@@ -226,7 +226,12 @@ gui:
 # 消息配置
 # ============================================
 # 所有聊天栏消息都可以在这里自定义
-# 支持颜色代码: &0-&9, &a-&f, &k-&r, &l-&o
+# 
+# 支持的颜色代码格式:
+#   - 传统颜色代码: &0-&9, &a-&f, &k-&r, &l-&o
+#   - 16进制颜色: &{#FFFFFF} 或 <#FFFFFF>
+#     示例: &{#FF0000} (红色), <#00FF00> (绿色)
+# 
 # 支持占位符: {占位符名} 会被自动替换为实际值
 # 
 # 占位符说明:
@@ -306,20 +311,17 @@ messages:
     # 物品ID显示
     # 占位符: {id} - MMOItems物品的唯一标识符
     info-id: "&6物品 ID: &e&l{id}"
-    # 物品ID提示
-    # 占位符: {id} - MMOItems物品的唯一标识符
-    info-hint: "&bℹ &f提示: 物品ID为 &e{id}"
     
   # 帮助信息
   help:
     # 帮助标题
     title: "SnowTerritory 命令帮助"
     # 强化命令帮助
-    reinforce: "&e/snowterritory reinforce &7- &f打开物品强化界面 (可简写: &e/st r&f)"
+    reinforce: "&e/snowterritory reinforce &7- &f打开物品强化界面"
     # 重载命令帮助
-    reload: "&e/snowterritory reload &7- &f重载插件配置 (可简写: &e/st reload&f)"
+    reload: "&e/snowterritory reload &7- &f重载插件配置"
     # 查看ID命令帮助
-    checkid: "&e/snowterritory checkID &7- &f查看手中物品的MMOItems ID (可简写: &e/st checkID&f)"
+    checkid: "&e/snowterritory checkID &7- &f查看手中物品的MMOItems ID"
     
   # 分隔线 (用于美化消息显示)
   separator: "&8&m                                        "
