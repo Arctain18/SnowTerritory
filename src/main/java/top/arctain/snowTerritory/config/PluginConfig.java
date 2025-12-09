@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import top.arctain.snowTerritory.Main;
+import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +43,9 @@ public class PluginConfig {
     private String guiConfirmButtonName;
     private String guiCancelButtonName;
     private Map<Integer, ItemConfig> customSlots;  // 自定义槽位（槽位: ItemConfig）
+    
+    // 消息配置
+    private Map<String, String> messages;  // 消息映射表
 
     public PluginConfig(Main plugin) {
         this.plugin = plugin;
@@ -49,6 +53,7 @@ public class PluginConfig {
         this.reinforceSuccessRates = new HashMap<>();
         this.customSlots = new HashMap<>();
         this.slotMaterials = new int[6];
+        this.messages = new HashMap<>();
     }
 
     public void loadConfig() {
@@ -76,7 +81,7 @@ public class PluginConfig {
                         double rate = config.getDouble("reinforce.success-rates." + key);
                         reinforceSuccessRates.put(level, rate);
                     } catch (NumberFormatException e) {
-                        plugin.getLogger().warning("无效的等级配置: " + key);
+                        MessageUtils.logWarning("无效的等级配置: " + key);
                     }
                 }
             }
@@ -110,27 +115,80 @@ public class PluginConfig {
                         Material mat = Material.valueOf(material.toUpperCase());
                         customSlots.put(slot, new ItemConfig(mat, name));
                     } catch (IllegalArgumentException e) {
-                        plugin.getLogger().warning("无效的材料类型: " + material + " (槽位: " + slot + ")");
+                        MessageUtils.logWarning("无效的材料类型: " + material + " (槽位: " + slot + ")");
                     }
                 } catch (NumberFormatException e) {
-                    plugin.getLogger().warning("无效的槽位号: " + key);
+                    MessageUtils.logWarning("无效的槽位号: " + key);
                 }
             }
         }
 
-        plugin.getLogger().info("配置已加载。");
+        // 加载消息配置
+        loadMessages();
+
+        MessageUtils.logSuccess("配置已加载");
+    }
+    
+    /**
+     * 加载消息配置
+     */
+    private void loadMessages() {
+        messages.clear();
+        if (config.getConfigurationSection("messages") != null) {
+            loadMessagesRecursive("messages", config.getConfigurationSection("messages"));
+        }
+    }
+    
+    /**
+     * 递归加载消息配置
+     */
+    private void loadMessagesRecursive(String path, org.bukkit.configuration.ConfigurationSection section) {
+        for (String key : section.getKeys(false)) {
+            String fullPath = path + "." + key;
+            if (section.isConfigurationSection(key)) {
+                loadMessagesRecursive(fullPath, section.getConfigurationSection(key));
+            } else {
+                messages.put(fullPath, section.getString(key));
+            }
+        }
+    }
+    
+    /**
+     * 获取消息（支持占位符替换）
+     */
+    public String getMessage(String key, String... placeholders) {
+        String message = messages.getOrDefault("messages." + key, "");
+        if (message.isEmpty()) {
+            return key; // 如果找不到消息，返回key
+        }
+        
+        // 替换占位符 {placeholder}
+        for (int i = 0; i < placeholders.length; i += 2) {
+            if (i + 1 < placeholders.length) {
+                message = message.replace("{" + placeholders[i] + "}", placeholders[i + 1]);
+            }
+        }
+        
+        return message;
+    }
+    
+    /**
+     * 获取消息前缀
+     */
+    public String getMessagePrefix() {
+        return messages.getOrDefault("messages.prefix", "&8[&6SnowTerritory&8]&r ");
     }
 
     public void reloadConfig() {
         loadConfig();  // 重用加载逻辑进行重载
-        plugin.getLogger().info("配置已重载。");
+        MessageUtils.logSuccess("配置已重载");
     }
 
     public void saveConfig() {
         try {
             config.save(configFile);
         } catch (IOException e) {
-            plugin.getLogger().severe("无法保存配置: " + e.getMessage());
+            MessageUtils.logError("无法保存配置: " + e.getMessage());
         }
     }
 

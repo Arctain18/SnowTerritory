@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import top.arctain.snowTerritory.config.PluginConfig;
 import top.arctain.snowTerritory.gui.ItemEditorGUI;
+import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.util.Arrays;
 
@@ -69,7 +70,7 @@ public class GUIListener implements Listener {
             event.setCancelled(true);
         } else if (itemName.equals(cancelName)) {
             player.closeInventory();
-            player.sendMessage(ChatColor.YELLOW + "强化已取消。");
+            MessageUtils.sendWarning(player, "reinforce.cancelled", "&e⚠ &f强化已取消。");
             event.setCancelled(true);
         }
     }

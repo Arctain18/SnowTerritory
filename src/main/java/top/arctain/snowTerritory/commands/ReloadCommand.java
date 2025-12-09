@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.config.PluginConfig;
+import top.arctain.snowTerritory.utils.MessageUtils;
 
 public class ReloadCommand implements CommandExecutor {
 
@@ -20,12 +21,12 @@ public class ReloadCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("mmoitemseditor.reload") && !(sender instanceof Player && ((Player) sender).isOp())) {
-            sender.sendMessage("您没有权限！");
+            MessageUtils.sendError(sender, "command.no-permission", "&c✗ &f您没有权限！");
             return true;
         }
 
         config.reloadConfig();
-        sender.sendMessage("插件配置已重载！");
+        MessageUtils.sendSuccess(sender, "command.reload-success", "&a✓ &f插件配置已重载！");
         return true;
     }
 }

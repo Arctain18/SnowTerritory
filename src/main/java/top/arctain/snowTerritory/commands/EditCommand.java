@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.config.PluginConfig;
 import top.arctain.snowTerritory.gui.ItemEditorGUI;
+import top.arctain.snowTerritory.utils.MessageUtils;
 
 public class EditCommand implements CommandExecutor {
 
@@ -23,13 +24,13 @@ public class EditCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("此命令仅限玩家使用！");
+            MessageUtils.sendError(sender, "command.player-only", "&c✗ &f此命令仅限玩家使用！");
             return true;
         }
 
         Player player = (Player) sender;
         if (!player.hasPermission("mmoitemseditor.edit") && !player.isOp()) {
-            player.sendMessage("您没有权限！");
+            MessageUtils.sendError(player, "command.no-permission", "&c✗ &f您没有权限！");
             return true;
         }
 

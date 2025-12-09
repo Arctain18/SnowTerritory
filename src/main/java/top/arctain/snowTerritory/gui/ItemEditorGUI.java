@@ -9,6 +9,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import top.arctain.snowTerritory.config.PluginConfig;
+import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.Utils;
 
 import java.lang.reflect.Method;
@@ -128,7 +129,7 @@ public class ItemEditorGUI {
             ItemStack customItem = new ItemStack(itemConfig.getMaterial());
             ItemMeta meta = customItem.getItemMeta();
             if (meta != null) {
-                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemConfig.getName()));
+                meta.setDisplayName(MessageUtils.colorize(itemConfig.getName()));
                 customItem.setItemMeta(meta);
             }
             gui.setItem(slot, customItem);
@@ -138,8 +139,8 @@ public class ItemEditorGUI {
         ItemStack confirmButton = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
         ItemMeta confirmMeta = confirmButton.getItemMeta();
         if (confirmMeta != null) {
-            confirmMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', config.getGuiConfirmButtonName()));
-            confirmMeta.setLore(Collections.singletonList(ChatColor.GRAY + "点击确认强化"));
+            confirmMeta.setDisplayName(MessageUtils.colorize(config.getGuiConfirmButtonName()));
+            confirmMeta.setLore(Collections.singletonList(MessageUtils.colorize("&7点击确认强化")));
             confirmButton.setItemMeta(confirmMeta);
         }
         gui.setItem(config.getSlotConfirm(), confirmButton);
@@ -147,8 +148,8 @@ public class ItemEditorGUI {
         ItemStack cancelButton = new ItemStack(Material.RED_STAINED_GLASS_PANE);
         ItemMeta cancelMeta = cancelButton.getItemMeta();
         if (cancelMeta != null) {
-            cancelMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', config.getGuiCancelButtonName()));
-            cancelMeta.setLore(Collections.singletonList(ChatColor.GRAY + "点击取消操作"));
+            cancelMeta.setDisplayName(MessageUtils.colorize(config.getGuiCancelButtonName()));
+            cancelMeta.setLore(Collections.singletonList(MessageUtils.colorize("&7点击取消操作")));
             cancelButton.setItemMeta(cancelMeta);
         }
         gui.setItem(config.getSlotCancel(), cancelButton);
@@ -170,32 +171,35 @@ public class ItemEditorGUI {
 
         // 检查是否为MMOItems物品
         if (weapon == null || !Utils.isMMOItem(weapon)) {
-            player.sendMessage(ChatColor.RED + "请放置有效的MMO物品作为武器！");
+            MessageUtils.sendError(player, "reinforce.invalid-item", "&c✗ &f请放置有效的MMO物品作为武器！");
             return;
         }
 
         // 检查是否可强化
         if (!Utils.isReinforceable(weapon, config.getReinforceableItems())) {
-            player.sendMessage(ChatColor.RED + "此物品不可强化！");
+            MessageUtils.sendError(player, "reinforce.not-reinforceable", "&c✗ &f此物品不可强化！");
             return;
         }
 
         // 检查消耗（如果启用了经济系统）
         if (economy != null && config.getCostVaultGold() > 0) {
             if (getBalance(player) < config.getCostVaultGold()) {
-                player.sendMessage(ChatColor.RED + "金币不足！需要: " + config.getCostVaultGold());
+                MessageUtils.sendError(player, "reinforce.insufficient-gold", "&c✗ &f金币不足！需要: &e{cost}", 
+                    "cost", MessageUtils.formatNumber(config.getCostVaultGold()));
                 return;
             }
         }
         if (playerPointsAPI != null && config.getCostPlayerPoints() > 0) {
             if (getPlayerPoints(player.getUniqueId()) < config.getCostPlayerPoints()) {
-                player.sendMessage(ChatColor.RED + "点券不足！需要: " + config.getCostPlayerPoints());
+                MessageUtils.sendError(player, "reinforce.insufficient-points", "&c✗ &f点券不足！需要: &e{cost}", 
+                    "cost", MessageUtils.formatNumber(config.getCostPlayerPoints()));
                 return;
             }
         }
         int materialCount = (int) Arrays.stream(materials).filter(item -> item != null).count();
         if (materialCount < config.getCostMaterials()) {
-            player.sendMessage("强化材料不足！");
+            MessageUtils.sendError(player, "reinforce.insufficient-materials", "&c✗ &f强化材料不足！需要: &e{count} &f个", 
+                "count", MessageUtils.formatNumber(config.getCostMaterials()));
             return;
         }
 
@@ -230,23 +234,24 @@ public class ItemEditorGUI {
                 case SUCCESS:
                     Utils.modifyMMOAttribute(mmoItem, config.getAttributeBoostPercent());
                     Utils.updateItemName(weapon, currentLevel + 1);
-                    player.sendMessage(ChatColor.GREEN + "强化成功！等级提升至 +" + (currentLevel + 1));
+                    MessageUtils.sendReinforceSuccess(player, currentLevel + 1);
                     break;
                 case FAIL_DEGRADE:
                     int newLevel = Math.max(0, currentLevel - 1);
                     Utils.modifyMMOAttribute(mmoItem, config.getAttributeReducePercent());
                     Utils.updateItemName(weapon, newLevel);
-                    player.sendMessage(ChatColor.RED + "强化失败！等级下降至 +" + newLevel);
+                    MessageUtils.sendReinforceFail(player, newLevel);
                     break;
                 case MAINTAIN:
-                    player.sendMessage(ChatColor.YELLOW + "强化维持不变。");
+                    MessageUtils.sendReinforceMaintain(player);
                     break;
             }
             
             // 更新物品回GUI
             gui.setItem(config.getSlotWeapon(), weapon);
         } catch (Exception e) {
-            player.sendMessage(ChatColor.RED + "强化过程中发生错误: " + e.getMessage());
+            MessageUtils.sendError(player, "reinforce.error", "&c✗ &f强化过程中发生错误: &e{error}", "error", e.getMessage());
+            MessageUtils.logError("强化过程中发生错误: " + e.getMessage());
             e.printStackTrace();
         }
     }

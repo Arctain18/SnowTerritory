@@ -222,3 +222,105 @@ gui:
       material: "BLACK_STAINED_GLASS_PANE"
       name: "&r"
 
+# ============================================
+# 消息配置
+# ============================================
+# 所有聊天栏消息都可以在这里自定义
+# 支持颜色代码: &0-&9, &a-&f, &k-&r, &l-&o
+# 支持占位符: {占位符名} 会被自动替换为实际值
+# 
+# 占位符说明:
+#   {label}    - 命令标签 (如: "st" 或 "snowterritory")
+#   {cost}     - 消耗数量 (金币/点券)
+#   {count}    - 材料数量
+#   {level}    - 强化等级 (数字)
+#   {error}    - 错误消息文本
+#   {type}     - 物品类型 (如: "SWORD", "AXE")
+#   {id}       - 物品ID (MMOItems物品的唯一标识符)
+# ============================================
+messages:
+  # 消息前缀 (所有带前缀的消息都会使用这个前缀)
+  prefix: "&8[&6SnowTerritory&8]&r "
+  
+  # 命令相关消息
+  command:
+    # 无权限提示
+    no-permission: "&c✗ &f您没有权限使用此命令！"
+    # 仅限玩家使用的提示
+    player-only: "&c✗ &f此命令仅限玩家使用！"
+    # 未知命令提示
+    # 占位符: {label} - 命令标签
+    unknown-command: "&c✗ &f未知的子命令！输入 /{label} 查看帮助。"
+    # 重载成功提示
+    reload-success: "&a✓ &f插件配置已重载！"
+    
+  # 强化相关消息
+  reinforce:
+    # 无效物品提示
+    invalid-item: "&c✗ &f请放置有效的MMO物品作为武器！"
+    # 不可强化提示
+    not-reinforceable: "&c✗ &f此物品不可强化！"
+    # 金币不足提示
+    # 占位符: {cost} - 需要的金币数量 (已格式化，包含颜色代码)
+    insufficient-gold: "&c✗ &f金币不足！需要: &e{cost}"
+    # 点券不足提示
+    # 占位符: {cost} - 需要的点券数量 (已格式化，包含颜色代码)
+    insufficient-points: "&c✗ &f点券不足！需要: &e{cost}"
+    # 材料不足提示
+    # 占位符: {count} - 需要的材料数量 (已格式化，包含颜色代码)
+    insufficient-materials: "&c✗ &f强化材料不足！需要: &e{count} &f个"
+    # 强化成功标题
+    success-title: "&a&l✓ 强化成功！"
+    # 强化成功等级提示
+    # 占位符: {level} - 新的强化等级 (数字)
+    success-level: "&7等级提升至: &a&l+{level}"
+    # 强化失败标题
+    fail-title: "&c&l✗ 强化失败！"
+    # 强化失败等级提示
+    # 占位符: {level} - 新的强化等级 (数字)
+    fail-level: "&7等级下降至: &c&l+{level}"
+    # 强化维持标题
+    maintain-title: "&e&l⚠ 强化维持不变"
+    # 强化维持描述
+    maintain-desc: "&7物品等级未发生变化"
+    # 强化错误提示
+    # 占位符: {error} - 错误消息文本
+    error: "&c✗ &f强化过程中发生错误: &e{error}"
+    # 强化取消提示
+    cancelled: "&e⚠ &f强化已取消。"
+    
+  # 物品信息相关消息
+  item:
+    # 未手持物品提示
+    no-item: "&c✗ &f请手持一个物品！"
+    # 非MMOItems物品提示
+    not-mmoitem: "&e⚠ &f这不是一个 MMOItems 物品！"
+    # 获取物品信息错误提示
+    # 占位符: {error} - 错误消息文本 (仅在异常时使用)
+    info-error: "&c✗ &f无法获取物品信息！"
+    # 物品信息标题
+    info-title: "物品信息"
+    # 物品类型显示
+    # 占位符: {type} - 物品类型 (如: "SWORD", "AXE", "BOW")
+    info-type: "&6物品类型: &f{type}"
+    # 物品ID显示
+    # 占位符: {id} - MMOItems物品的唯一标识符
+    info-id: "&6物品 ID: &e&l{id}"
+    # 物品ID提示
+    # 占位符: {id} - MMOItems物品的唯一标识符
+    info-hint: "&bℹ &f提示: 物品ID为 &e{id}"
+    
+  # 帮助信息
+  help:
+    # 帮助标题
+    title: "SnowTerritory 命令帮助"
+    # 强化命令帮助
+    reinforce: "&e/snowterritory reinforce &7- &f打开物品强化界面 (可简写: &e/st r&f)"
+    # 重载命令帮助
+    reload: "&e/snowterritory reload &7- &f重载插件配置 (可简写: &e/st reload&f)"
+    # 查看ID命令帮助
+    checkid: "&e/snowterritory checkID &7- &f查看手中物品的MMOItems ID (可简写: &e/st checkID&f)"
+    
+  # 分隔线 (用于美化消息显示)
+  separator: "&8&m                                        "
+

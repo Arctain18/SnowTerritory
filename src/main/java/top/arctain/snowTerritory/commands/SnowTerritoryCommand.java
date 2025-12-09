@@ -1,6 +1,5 @@
 package top.arctain.snowTerritory.commands;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -9,6 +8,7 @@ import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.config.PluginConfig;
 import top.arctain.snowTerritory.gui.ItemEditorGUI;
+import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +43,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         } else if (subCommand.equals("checkid") || subCommand.equals("check")) {
             return handleCheckID(sender, args);
         } else {
-            sender.sendMessage(ChatColor.RED + "未知的子命令！输入 /" + label + " 查看帮助。");
+            MessageUtils.sendError(sender, "command.unknown-command", "&c✗ &f未知的子命令！输入 /{label} 查看帮助。", "label", label);
             return true;
         }
     }
@@ -53,13 +53,13 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
      */
     private boolean handleReinforce(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "此命令仅限玩家使用！");
+            MessageUtils.sendError(sender, "command.player-only", "&c✗ &f此命令仅限玩家使用！");
             return true;
         }
 
         Player player = (Player) sender;
         if (!player.hasPermission("mmoitemseditor.edit") && !player.isOp()) {
-            player.sendMessage(ChatColor.RED + "您没有权限使用此命令！");
+            MessageUtils.sendError(player, "command.no-permission", "&c✗ &f您没有权限使用此命令！");
             return true;
         }
 
@@ -72,12 +72,12 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
      */
     private boolean handleReload(CommandSender sender, String[] args) {
         if (!sender.hasPermission("mmoitemseditor.reload") && !(sender instanceof Player && ((Player) sender).isOp())) {
-            sender.sendMessage(ChatColor.RED + "您没有权限使用此命令！");
+            MessageUtils.sendError(sender, "command.no-permission", "&c✗ &f您没有权限使用此命令！");
             return true;
         }
 
         config.reloadConfig();
-        sender.sendMessage(ChatColor.GREEN + "插件配置已重载！");
+        MessageUtils.sendSuccess(sender, "command.reload-success", "&a✓ &f插件配置已重载！");
         return true;
     }
 
@@ -86,13 +86,13 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
      */
     private boolean handleCheckID(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "此命令仅限玩家使用！");
+            MessageUtils.sendError(sender, "command.player-only", "&c✗ &f此命令仅限玩家使用！");
             return true;
         }
 
         Player player = (Player) sender;
         if (!player.hasPermission("mmoitemseditor.itemid") && !player.isOp()) {
-            player.sendMessage(ChatColor.RED + "您没有权限使用此命令！");
+            MessageUtils.sendError(player, "command.no-permission", "&c✗ &f您没有权限使用此命令！");
             return true;
         }
 
@@ -103,11 +103,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
      * 发送帮助信息
      */
     private void sendHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.GOLD + "========== SnowTerritory 命令帮助 ==========");
-        sender.sendMessage(ChatColor.YELLOW + "/snowterritory reinforce" + ChatColor.WHITE + " (或 " + ChatColor.YELLOW + "/st r" + ChatColor.WHITE + ") - 打开物品强化界面");
-        sender.sendMessage(ChatColor.YELLOW + "/snowterritory reload" + ChatColor.WHITE + " (或 " + ChatColor.YELLOW + "/st reload" + ChatColor.WHITE + ") - 重载插件配置");
-        sender.sendMessage(ChatColor.YELLOW + "/snowterritory checkID" + ChatColor.WHITE + " (或 " + ChatColor.YELLOW + "/st checkID" + ChatColor.WHITE + ") - 查看手中物品的MMOItems ID");
-        sender.sendMessage(ChatColor.GOLD + "==========================================");
+        MessageUtils.sendHelp(sender);
     }
 
     @Override

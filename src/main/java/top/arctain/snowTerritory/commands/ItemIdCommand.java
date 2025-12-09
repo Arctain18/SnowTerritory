@@ -1,12 +1,12 @@
 package top.arctain.snowTerritory.commands;
 
 import net.Indyuce.mmoitems.MMOItems;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.Utils;
 
 public class ItemIdCommand implements CommandExecutor {
@@ -14,13 +14,13 @@ public class ItemIdCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "此命令仅限玩家使用！");
+            MessageUtils.sendError(sender, "command.player-only", "&c✗ &f此命令仅限玩家使用！");
             return true;
         }
 
         Player player = (Player) sender;
         if (!player.hasPermission("mmoitemseditor.itemid") && !player.isOp()) {
-            player.sendMessage(ChatColor.RED + "您没有权限使用此命令！");
+            MessageUtils.sendError(player, "command.no-permission", "&c✗ &f您没有权限使用此命令！");
             return true;
         }
 
@@ -28,13 +28,13 @@ public class ItemIdCommand implements CommandExecutor {
         
         // 检查是否为空
         if (item == null || item.getType().isAir()) {
-            player.sendMessage(ChatColor.RED + "请手持一个物品！");
+            MessageUtils.sendError(player, "item.no-item", "&c✗ &f请手持一个物品！");
             return true;
         }
 
         // 检查是否为 MMOItems 物品
         if (!Utils.isMMOItem(item)) {
-            player.sendMessage(ChatColor.YELLOW + "这不是一个 MMOItems 物品！");
+            MessageUtils.sendWarning(player, "item.not-mmoitem", "&e⚠ &f这不是一个 MMOItems 物品！");
             return true;
         }
 
@@ -44,19 +44,16 @@ public class ItemIdCommand implements CommandExecutor {
             String id = MMOItems.getID(item);
             
             if (type == null || id == null || id.isEmpty()) {
-                player.sendMessage(ChatColor.RED + "无法获取物品信息！");
+                MessageUtils.sendError(player, "item.info-error", "&c✗ &f无法获取物品信息！");
                 return true;
             }
 
             // 发送信息给玩家
-            player.sendMessage(ChatColor.GREEN + "========== 物品信息 ==========");
-            player.sendMessage(ChatColor.GOLD + "物品类型: " + ChatColor.WHITE + type.getId());
-            player.sendMessage(ChatColor.GOLD + "物品 ID: " + ChatColor.WHITE + id);
-            player.sendMessage(ChatColor.GREEN + "============================");
-            
+            MessageUtils.sendItemInfo(player, type.getId(), id);
             
         } catch (Exception e) {
-            player.sendMessage(ChatColor.RED + "获取物品信息时发生错误: " + e.getMessage());
+            MessageUtils.sendError(player, "item.info-error", "&c✗ &f获取物品信息时发生错误: &e{error}", "error", e.getMessage());
+            MessageUtils.logError("获取物品信息时发生错误: " + e.getMessage());
             e.printStackTrace();
         }
 
