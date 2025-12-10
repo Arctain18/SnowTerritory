@@ -274,7 +274,7 @@ messages:
   # 强化相关消息
   reinforce:
     # 无效物品提示
-    invalid-item: "&c✗ &f请放置有效的MMO物品作为武器！"
+    invalid-item: "&c✗ &f此物品不可强化！"
     # 不可强化提示
     not-reinforceable: "&c✗ &f此物品不可强化！"
     # 金币不足提示

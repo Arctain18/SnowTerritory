@@ -176,7 +176,7 @@ public class PluginConfig {
      * 获取消息前缀
      */
     public String getMessagePrefix() {
-        return messages.getOrDefault("messages.prefix", "&8[&6SnowTerritory&8]&r ");
+        return messages.getOrDefault("messages.prefix", "");
     }
 
     public void reloadConfig() {
