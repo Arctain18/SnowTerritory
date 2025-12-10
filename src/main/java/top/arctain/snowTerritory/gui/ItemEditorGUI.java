@@ -176,7 +176,7 @@ public class ItemEditorGUI {
         }
 
         // 检查是否可强化
-        if (!Utils.isReinforceable(weapon, config.getReinforceableItems())) {
+        if (!Utils.isReinforceable(weapon)) {
             MessageUtils.sendError(player, "reinforce.not-reinforceable", "&c✗ &f此物品不可强化！");
             return;
         }
@@ -232,14 +232,30 @@ public class ItemEditorGUI {
             
             switch (result) {
                 case SUCCESS:
-                    Utils.modifyMMOAttribute(mmoItem, config.getAttributeBoostPercent());
-                    Utils.updateItemName(weapon, currentLevel + 1);
+                    Utils.modifyMMOAttribute(mmoItem, config.getAttributeBoostPercent(), config.getReinforceableAttributes());
+                    // 从LiveMMOItem获取更新后的ItemStack
+                    ItemStack updatedWeapon = Utils.getUpdatedItemStack(mmoItem);
+                    if (updatedWeapon != null) {
+                        Utils.updateItemName(updatedWeapon, currentLevel + 1);
+                        weapon = updatedWeapon;  // 更新weapon引用
+                    } else {
+                        // 如果无法获取更新后的ItemStack，至少更新名字
+                        Utils.updateItemName(weapon, currentLevel + 1);
+                    }
                     MessageUtils.sendReinforceSuccess(player, currentLevel + 1);
                     break;
                 case FAIL_DEGRADE:
                     int newLevel = Math.max(0, currentLevel - 1);
-                    Utils.modifyMMOAttribute(mmoItem, config.getAttributeReducePercent());
-                    Utils.updateItemName(weapon, newLevel);
+                    Utils.modifyMMOAttribute(mmoItem, config.getAttributeReducePercent(), config.getReinforceableAttributes());
+                    // 从LiveMMOItem获取更新后的ItemStack
+                    ItemStack updatedWeapon2 = Utils.getUpdatedItemStack(mmoItem);
+                    if (updatedWeapon2 != null) {
+                        Utils.updateItemName(updatedWeapon2, newLevel);
+                        weapon = updatedWeapon2;  // 更新weapon引用
+                    } else {
+                        // 如果无法获取更新后的ItemStack，至少更新名字
+                        Utils.updateItemName(weapon, newLevel);
+                    }
                     MessageUtils.sendReinforceFail(player, newLevel);
                     break;
                 case MAINTAIN:

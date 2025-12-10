@@ -27,6 +27,7 @@ public class PluginConfig {
     private double attributeBoostPercent;  // 成功时属性增加百分比（例如1.1表示+10%）
     private double attributeReducePercent;  // 失败时属性减少百分比（例如0.9表示-10%）
     private List<String> reinforceableItems;  // 可强化物品列表（基于NBT的name或lore匹配字符串）
+    private List<String> reinforceableAttributes;  // 可强化属性列表（例如: ATTACK_DAMAGE, DEFENSE）
     private int costVaultGold;  // 每次强化消耗的Vault金币
     private int costPlayerPoints;  // 每次强化消耗的PlayerPoints点券
     private int costMaterials;  // 所需强化材料数量（检查GUI中的6个槽位）
@@ -68,6 +69,7 @@ public class PluginConfig {
         attributeBoostPercent = config.getDouble("reinforce.attribute-boost-percent", 1.1);
         attributeReducePercent = config.getDouble("reinforce.attribute-reduce-percent", 0.9);
         reinforceableItems = config.getStringList("reinforce.reinforceable-items");
+        reinforceableAttributes = config.getStringList("reinforce.reinforceable-attributes");
         costVaultGold = config.getInt("reinforce.cost.vault-gold", 1000);
         costPlayerPoints = config.getInt("reinforce.cost.player-points", 50);
         costMaterials = config.getInt("reinforce.cost.materials", 6);

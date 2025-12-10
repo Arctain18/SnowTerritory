@@ -37,6 +37,14 @@ reinforce:
   reinforceable-items:
     - "弓箭手1"
   
+  # 可强化属性列表 (只强化配置中指定的属性)
+  # 属性ID需要大写，例如: ATTACK_DAMAGE, DEFENSE, MAX_HEALTH 等
+  # 如果不配置或列表为空，则不会强化任何属性
+  reinforceable-attributes:
+    - "ATTACK_DAMAGE"
+    - "DEFENSE"
+    - "MAX_HEALTH"
+  
   # 消耗配置
   cost:
     # Vault金币消耗 (设置为0禁用)

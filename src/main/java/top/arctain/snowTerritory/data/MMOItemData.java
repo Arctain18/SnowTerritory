@@ -59,7 +59,7 @@ public class MMOItemData {
     /**
      * 检查是否可强化
      */
-    public boolean isReinforceable(java.util.List<String> reinforceableItems) {
-        return Utils.isReinforceable(itemStack, reinforceableItems);
+    public boolean isReinforceable() {
+        return Utils.isReinforceable(itemStack);
     }
 }
