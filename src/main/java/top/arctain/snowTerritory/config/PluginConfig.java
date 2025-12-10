@@ -102,7 +102,7 @@ public class PluginConfig {
         }
 
         // 加载GUI相关
-        guiTitle = config.getString("gui.title", "强化MMO物品");
+        guiTitle = config.getString("gui.title", "&{#4a95ff}ST <#C9AE59>Reinforce");
         guiSize = config.getInt("gui.size", 54);
         slotWeapon = config.getInt("gui.slots.weapon", 10);
         slotProtectCharm = config.getInt("gui.slots.protect-charm", 12);

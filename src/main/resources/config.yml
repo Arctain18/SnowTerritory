@@ -57,8 +57,8 @@ reinforce:
 # GUI界面配置
 # ============================================
 gui:
-  # GUI标题
-  title: "ST Reinforce"
+  # GUI标题 不能使用渐变
+  title: "&{#4a95ff}ST <#C9AE59>Reinforce"
   
   # GUI大小 (必须是9的倍数，如9, 18, 27, 36, 45, 54)
   size: 54
@@ -284,7 +284,7 @@ gui:
 # ============================================
 messages:
   # 消息前缀 (所有带前缀的消息都会使用这个前缀)
-  prefix: "&{#4a95ff}ST <g:#C97759:#C9AE59>Strengthen</g> &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> "
+  prefix: "&{#4a95ff}ST <g:#C97759:#C9AE59>Reinforce</g> &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> "
   
   # 命令相关消息
   command:

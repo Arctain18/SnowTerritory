@@ -12,6 +12,7 @@ import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.config.PluginConfig;
 import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.Utils;
+import top.arctain.snowTerritory.utils.ColorUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -131,7 +132,7 @@ public class ItemEditorGUI {
 
     public void openGUI(Player player) {
         // 从配置创建GUI
-        Inventory gui = Bukkit.createInventory(null, config.getGuiSize(), config.getGuiTitle());
+        Inventory gui = Bukkit.createInventory(null, config.getGuiSize(), ColorUtils.colorize(config.getGuiTitle()));
 
         // 添加自定义槽位（装饰等）
         config.getCustomSlots().forEach((slot, itemConfig) -> {

@@ -391,11 +391,40 @@ public class ColorUtils {
     }
 
     /**
-     * 移除颜色代码
+     * 移除所有颜色代码（包括传统颜色代码、16进制颜色和渐变）
+     * 
+     * 这个方法会移除：
+     * - 传统颜色代码: &a, &l, &r 等
+     * - 16进制颜色: &x&R&R&G&G&B&B
+     * - 渐变代码: <GRADIENT:...>, <g:...>, {#...>}, {#...<} 等
+     * 
+     * @param text 包含颜色代码的文本
+     * @return 移除颜色代码后的纯文本
      */
     public static String stripColor(String text) {
         if (text == null) return "";
-        return ChatColor.stripColor(text);
+        
+        // 先移除传统颜色代码
+        text = ChatColor.stripColor(text);
+        
+        // 移除16进制颜色代码格式: &x&R&R&G&G&B&B (Minecraft 1.16+格式)
+        // 匹配 &x 后跟6个 &[0-9A-Fa-f] 的组合
+        text = text.replaceAll("&x(&[0-9A-Fa-f]){6}", "");
+        
+        // 移除渐变代码格式（在colorize之前）: <GRADIENT:#...#:...#>...</GRADIENT> 或 <g:#...#:...#>...</g>
+        text = text.replaceAll("<(?:GRADIENT|g):#[0-9A-Fa-f]{6}:#[0-9A-Fa-f]{6}>.*?</(?:GRADIENT|g)>", "");
+        
+        // 移除自定义渐变格式（在colorize之前）: {#RRGGBB>}, {#RRGGBB<>}, {#RRGGBB<}
+        text = text.replaceAll("\\{#[0-9A-Fa-f]{6}(>|<>|<)\\}", "");
+        
+        // 移除16进制颜色格式（在colorize之前）: &{#RRGGBB} 或 <#RRGGBB>
+        text = text.replaceAll("&?\\{#[0-9A-Fa-f]{6}\\}", "");
+        text = text.replaceAll("<#[0-9A-Fa-f]{6}>", "");
+        
+        // 移除所有剩余的 & 符号（可能是颜色代码的一部分）
+        text = text.replaceAll("&[0-9a-fk-orx]", "");
+        
+        return text.trim();
     }
 }
 
