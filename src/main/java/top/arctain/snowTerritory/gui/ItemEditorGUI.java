@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.config.PluginConfig;
 import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.Utils;
@@ -16,17 +17,23 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class ItemEditorGUI {
 
     private final PluginConfig config;
+    private final Main plugin;
     private Object economy;  // Vault经济（使用Object避免类加载时依赖）
     private Object playerPointsAPI;  // PlayerPoints API（使用Object避免类加载时依赖）
+    private final Set<UUID> reinforcingPlayers;  // 正在强化的玩家集合，用于防止重复点击
 
-    public ItemEditorGUI(PluginConfig config) {
+    public ItemEditorGUI(PluginConfig config, Main plugin) {
         this.config = config;
+        this.plugin = plugin;
+        this.reinforcingPlayers = new HashSet<>();
         
         // 使用反射安全获取经济系统（避免类加载时依赖）
         this.economy = getVaultEconomy();
@@ -256,6 +263,16 @@ public class ItemEditorGUI {
 
     // 执行强化逻辑（在监听器中调用）
     public void applyReinforce(Player player, Inventory gui) {
+        // 防止重复点击
+        UUID playerUUID = player.getUniqueId();
+        if (reinforcingPlayers.contains(playerUUID)) {
+            MessageUtils.sendWarning(player, "reinforce.processing", "&e⚠ &f正在处理强化，请稍候...");
+            return;
+        }
+        
+        // 标记玩家正在强化
+        reinforcingPlayers.add(playerUUID);
+        
         // 获取槽位物品
         ItemStack weapon = gui.getItem(config.getSlotWeapon());
         ItemStack protectCharm = gui.getItem(config.getSlotProtectCharm());
@@ -267,12 +284,14 @@ public class ItemEditorGUI {
 
         // 检查是否为MMOItems物品
         if (weapon == null || !Utils.isMMOItem(weapon)) {
+            reinforcingPlayers.remove(playerUUID);  // 移除标记
             MessageUtils.sendError(player, "reinforce.invalid-item", "&c✗ &f请放置有效的MMO物品作为武器！");
             return;
         }
 
         // 检查是否可强化
         if (!Utils.isReinforceable(weapon)) {
+            reinforcingPlayers.remove(playerUUID);  // 移除标记
             MessageUtils.sendError(player, "reinforce.not-reinforceable", "&c✗ &f此物品不可强化！");
             return;
         }
@@ -280,6 +299,7 @@ public class ItemEditorGUI {
         // 检查消耗（如果启用了经济系统）
         if (economy != null && config.getCostVaultGold() > 0) {
             if (getBalance(player) < config.getCostVaultGold()) {
+                reinforcingPlayers.remove(playerUUID);  // 移除标记
                 MessageUtils.sendError(player, "reinforce.insufficient-gold", "&c✗ &f金币不足！需要: &e{cost}", 
                     "cost", MessageUtils.formatNumber(config.getCostVaultGold()));
                 return;
@@ -287,6 +307,7 @@ public class ItemEditorGUI {
         }
         if (playerPointsAPI != null && config.getCostPlayerPoints() > 0) {
             if (getPlayerPoints(player.getUniqueId()) < config.getCostPlayerPoints()) {
+                reinforcingPlayers.remove(playerUUID);  // 移除标记
                 MessageUtils.sendError(player, "reinforce.insufficient-points", "&c✗ &f点券不足！需要: &e{cost}", 
                     "cost", MessageUtils.formatNumber(config.getCostPlayerPoints()));
                 return;
@@ -294,6 +315,7 @@ public class ItemEditorGUI {
         }
         int materialCount = (int) Arrays.stream(materials).filter(item -> item != null).count();
         if (materialCount < config.getCostMaterials()) {
+            reinforcingPlayers.remove(playerUUID);  // 移除标记
             MessageUtils.sendError(player, "reinforce.insufficient-materials", "&c✗ &f强化材料不足！需要: &e{count} &f个", 
                 "count", MessageUtils.formatNumber(config.getCostMaterials()));
             return;
@@ -361,7 +383,16 @@ public class ItemEditorGUI {
             
             // 更新物品回GUI
             gui.setItem(config.getSlotWeapon(), weapon);
+            
+            // 强化完成后，延迟更新确认按钮的lore（使用调度器确保GUI已更新）
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (player.isOnline() && player.getOpenInventory().getTopInventory() == gui) {
+                    updateConfirmButtonLore(player, gui);
+                }
+                reinforcingPlayers.remove(playerUUID);  // 移除标记，允许下次强化
+            }, 2L);  // 延迟2 tick，确保GUI已更新
         } catch (Exception e) {
+            reinforcingPlayers.remove(playerUUID);  // 移除标记
             MessageUtils.sendError(player, "reinforce.error", "&c✗ &f强化过程中发生错误: &e{error}", "error", e.getMessage());
             MessageUtils.logError("强化过程中发生错误: " + e.getMessage());
             e.printStackTrace();

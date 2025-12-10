@@ -18,7 +18,7 @@ public class EditCommand implements CommandExecutor {
     public EditCommand(Main plugin, PluginConfig config) {
         this.plugin = plugin;
         this.config = config;
-        this.gui = new ItemEditorGUI(config);
+        this.gui = new ItemEditorGUI(config, plugin);
     }
 
     @Override

@@ -26,8 +26,8 @@ public class GUIListener implements Listener {
 
     public GUIListener(PluginConfig config, Main plugin) {
         this.config = config;
-        this.guiHandler = new ItemEditorGUI(config);
         this.plugin = plugin;
+        this.guiHandler = new ItemEditorGUI(config, plugin);
     }
 
     @EventHandler(priority = EventPriority.HIGH)

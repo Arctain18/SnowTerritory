@@ -15,15 +15,16 @@ import java.util.List;
 
 public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
 
+    private final Main plugin;
     private final PluginConfig config;
     private final ItemEditorGUI gui;
     private final ItemIdCommand itemIdCommand;
 
     public SnowTerritoryCommand(Main plugin, PluginConfig config) {
+        this.plugin = plugin;
         this.config = config;
-        this.gui = new ItemEditorGUI(config);
+        this.gui = new ItemEditorGUI(config, plugin);
         this.itemIdCommand = new ItemIdCommand();
-        // plugin 参数保留以保持接口一致性
     }
 
     @Override
