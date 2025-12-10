@@ -13,8 +13,10 @@ import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.Utils;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class ItemEditorGUI {
@@ -156,6 +158,100 @@ public class ItemEditorGUI {
 
         // 空槽位已由玩家放置，无需预填充
         player.openInventory(gui);
+    }
+
+    /**
+     * 更新确认按钮的lore，显示成功率、失败率和消耗资源
+     */
+    public void updateConfirmButtonLore(Player player, Inventory gui) {
+        ItemStack confirmButton = gui.getItem(config.getSlotConfirm());
+        if (confirmButton == null) return;
+
+        ItemMeta confirmMeta = confirmButton.getItemMeta();
+        if (confirmMeta == null) return;
+
+        List<String> lore = new ArrayList<>();
+        lore.add(MessageUtils.colorize("&7点击确认强化"));
+
+        // 获取槽位物品
+        ItemStack weapon = gui.getItem(config.getSlotWeapon());
+        ItemStack protectCharm = gui.getItem(config.getSlotProtectCharm());
+        ItemStack enhanceCharm = gui.getItem(config.getSlotEnhanceCharm());
+
+        // 只有当武器存在且可强化时才显示信息
+        if (weapon != null && Utils.isReinforceable(weapon)) {
+            int currentLevel = Utils.getCurrentLevel(weapon);
+            int nextLevel = currentLevel + 1;
+            
+            // 计算成功率
+            double baseSuccessRate = config.getSuccessRateForLevel(nextLevel);
+            if (enhanceCharm != null) {
+                baseSuccessRate += 0.1; // 强化符增加10%成功率
+            }
+            double successRate = Math.min(1.0, baseSuccessRate); // 确保不超过100%
+            
+            // 计算失败率
+            double failDegradeChance = config.getReinforceFailDegradeChance();
+            if (protectCharm != null) {
+                failDegradeChance = 0.0; // 保护符：失败不降级
+            }
+            double maintainChance = config.getReinforceMaintainChance();
+            double totalFailRate = 1.0 - successRate; // 总失败率（包括降级和维持）
+            
+            lore.add(""); // 空行分隔
+            lore.add(MessageUtils.colorize("&8━━━━━━━━━━━━━━━━━━━━"));
+            lore.add(MessageUtils.colorize("&7当前等级: &e+" + currentLevel + " &7→ &a+" + nextLevel));
+            lore.add(MessageUtils.colorize("&7成功率: &a" + String.format("%.1f", successRate * 100) + "%"));
+            lore.add(MessageUtils.colorize("&7失败率: &c" + String.format("%.1f", totalFailRate * 100) + "%"));
+            
+            // 如果有保护符，显示保护信息
+            if (protectCharm != null) {
+                lore.add(MessageUtils.colorize("&7&o失败时不会降级"));
+            } else if (failDegradeChance > 0) {
+                // 显示失败降级概率
+                lore.add(MessageUtils.colorize("&7&o失败降级概率: &c" + String.format("%.1f", failDegradeChance * 100) + "%"));
+            }
+            
+            // 如果有强化符，显示加成信息
+            if (enhanceCharm != null) {
+                lore.add(MessageUtils.colorize("&7&o强化符加成: &a+10%"));
+            }
+            
+            // 显示消耗资源
+            List<String> costLines = new ArrayList<>();
+            if (economy != null && config.getCostVaultGold() > 0) {
+                double balance = getBalance(player);
+                String color = balance >= config.getCostVaultGold() ? "&a" : "&c";
+                costLines.add(MessageUtils.colorize("&7金币: " + color + MessageUtils.formatNumber(config.getCostVaultGold())));
+            }
+            if (playerPointsAPI != null && config.getCostPlayerPoints() > 0) {
+                int points = getPlayerPoints(player.getUniqueId());
+                String color = points >= config.getCostPlayerPoints() ? "&a" : "&c";
+                costLines.add(MessageUtils.colorize("&7点券: " + color + MessageUtils.formatNumber(config.getCostPlayerPoints())));
+            }
+            if (config.getCostMaterials() > 0) {
+                int materialCount = 0;
+                for (int i = 0; i < 6; i++) {
+                    ItemStack material = gui.getItem(config.getSlotMaterials()[i]);
+                    if (material != null && !material.getType().isAir()) {
+                        materialCount++;
+                    }
+                }
+                String color = materialCount >= config.getCostMaterials() ? "&a" : "&c";
+                costLines.add(MessageUtils.colorize("&7材料: " + color + materialCount + "&7/" + config.getCostMaterials()));
+            }
+            
+            if (!costLines.isEmpty()) {
+                lore.add(""); // 空行分隔
+                lore.add(MessageUtils.colorize("&8━━━━━━━━━━━━━━━━━━━━"));
+                lore.add(MessageUtils.colorize("&7消耗资源:"));
+                lore.addAll(costLines);
+            }
+        }
+
+        confirmMeta.setLore(lore);
+        confirmButton.setItemMeta(confirmMeta);
+        gui.setItem(config.getSlotConfirm(), confirmButton);
     }
 
     // 执行强化逻辑（在监听器中调用）

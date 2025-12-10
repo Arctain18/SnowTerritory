@@ -1,13 +1,16 @@
 package top.arctain.snowTerritory.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
+import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.config.PluginConfig;
 import top.arctain.snowTerritory.gui.ItemEditorGUI;
 import top.arctain.snowTerritory.utils.ColorUtils;
@@ -19,10 +22,12 @@ public class GUIListener implements Listener {
 
     private final PluginConfig config;
     private final ItemEditorGUI guiHandler;
+    private final Main plugin;
 
-    public GUIListener(PluginConfig config) {
+    public GUIListener(PluginConfig config, Main plugin) {
         this.config = config;
         this.guiHandler = new ItemEditorGUI(config);
+        this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -69,6 +74,48 @@ public class GUIListener implements Listener {
         // 如果不是可编辑槽位，取消事件
         if (!isEditableSlot) {
             event.setCancelled(true);
+            return;
+        }
+        
+        // 如果是可编辑槽位，在物品放入后更新确认按钮的lore
+        // 使用调度器延迟执行，确保物品已经放入
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (player.getOpenInventory().getTopInventory() == topInv) {
+                guiHandler.updateConfirmButtonLore(player, topInv);
+            }
+        });
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player)) return;
+        Player player = (Player) event.getWhoClicked();
+        InventoryView view = event.getView();
+        Inventory topInv = event.getView().getTopInventory();
+
+        // 检查是否为我们的GUI
+        String title = ColorUtils.stripColor(view.getTitle());
+        String configTitle = ColorUtils.stripColor(config.getGuiTitle());
+        
+        if (!title.equals(configTitle)) {
+            return;
+        }
+        
+        // 检查是否拖拽到了可编辑槽位
+        boolean isEditableSlot = event.getRawSlots().stream().anyMatch(slot -> 
+            slot == config.getSlotWeapon() 
+            || slot == config.getSlotProtectCharm()
+            || slot == config.getSlotEnhanceCharm() 
+            || Arrays.stream(config.getSlotMaterials()).anyMatch(s -> s == slot)
+        );
+        
+        if (isEditableSlot) {
+            // 在拖拽完成后更新确认按钮的lore
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (player.getOpenInventory().getTopInventory() == topInv) {
+                    guiHandler.updateConfirmButtonLore(player, topInv);
+                }
+            });
         }
     }
 

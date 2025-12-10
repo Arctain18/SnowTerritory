@@ -45,7 +45,7 @@ public class Main extends JavaPlugin {
         }
 
         // 注册监听器
-        getServer().getPluginManager().registerEvents(new GUIListener(pluginConfig), this);
+        getServer().getPluginManager().registerEvents(new GUIListener(pluginConfig, this), this);
         getServer().getPluginManager().registerEvents(new ItemEditListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
 
