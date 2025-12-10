@@ -14,9 +14,6 @@ reinforce:
   # 成功时属性增加百分比 (例如: 1.1 表示 +10%)
   attribute-boost-percent: 1.1
   
-  # 失败时属性减少百分比 (例如: 0.9 表示 -10%)
-  attribute-reduce-percent: 0.9
-  
   # 不同等级的成功概率 (0.0-1.0)
   success-rates:
     level-0: 0.9   # 0级升1级: 90%

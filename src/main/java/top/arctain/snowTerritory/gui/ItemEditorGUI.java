@@ -246,7 +246,7 @@ public class ItemEditorGUI {
                     break;
                 case FAIL_DEGRADE:
                     int newLevel = Math.max(0, currentLevel - 1);
-                    Utils.modifyMMOAttribute(mmoItem, config.getAttributeReducePercent(), config.getReinforceableAttributes());
+                    Utils.modifyMMOAttribute(mmoItem, 1 / config.getAttributeBoostPercent(), config.getReinforceableAttributes());
                     // 从LiveMMOItem获取更新后的ItemStack
                     ItemStack updatedWeapon2 = Utils.getUpdatedItemStack(mmoItem);
                     if (updatedWeapon2 != null) {
