@@ -25,4 +25,7 @@ permissions:
   mmoitemseditor.itemid:
     description: 允许查看物品ID
     default: op
+  mmoitemseditor.openforothers:
+    description: 允许为其他玩家打开物品强化界面
+    default: op
 

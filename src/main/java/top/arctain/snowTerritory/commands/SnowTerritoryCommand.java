@@ -50,11 +50,37 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * 处理强化命令: /st reinforce 或 /st r
+     * 处理强化命令: /sn reinforce 或 /sn r [玩家名字]
      */
     private boolean handleReinforce(CommandSender sender, String[] args) {
+        // 如果指定了玩家名字，需要权限检查
+        if (args.length > 1) {
+            // 只有有权限的玩家或控制台才能为其他玩家打开GUI
+            boolean hasPermission = sender.hasPermission("mmoitemseditor.openforothers");
+            boolean isOp = sender instanceof Player && ((Player) sender).isOp();
+            boolean isConsole = sender instanceof org.bukkit.command.ConsoleCommandSender;
+            
+            if (!hasPermission && !isOp && !isConsole) {
+                MessageUtils.sendError(sender, "command.no-permission", "&c✗ &f您没有权限为其他玩家打开强化界面！");
+                return true;
+            }
+
+            String targetPlayerName = args[1];
+            Player targetPlayer = plugin.getServer().getPlayer(targetPlayerName);
+            
+            if (targetPlayer == null) {
+                MessageUtils.sendError(sender, "command.player-not-found", "&c✗ &f找不到玩家: " + targetPlayerName);
+                return true;
+            }
+
+            gui.openGUI(targetPlayer);
+            MessageUtils.sendSuccess(sender, "command.open-gui-success", "&a✓ &f已为玩家 &e" + targetPlayerName + " &f打开物品强化界面！");
+            return true;
+        }
+
+        // 没有指定玩家名字，为自己打开GUI
         if (!(sender instanceof Player)) {
-            MessageUtils.sendError(sender, "command.player-only", "&c✗ &f此命令仅限玩家使用！");
+            MessageUtils.sendError(sender, "command.player-only", "&c✗ &f此命令仅限玩家使用！请指定玩家名字：/{label} r <玩家名字>", "label", "sn");
             return true;
         }
 
@@ -124,6 +150,26 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             }
             
             return completions;
+        }
+        
+        // 当输入 /sn r 后，补全玩家名字
+        if (args.length == 2 && (args[0].equalsIgnoreCase("r") || args[0].equalsIgnoreCase("reinforce"))) {
+            // 检查是否有权限为其他玩家打开GUI
+            if (sender.hasPermission("mmoitemseditor.openforothers") || 
+                (sender instanceof Player && ((Player) sender).isOp()) || 
+                sender instanceof org.bukkit.command.ConsoleCommandSender) {
+                
+                List<String> playerNames = new ArrayList<>();
+                String input = args[1].toLowerCase();
+                
+                for (Player player : plugin.getServer().getOnlinePlayers()) {
+                    if (player.getName().toLowerCase().startsWith(input)) {
+                        playerNames.add(player.getName());
+                    }
+                }
+                
+                return playerNames;
+            }
         }
         
         return new ArrayList<>();
