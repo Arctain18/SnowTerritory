@@ -3,7 +3,6 @@ package top.arctain.snowTerritory.enderstorage.listener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.inventory.ItemStack;
 import top.arctain.snowTerritory.enderstorage.config.EnderStorageConfigManager;
 import top.arctain.snowTerritory.enderstorage.service.LootStorageService;
 import top.arctain.snowTerritory.utils.MessageUtils;
@@ -36,7 +35,7 @@ public class MythicDropListener implements Listener {
             if (key == null) return false;
             int perItemMax = service.resolvePerItemMax(event.getEntity().getKiller(), key);
             service.add(event.getEntity().getKiller().getUniqueId(), key, itemStack.getAmount(), perItemMax, slotLimit);
-            MessageUtils.sendSuccess(event.getEntity().getKiller(), "enderstorage.loot-gained", "&a+" + itemStack.getAmount() + "x " + key + " 已存入战利品仓库");
+            MessageUtils.sendConfigMessage(event.getEntity().getKiller(), "enderstorage.loot-gained", "&a+" + itemStack.getAmount() + "x " + key + " 已存入战利品仓库", "amount", String.valueOf(itemStack.getAmount()), "item", key);
             return configManager.getMainConfig().getBoolean("features.cancel-entity-drop", true);
         });
     }

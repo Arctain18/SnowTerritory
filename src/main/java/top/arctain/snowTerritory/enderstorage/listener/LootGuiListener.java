@@ -62,18 +62,18 @@ public class LootGuiListener implements Listener {
         if (isDeposit(event.getClick())) {
             int moved = removeFromInventory(player, key, amount);
             if (moved <= 0) {
-                MessageUtils.sendWarning(player, "enderstorage.no-items", "&e没有可存入的物品");
+                MessageUtils.sendConfigMessage(player, "enderstorage.no-items-to-deposit", "&e没有可存入的物品");
                 return;
             }
             int perItemMax = service.resolvePerItemMax(player, key);
             int slotLimit = service.resolveSlots(player);
             service.add(player.getUniqueId(), key, moved, perItemMax, slotLimit);
-            MessageUtils.sendSuccess(player, "enderstorage.deposit", "&a✓ &f存入 " + moved + "x " + entry.getDisplay());
+            MessageUtils.sendConfigMessage(player, "enderstorage.deposit-success", "&a✓ &f存入 " + moved + "x " + entry.getDisplay(), "amount", String.valueOf(moved), "item", entry.getDisplay());
         } else {
             // 取出
             int current = service.getAmount(player.getUniqueId(), key);
             if (current <= 0) {
-                MessageUtils.sendWarning(player, "enderstorage.empty", "&e仓库中没有该物品");
+                MessageUtils.sendConfigMessage(player, "enderstorage.no-items-in-storage", "&e仓库中没有该物品");
                 return;
             }
             int take = Math.min(amount, current);
@@ -81,7 +81,7 @@ public class LootGuiListener implements Listener {
             if (give == null) return;
             service.consume(player.getUniqueId(), key, take);
             player.getInventory().addItem(give);
-            MessageUtils.sendSuccess(player, "enderstorage.withdraw", "&a✓ &f取出 " + take + "x " + entry.getDisplay());
+            MessageUtils.sendConfigMessage(player, "enderstorage.withdraw-success", "&a✓ &f取出 " + take + "x " + entry.getDisplay(), "amount", String.valueOf(take), "item", entry.getDisplay());
         }
         Bukkit.getScheduler().runTask(plugin, () -> gui.open(player, holder.getPage()));
     }

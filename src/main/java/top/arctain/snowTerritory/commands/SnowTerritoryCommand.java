@@ -7,6 +7,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.config.PluginConfig;
+import top.arctain.snowTerritory.enderstorage.EnderStorageModule;
 import top.arctain.snowTerritory.gui.ItemEditorGUI;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
@@ -19,12 +20,14 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
     private final PluginConfig config;
     private final ItemEditorGUI gui;
     private final ItemIdCommand itemIdCommand;
+    private final EnderStorageModule enderModule;
 
     public SnowTerritoryCommand(Main plugin, PluginConfig config) {
         this.plugin = plugin;
         this.config = config;
         this.gui = new ItemEditorGUI(config, plugin);
         this.itemIdCommand = new ItemIdCommand();
+        this.enderModule = plugin.getEnderStorageModule();
     }
 
     @Override
@@ -43,6 +46,8 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             return handleReload(sender, args);
         } else if (subCommand.equals("checkid") || subCommand.equals("check")) {
             return handleCheckID(sender, args);
+        } else if (subCommand.equals("es") || subCommand.equals("enderstorage")) {
+            return handleEnderStorage(sender, args);
         } else {
             MessageUtils.sendError(sender, "command.unknown-command", "&c✗ &f未知的子命令！输入 /{label} 查看帮助。", "label", label);
             return true;
@@ -137,6 +142,31 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         MessageUtils.sendHelp(sender);
     }
 
+    /**
+     * 处理 EnderStorage 子命令: /sn es ...
+     */
+    private boolean handleEnderStorage(CommandSender sender, String[] args) {
+        if (enderModule == null || enderModule.getEnderCommand() == null) {
+            MessageUtils.sendError(sender, "command.feature-missing", "&c✗ &fEnderStorage 功能未启用");
+            return true;
+        }
+        // 去除首个 "es"
+        String[] forward = new String[Math.max(0, args.length - 1)];
+        if (args.length > 1) {
+            System.arraycopy(args, 1, forward, 0, args.length - 1);
+        }
+        // 校验基本格式：当子参数为空且非玩家则提示
+        if (forward.length == 0 && !(sender instanceof Player)) {
+            MessageUtils.sendError(sender, "enderstorage.player-only", "&c✗ &f此命令仅限玩家使用");
+            return true;
+        }
+        boolean handled = enderModule.getEnderCommand().onCommand(sender, null, "snowterritory es", forward);
+        if (!handled) {
+            MessageUtils.sendError(sender, "enderstorage.usage", "&c用法: /sn es reload | /sn es give <player> <itemKey> <amount>");
+        }
+        return true;
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
@@ -152,8 +182,29 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             if ("checkid".startsWith(input) || "check".startsWith(input)) {
                 completions.add("checkID");
             }
+            if ("es".startsWith(input) || "enderstorage".startsWith(input)) {
+                completions.add("es");
+            }
             
             return completions;
+        }
+
+        // /sn es 子命令补全
+        if (args.length == 2 && (args[0].equalsIgnoreCase("es") || args[0].equalsIgnoreCase("enderstorage"))) {
+            List<String> subs = new ArrayList<>();
+            subs.add("reload");
+            subs.add("give");
+            return subs;
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("es") && args[1].equalsIgnoreCase("give")) {
+            List<String> playerNames = new ArrayList<>();
+            String input = args[2].toLowerCase();
+            for (Player player : plugin.getServer().getOnlinePlayers()) {
+                if (player.getName().toLowerCase().startsWith(input)) {
+                    playerNames.add(player.getName());
+                }
+            }
+            return playerNames;
         }
         
         // 当输入 /sn r 后，补全玩家名字

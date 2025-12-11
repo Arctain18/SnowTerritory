@@ -35,13 +35,40 @@ public class MessageUtils {
     }
     
     /**
-     * 获取消息前缀
+     * 获取消息前缀（根据配置键自动选择）
+     * @param key 配置键，用于判断使用哪个前缀
+     * @return 对应的前缀
      */
-    private static String getPrefix() {
-        if (config != null) {
-            return config.getMessagePrefix();
+    private static String getPrefix(String key) {
+        // 从配置读取前缀，如果配置中没有则使用默认值
+        String prefixKey = null;
+        String defaultPrefix = null;
+        
+        if (key != null) {
+            if (key.startsWith("reinforce.")) {
+                prefixKey = "prefix.reinforce";
+                defaultPrefix = "&{#4a95ff}ST &{#C9AE59}Reinforce &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";
+            } else if (key.startsWith("enderstorage.") || key.startsWith("ender-storage.")) {
+                prefixKey = "prefix.enderstorage";
+                defaultPrefix = "&{#4a95ff}ST &{#3ab835}Ender&{#6dc97f}Storage &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";
+            } else {
+                prefixKey = "prefix.default";
+                defaultPrefix = "<g:#FFFFFF:#4A95FF>SnowTerritory</g> &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";
+            }
+        } else {
+            prefixKey = "prefix.default";
+            defaultPrefix = "<g:#FFFFFF:#4A95FF>SnowTerritory</g> &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";
         }
-        return "&{#4a95ff}ST <g:#C97759:#C9AE59>Strengthen</g> &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";
+        
+        // 尝试从配置读取前缀
+        if (config != null && prefixKey != null) {
+            String configPrefix = config.getMessage(prefixKey);
+            if (configPrefix != null && !configPrefix.isEmpty() && !configPrefix.equals(prefixKey)) {
+                return configPrefix;
+            }
+        }
+        
+        return defaultPrefix;
     }
     
     /**
@@ -67,11 +94,18 @@ public class MessageUtils {
     }
     
     /**
-     * 发送配置消息（从配置文件读取，带前缀）
+     * 发送配置消息（从配置文件读取，根据配置键自动选择前缀）
+     * @param sender 接收者
+     * @param key 配置键（用于判断使用哪个前缀，如 reinforce.xxx 使用 Reinforce 前缀，enderstorage.xxx 使用 EnderStorage 前缀）
+     * @param defaultValue 默认消息内容
+     * @param placeholders 占位符替换（key, value, key, value...）
      */
     public static void sendConfigMessage(CommandSender sender, String key, String defaultValue, String... placeholders) {
         String message = getMessage(key, defaultValue, placeholders);
-        sendMessage(sender, message);
+        String prefix = getPrefix(key);
+        if (sender != null) {
+            sender.sendMessage(colorize(prefix + message));
+        }
     }
     
     /**
@@ -111,11 +145,12 @@ public class MessageUtils {
     }
 
     /**
-     * 发送普通消息给玩家（带前缀）
+     * 发送普通消息给玩家（带默认前缀）
      */
     public static void sendMessage(CommandSender sender, String message) {
         if (sender != null) {
-            sender.sendMessage(colorize(getPrefix() + message));
+            String prefix = getPrefix(null);
+            sender.sendMessage(colorize(prefix + message));
         }
     }
 
@@ -168,9 +203,10 @@ public class MessageUtils {
     public static void sendHelp(CommandSender sender) {
         String title = getMessage("help.title", "SnowTerritory 命令帮助");
         sendTitle(sender, title);
-        sendConfigRaw(sender, "help.reinforce", "&e/snowterritory reinforce &7- &f打开物品强化界面");
-        sendConfigRaw(sender, "help.reload", "&e/snowterritory reload &7- &f重载插件配置");
-        sendConfigRaw(sender, "help.checkid", "&e/snowterritory checkID &7- &f查看手中物品的MMOItems ID");
+        sendConfigRaw(sender, "help.reinforce", "&e/sn reinforce &7- &f打开物品强化界面");
+        sendConfigRaw(sender, "help.reload", "&e/sn reload &7- &f重载插件配置");
+        sendConfigRaw(sender, "help.checkid", "&e/sn checkID &7- &f查看手中物品的MMOItems ID");
+        sendConfigRaw(sender, "help.enderstorage", "&e/sn es &7- &f打开战利品仓库界面");
         sendSeparator(sender);
     }
 
@@ -244,8 +280,7 @@ public class MessageUtils {
     public static void sendReinforceSuccess(Player player, int newLevel) {
         sendSeparator(player);
         sendConfigRaw(player, "reinforce.success-title", "&a&l✓ 强化成功！");
-        String levelMsg = getMessage("reinforce.success-level", "&7等级提升至: &a&l+{level}", "level", String.valueOf(newLevel));
-        sendRaw(player, levelMsg);
+        sendConfigMessage(player, "reinforce.success-level", "&7等级提升至: &a&l+{level}", "level", String.valueOf(newLevel));
         sendSeparator(player);
     }
 
@@ -255,8 +290,7 @@ public class MessageUtils {
     public static void sendReinforceFail(Player player, int newLevel) {
         sendSeparator(player);
         sendConfigRaw(player, "reinforce.fail-title", "&c&l✗ 强化失败！");
-        String levelMsg = getMessage("reinforce.fail-level", "&7等级下降至: &c&l+{level}", "level", String.valueOf(newLevel));
-        sendRaw(player, levelMsg);
+        sendConfigMessage(player, "reinforce.fail-level", "&7等级下降至: &c&l+{level}", "level", String.valueOf(newLevel));
         sendSeparator(player);
     }
 

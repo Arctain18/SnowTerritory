@@ -21,6 +21,7 @@ public class EnderStorageModule {
     private final EnderStorageConfigManager configManager;
     private final LootStorageService lootStorageService;
     private LootStorageGUI lootStorageGUI;
+    private EnderStorageCommand enderCommand;
 
     public EnderStorageModule(Main plugin) {
         this.plugin = plugin;
@@ -32,6 +33,7 @@ public class EnderStorageModule {
         configManager.loadAll();
         lootStorageService.initialize();
         this.lootStorageGUI = new LootStorageGUI(plugin, configManager, lootStorageService);
+        this.enderCommand = new EnderStorageCommand(configManager, lootStorageService, lootStorageGUI);
 
         registerCommand();
         registerListeners();
@@ -47,14 +49,14 @@ public class EnderStorageModule {
         configManager.loadAll();
         lootStorageService.reload();
         this.lootStorageGUI = new LootStorageGUI(plugin, configManager, lootStorageService);
+        this.enderCommand = new EnderStorageCommand(configManager, lootStorageService, lootStorageGUI);
     }
 
     private void registerCommand() {
         PluginCommand command = plugin.getCommand("snowterritoryenderstorage");
         if (command != null) {
-            EnderStorageCommand executor = new EnderStorageCommand(configManager, lootStorageService, lootStorageGUI);
-            command.setExecutor(executor);
-            command.setTabCompleter(executor);
+            command.setExecutor(enderCommand);
+            command.setTabCompleter(enderCommand);
         } else {
             MessageUtils.logWarning("命令 'snowterritoryenderstorage' 未在 plugin.yml 中注册！");
         }
@@ -70,6 +72,10 @@ public class EnderStorageModule {
 
     public LootStorageService getLootStorageService() {
         return lootStorageService;
+    }
+
+    public EnderStorageCommand getEnderCommand() {
+        return enderCommand;
     }
 }
 

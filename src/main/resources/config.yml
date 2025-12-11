@@ -265,6 +265,8 @@ messages:
     reload: "&e/snowterritory reload &7- &f重载插件配置"
     # 查看ID命令帮助
     checkid: "&e/snowterritory checkID &7- &f查看手中物品的MMOItems ID"
+    # 战利品仓库命令帮助
+    enderstorage: "&e/sn es &7- &f打开战利品仓库界面"
   
   # GUI相关消息
   gui:

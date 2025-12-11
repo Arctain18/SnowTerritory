@@ -35,6 +35,10 @@ public class Main extends JavaPlugin {
         // 设置 MessageUtils 的配置引用
         MessageUtils.setConfig(pluginConfig);
 
+        // 初始化 EnderStorage 模块
+        this.enderStorageModule = new EnderStorageModule(this);
+        this.enderStorageModule.enable();
+
         // 注册主命令
         org.bukkit.command.PluginCommand mainCommand = getServer().getPluginCommand("snowterritory");
         if (mainCommand != null) {
@@ -50,10 +54,6 @@ public class Main extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GUIListener(pluginConfig, this), this);
         getServer().getPluginManager().registerEvents(new ItemEditListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
-
-        // 初始化 EnderStorage 模块
-        this.enderStorageModule = new EnderStorageModule(this);
-        this.enderStorageModule.enable();
 
         MessageUtils.sendStartupBanner(this);
     }

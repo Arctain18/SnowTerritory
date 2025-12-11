@@ -35,5 +35,12 @@ public interface LootStorageService {
     int resolveSlots(Player player);
 
     int resolvePerItemMax(Player player, String itemKey);
+
+    /**
+     * 提供命令描述，便于主命令转发时校验。
+     */
+    default String usage() {
+        return "/sn es [reload|give <player> <itemKey> <amount>]";
+    }
 }
 
