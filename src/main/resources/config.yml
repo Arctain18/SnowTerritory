@@ -52,6 +52,23 @@ reinforce:
     
     # 所需材料数量 (检查GUI中的6个材料槽位)
     materials: 0
+  
+  # 保护符配置
+  # 保护符必须是MMOItems指定type的物品
+  # 保护符lore中"+"后面的数字代表能保护的最高强化等级
+  # 例如: lore中包含 "+5" 表示能保护到+5等级，+6及以上失效
+  preservation-token:
+    # MMOItems的type (默认: PRESERVATION_TOKEN)
+    type: "PRESERVATION_TOKEN"
+  
+  # 强化符配置
+  # 强化符必须是MMOItems指定type的物品
+  # 强化符lore中"+"后面的数字代表能提升概率的最高强化等级
+  # 强化符lore中"%"前面的数字代表能提升的概率数值
+  # 例如: lore中包含 "+5" 和 "10%" 表示能提升到+5等级，提升10%概率
+  upgrade-token:
+    # MMOItems的type (默认: UPGRADE_TOKEN)
+    type: "UPGRADE_TOKEN"
 
 # ============================================
 # GUI界面配置

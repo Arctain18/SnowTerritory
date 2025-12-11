@@ -33,6 +33,10 @@ public class PluginConfig {
     private int costVaultGold;  // 每次强化消耗的Vault金币
     private int costPlayerPoints;  // 每次强化消耗的PlayerPoints点券
     private int costMaterials;  // 所需强化材料数量（检查GUI中的6个槽位）
+    
+    // 保护符和强化符配置
+    private String preservationTokenType;  // 保护符的MMOItems type
+    private String upgradeTokenType;  // 强化符的MMOItems type
 
     // GUI相关
     private String guiTitle;
@@ -88,6 +92,10 @@ public class PluginConfig {
         costVaultGold = config.getInt("reinforce.cost.vault-gold", 1000);
         costPlayerPoints = config.getInt("reinforce.cost.player-points", 50);
         costMaterials = config.getInt("reinforce.cost.materials", 6);
+        
+        // 加载保护符和强化符配置
+        preservationTokenType = config.getString("reinforce.preservation-token.type", "PRESERVATION_TOKEN");
+        upgradeTokenType = config.getString("reinforce.upgrade-token.type", "UPGRADE_TOKEN");
 
         // 加载不同等级的成功概率（例如 level-1: 0.8）
         if (config.getConfigurationSection("reinforce.success-rates") != null) {
@@ -382,5 +390,13 @@ public class PluginConfig {
 
     public String getConfirmButtonLoreCostMaterials() {
         return confirmButtonLoreCostMaterials;
+    }
+    
+    public String getPreservationTokenType() {
+        return preservationTokenType;
+    }
+    
+    public String getUpgradeTokenType() {
+        return upgradeTokenType;
     }
 }

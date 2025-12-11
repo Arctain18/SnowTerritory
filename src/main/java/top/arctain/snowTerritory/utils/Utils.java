@@ -6,6 +6,7 @@ import net.Indyuce.mmoitems.api.item.mmoitem.LiveMMOItem;
 import net.Indyuce.mmoitems.stat.type.ItemStat;
 import net.Indyuce.mmoitems.stat.data.type.StatData;
 import net.Indyuce.mmoitems.stat.data.DoubleData;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -13,6 +14,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Utils {
 
@@ -205,6 +208,118 @@ public class Utils {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * 检查物品是否为指定type的保护符
+     * @param item 物品
+     * @param expectedType 期望的MMOItems type
+     * @return 是否为保护符
+     */
+    public static boolean isPreservationToken(ItemStack item, String expectedType) {
+        if (item == null || !isMMOItem(item)) {
+            return false;
+        }
+        try {
+            net.Indyuce.mmoitems.api.Type type = MMOItems.getType(item);
+            return type != null && type.getId().equalsIgnoreCase(expectedType);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    /**
+     * 检查物品是否为指定type的强化符
+     * @param item 物品
+     * @param expectedType 期望的MMOItems type
+     * @return 是否为强化符
+     */
+    public static boolean isUpgradeToken(ItemStack item, String expectedType) {
+        if (item == null || !isMMOItem(item)) {
+            return false;
+        }
+        try {
+            net.Indyuce.mmoitems.api.Type type = MMOItems.getType(item);
+            return type != null && type.getId().equalsIgnoreCase(expectedType);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    /**
+     * 从保护符/强化符的lore中解析"+"后面的数字（最高等级）
+     * 例如: lore中包含 "+5" 返回 5
+     * @param item 物品
+     * @return 最高等级，如果未找到则返回-1
+     */
+    public static int parseMaxLevelFromLore(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) {
+            return -1;
+        }
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null || !meta.hasLore()) {
+            return -1;
+        }
+        
+        List<String> lore = meta.getLore();
+        if (lore == null) {
+            return -1;
+        }
+        
+        // 匹配 "+数字" 格式，例如 "+5", "+10"
+        Pattern pattern = Pattern.compile("\\+(\\d+)");
+        for (String line : lore) {
+            if (line == null) continue;
+            // 移除颜色代码后再匹配
+            String plainLine = ChatColor.stripColor(line);
+            Matcher matcher = pattern.matcher(plainLine);
+            if (matcher.find()) {
+                try {
+                    return Integer.parseInt(matcher.group(1));
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+            }
+        }
+        return -1;
+    }
+    
+    /**
+     * 从强化符的lore中解析"%"前面的数字（概率提升值）
+     * 例如: lore中包含 "10%" 返回 10
+     * @param item 物品
+     * @return 概率提升值（百分比），如果未找到则返回-1
+     */
+    public static int parseProbabilityBoostFromLore(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) {
+            return -1;
+        }
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null || !meta.hasLore()) {
+            return -1;
+        }
+        
+        List<String> lore = meta.getLore();
+        if (lore == null) {
+            return -1;
+        }
+        
+        // 匹配 "数字%" 格式，例如 "10%", "15%"
+        Pattern pattern = Pattern.compile("(\\d+)%");
+        for (String line : lore) {
+            if (line == null) continue;
+            // 移除颜色代码后再匹配
+            String plainLine = ChatColor.stripColor(line);
+            Matcher matcher = pattern.matcher(plainLine);
+            if (matcher.find()) {
+                try {
+                    return Integer.parseInt(matcher.group(1));
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+            }
+        }
+        return -1;
     }
 
     /**

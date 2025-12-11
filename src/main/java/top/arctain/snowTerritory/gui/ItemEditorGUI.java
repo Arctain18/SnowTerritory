@@ -2,7 +2,6 @@ package top.arctain.snowTerritory.gui;
 
 import net.Indyuce.mmoitems.api.item.mmoitem.LiveMMOItem;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -200,19 +199,50 @@ public class ItemEditorGUI {
             int currentLevel = Utils.getCurrentLevel(weapon);
             int nextLevel = currentLevel + 1;
             
+            // 验证保护符
+            boolean protectCharmValid = false;
+            boolean protectCharmExpired = false;
+            int protectCharmMaxLevel = -1;
+            if (protectCharm != null) {
+                if (Utils.isPreservationToken(protectCharm, config.getPreservationTokenType())) {
+                    protectCharmMaxLevel = Utils.parseMaxLevelFromLore(protectCharm);
+                    if (protectCharmMaxLevel >= 0 && nextLevel <= protectCharmMaxLevel) {
+                        protectCharmValid = true;
+                    } else if (protectCharmMaxLevel >= 0) {
+                        protectCharmExpired = true;
+                    }
+                }
+            }
+            
+            // 验证强化符
+            boolean enhanceCharmValid = false;
+            boolean enhanceCharmExpired = false;
+            int enhanceCharmMaxLevel = -1;
+            int enhanceCharmBonus = 0;
+            if (enhanceCharm != null) {
+                if (Utils.isUpgradeToken(enhanceCharm, config.getUpgradeTokenType())) {
+                    enhanceCharmMaxLevel = Utils.parseMaxLevelFromLore(enhanceCharm);
+                    enhanceCharmBonus = Utils.parseProbabilityBoostFromLore(enhanceCharm);
+                    if (enhanceCharmMaxLevel >= 0 && nextLevel <= enhanceCharmMaxLevel && enhanceCharmBonus > 0) {
+                        enhanceCharmValid = true;
+                    } else if (enhanceCharmMaxLevel >= 0) {
+                        enhanceCharmExpired = true;
+                    }
+                }
+            }
+            
             // 计算成功率
             double baseSuccessRate = config.getSuccessRateForLevel(nextLevel);
-            if (enhanceCharm != null) {
-                baseSuccessRate += 0.1; // 强化符增加10%成功率
+            if (enhanceCharmValid) {
+                baseSuccessRate += enhanceCharmBonus / 100.0; // 强化符增加概率（百分比转小数）
             }
             double successRate = Math.min(1.0, baseSuccessRate); // 确保不超过100%
             
             // 计算失败率
             double failDegradeChance = config.getReinforceFailDegradeChance();
-            if (protectCharm != null) {
+            if (protectCharmValid) {
                 failDegradeChance = 0.0; // 保护符：失败不降级
             }
-            double maintainChance = config.getReinforceMaintainChance();
             double totalFailRate = 1.0 - successRate; // 总失败率（包括降级和维持）
             
             lore.add(MessageUtils.colorize(config.getConfirmButtonLoreSeparator()));
@@ -233,9 +263,15 @@ public class ItemEditorGUI {
                 .replace("{failRate}", String.format("%.1f", totalFailRate * 100));
             lore.add(MessageUtils.colorize(failRateText));
             
-            // 如果有保护符，显示保护信息
+            // 如果有保护符，显示保护信息或失效信息
             if (protectCharm != null) {
-                lore.add(MessageUtils.colorize(config.getConfirmButtonLoreProtectCharmHint()));
+                if (protectCharmValid) {
+                    lore.add(MessageUtils.colorize(config.getConfirmButtonLoreProtectCharmHint()));
+                } else if (protectCharmExpired) {
+                    lore.add(MessageUtils.colorize("&c&o保护符失效 (最高保护等级: +" + protectCharmMaxLevel + ")"));
+                } else {
+                    lore.add(MessageUtils.colorize("&c&o保护符无效 (类型不匹配)"));
+                }
             } else if (failDegradeChance > 0) {
                 // 显示失败降级概率
                 String failDegradeText = config.getConfirmButtonLoreFailDegradeChance()
@@ -243,11 +279,17 @@ public class ItemEditorGUI {
                 lore.add(MessageUtils.colorize(failDegradeText));
             }
             
-            // 如果有强化符，显示加成信息
+            // 如果有强化符，显示加成信息或失效信息
             if (enhanceCharm != null) {
-                String enhanceCharmText = config.getConfirmButtonLoreEnhanceCharmHint()
-                    .replace("{bonus}", "10");
-                lore.add(MessageUtils.colorize(enhanceCharmText));
+                if (enhanceCharmValid) {
+                    String enhanceCharmText = config.getConfirmButtonLoreEnhanceCharmHint()
+                        .replace("{bonus}", String.valueOf(enhanceCharmBonus));
+                    lore.add(MessageUtils.colorize(enhanceCharmText));
+                } else if (enhanceCharmExpired) {
+                    lore.add(MessageUtils.colorize("&c&o强化符失效 (最高强化等级: +" + enhanceCharmMaxLevel + ")"));
+                } else {
+                    lore.add(MessageUtils.colorize("&c&o强化符无效 (类型不匹配或概率解析失败)"));
+                }
             }
             
             // 显示消耗资源
@@ -357,6 +399,32 @@ public class ItemEditorGUI {
             return;
         }
 
+        // 验证保护符和强化符（需要在消耗之前验证）
+        int currentLevel = Utils.getCurrentLevel(weapon);
+        int nextLevel = currentLevel + 1;
+        
+        boolean protectCharmValid = false;
+        if (protectCharm != null) {
+            if (Utils.isPreservationToken(protectCharm, config.getPreservationTokenType())) {
+                int protectCharmMaxLevel = Utils.parseMaxLevelFromLore(protectCharm);
+                if (protectCharmMaxLevel >= 0 && nextLevel <= protectCharmMaxLevel) {
+                    protectCharmValid = true;
+                }
+            }
+        }
+        
+        boolean enhanceCharmValid = false;
+        int enhanceCharmBonus = 0;
+        if (enhanceCharm != null) {
+            if (Utils.isUpgradeToken(enhanceCharm, config.getUpgradeTokenType())) {
+                int enhanceCharmMaxLevel = Utils.parseMaxLevelFromLore(enhanceCharm);
+                enhanceCharmBonus = Utils.parseProbabilityBoostFromLore(enhanceCharm);
+                if (enhanceCharmMaxLevel >= 0 && nextLevel <= enhanceCharmMaxLevel && enhanceCharmBonus > 0) {
+                    enhanceCharmValid = true;
+                }
+            }
+        }
+
         // 扣除消耗
         if (economy != null && config.getCostVaultGold() > 0) {
             withdrawPlayer(player, config.getCostVaultGold());
@@ -367,16 +435,24 @@ public class ItemEditorGUI {
         for (int i = 0; i < 6; i++) {
             if (materials[i] != null) gui.setItem(config.getSlotMaterials()[i], null);  // 消耗材料
         }
-        if (protectCharm != null) gui.setItem(config.getSlotProtectCharm(), null);  // 消耗保护符
-        if (enhanceCharm != null) gui.setItem(config.getSlotEnhanceCharm(), null);  // 消耗强化符
-
+        // 只有有效的保护符和强化符才会被消耗
+        if (protectCharmValid) {
+            gui.setItem(config.getSlotProtectCharm(), null);  // 消耗保护符
+        }
+        if (enhanceCharmValid) {
+            gui.setItem(config.getSlotEnhanceCharm(), null);  // 消耗强化符
+        }
+        
         // 计算概率（基础 + 强化符效果）
-        int currentLevel = Utils.getCurrentLevel(weapon);
-        double baseSuccessRate = config.getSuccessRateForLevel(currentLevel + 1);  // 针对下一级
-        if (enhanceCharm != null) baseSuccessRate += 0.1;  // 示例：强化符加0.1概率
+        double baseSuccessRate = config.getSuccessRateForLevel(nextLevel);  // 针对下一级
+        if (enhanceCharmValid) {
+            baseSuccessRate += enhanceCharmBonus / 100.0;  // 强化符增加概率（百分比转小数）
+        }
         double failDegradeChance = config.getReinforceFailDegradeChance();
         double maintainChance = config.getReinforceMaintainChance();
-        if (protectCharm != null) failDegradeChance = 0.0;  // 保护符：失败不降级
+        if (protectCharmValid) {
+            failDegradeChance = 0.0;  // 保护符：失败不降级
+        }
 
         // 执行强化
         Utils.ReinforceResult result = Utils.attemptReinforce(baseSuccessRate, failDegradeChance, maintainChance);
