@@ -10,8 +10,10 @@ import top.arctain.snowTerritory.utils.MessageUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Getter
 public class PluginConfig {
@@ -132,18 +134,78 @@ public class PluginConfig {
         confirmButtonLoreCostPoints = config.getString("gui.confirm-button-lore.cost-points", "&7点券: {color}{amount}");
         confirmButtonLoreCostMaterials = config.getString("gui.confirm-button-lore.cost-materials", "&7材料: {color}{current}&7/{required}");
 
+        // 获取所有功能槽位集合（自定义槽位不能覆盖这些槽位）
+        Set<Integer> functionalSlots = getFunctionalSlots();
+        
         // 加载自定义槽位（支持16进制颜色，例如 &x&F&F&0&0&0&0）
+        // 支持范围表达式，例如: 0-5 表示槽位 0 到 5
+        // 注意: 自定义槽位优先级最低，不会覆盖功能槽位
         if (config.getConfigurationSection("gui.custom-slots") != null) {
             for (String key : config.getConfigurationSection("gui.custom-slots").getKeys(false)) {
                 try {
-                    int slot = Integer.parseInt(key);
                     String material = config.getString("gui.custom-slots." + key + ".material", "GLASS_PANE");
                     String name = config.getString("gui.custom-slots." + key + ".name", "");
+                    
+                    Material mat;
                     try {
-                        Material mat = Material.valueOf(material.toUpperCase());
-                        customSlots.put(slot, new ItemConfig(mat, name));
+                        mat = Material.valueOf(material.toUpperCase());
                     } catch (IllegalArgumentException e) {
-                        MessageUtils.logWarning("无效的材料类型: " + material + " (槽位: " + slot + ")");
+                        MessageUtils.logWarning("无效的材料类型: " + material + " (槽位: " + key + ")");
+                        continue;
+                    }
+                    
+                    ItemConfig itemConfig = new ItemConfig(mat, name);
+                    
+                    // 检查是否为范围表达式 (例如: 0-5)
+                    if (key.contains("-")) {
+                        String[] parts = key.split("-", 2);
+                        if (parts.length == 2) {
+                            try {
+                                int startSlot = Integer.parseInt(parts[0].trim());
+                                int endSlot = Integer.parseInt(parts[1].trim());
+                                
+                                // 确保范围有效
+                                if (startSlot < 0 || endSlot < 0) {
+                                    MessageUtils.logWarning("槽位范围不能为负数: " + key);
+                                    continue;
+                                }
+                                
+                                if (startSlot > endSlot) {
+                                    // 如果起始大于结束，交换它们
+                                    int temp = startSlot;
+                                    startSlot = endSlot;
+                                    endSlot = temp;
+                                }
+                                
+                                // 为范围内的每个槽位应用配置（跳过功能槽位）
+                                int skippedCount = 0;
+                                for (int slot = startSlot; slot <= endSlot; slot++) {
+                                    if (functionalSlots.contains(slot)) {
+                                        skippedCount++;
+                                        continue; // 跳过功能槽位
+                                    }
+                                    customSlots.put(slot, itemConfig);
+                                }
+                                
+                                if (skippedCount > 0) {
+                                    MessageUtils.logInfo("已加载槽位范围: " + key + " (槽位 " + startSlot + " 到 " + endSlot + "，跳过 " + skippedCount + " 个功能槽位)");
+                                } else {
+                                    MessageUtils.logInfo("已加载槽位范围: " + key + " (槽位 " + startSlot + " 到 " + endSlot + ")");
+                                }
+                            } catch (NumberFormatException e) {
+                                MessageUtils.logWarning("无效的槽位范围格式: " + key + " (应为: 起始-结束，例如: 0-5)");
+                            }
+                        } else {
+                            MessageUtils.logWarning("无效的槽位范围格式: " + key + " (应为: 起始-结束，例如: 0-5)");
+                        }
+                    } else {
+                        // 单个槽位
+                        int slot = Integer.parseInt(key);
+                        if (functionalSlots.contains(slot)) {
+                            MessageUtils.logWarning("槽位 " + slot + " 是功能槽位，已跳过自定义配置");
+                            continue; // 跳过功能槽位
+                        }
+                        customSlots.put(slot, itemConfig);
                     }
                 } catch (NumberFormatException e) {
                     MessageUtils.logWarning("无效的槽位号: " + key);
@@ -155,6 +217,38 @@ public class PluginConfig {
         loadMessages();
 
         MessageUtils.logSuccess("配置已加载");
+    }
+    
+    /**
+     * 获取所有功能槽位的集合
+     * 这些槽位不能被自定义槽位覆盖
+     * 
+     * @return 功能槽位集合
+     */
+    private Set<Integer> getFunctionalSlots() {
+        Set<Integer> functionalSlots = new HashSet<>();
+        
+        // 添加武器槽位
+        functionalSlots.add(slotWeapon);
+        
+        // 添加保护符槽位
+        functionalSlots.add(slotProtectCharm);
+        
+        // 添加强化符槽位
+        functionalSlots.add(slotEnhanceCharm);
+        
+        // 添加材料槽位（6个）
+        for (int materialSlot : slotMaterials) {
+            functionalSlots.add(materialSlot);
+        }
+        
+        // 添加确认按钮槽位
+        functionalSlots.add(slotConfirm);
+        
+        // 添加取消按钮槽位
+        functionalSlots.add(slotCancel);
+        
+        return functionalSlots;
     }
     
     /**

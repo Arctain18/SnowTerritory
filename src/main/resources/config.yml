@@ -16,17 +16,17 @@ reinforce:
   
   # 不同等级的成功概率 (0.0-1.0)
   success-rates:
-    level-0: 0.9   # 0级升1级: 90%
-    level-1: 0.8   # 1级升2级: 80%
-    level-2: 0.7   # 2级升3级: 70%
-    level-3: 0.6   # 3级升4级: 60%
-    level-4: 0.5   # 4级升5级: 50%
-    level-5: 0.4   # 5级升6级: 40%
-    level-6: 0.3   # 6级升7级: 30%
-    level-7: 0.25  # 7级升8级: 25%
-    level-8: 0.2   # 8级升9级: 20%
-    level-9: 0.15  # 9级升10级: 15%
-    level-10: 0.1  # 10级及以上: 10%
+    level-0: 0.9  
+    level-1: 0.8  
+    level-2: 0.7  
+    level-3: 0.6  
+    level-4: 0.5  
+    level-5: 0.4  
+    level-6: 0.3  
+    level-7: 0.25 
+    level-8: 0.2  
+    level-9: 0.15 
+    level-10: 0.1 
   
   # 可强化物品列表 (基于MMOItems物品ID匹配，需要精确匹配)
   # 如果列表为空，则允许所有MMOItems物品强化
@@ -122,134 +122,12 @@ gui:
   
   # 自定义槽位 (装饰用，支持16进制颜色 &x&F&F&0&0&0&0)
   # 格式: 槽位号: { material: 材料, name: 显示名称 }
+  # 支持范围表达式: 槽位范围: { material: 材料, name: 显示名称 }
+  # 例如: "0-5" 表示槽位 0 到 5 都使用相同的设置
+  # 优先级: 自定义槽位优先级最低，不会覆盖功能槽位（武器、保护符、强化符、材料、确认按钮、取消按钮）
+  # 因此可以安全地设置 "0-53" 来设置所有槽位，功能槽位不会被影响
   custom-slots:
-    0:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    1:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    2:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    3:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    4:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    5:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    6:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    7:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    8:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    9:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    11:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    13:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    15:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    16:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    17:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    18:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    19:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    20:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    21:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    23:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    24:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    25:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    26:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    27:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    31:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    32:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    33:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    34:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    35:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    36:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    41:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    42:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    43:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    44:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    45:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    46:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    47:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    48:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    49:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    50:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    51:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    52:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-    53:
+    0-53:
       material: "BLACK_STAINED_GLASS_PANE"
       name: "&r"
 
