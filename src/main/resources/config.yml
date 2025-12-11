@@ -118,16 +118,20 @@ gui:
     separator: "<#d6fff6>&m-<#fffad6>&m=<#FFFFFF>&m---------------<#fffad6>&m=<#d6fff6>&m-"
     # 当前等级显示 (占位符: {currentLevel}, {nextLevel})
     current-level: "&7当前等级: &e+{currentLevel} &7→ &a+{nextLevel}"
-    # 成功率显示 (占位符: {successRate})
-    success-rate: "&7成功率: &a{successRate}%"
-    # 失败率显示 (占位符: {failRate})
-    fail-rate: "&7失败率: &c{failRate}%"
-    # 保护符提示
-    protect-charm-hint: "&7&o失败时不会降级"
-    # 失败降级概率显示 (占位符: {chance})
-    fail-degrade-chance: "&7&o失败降级概率: &c{chance}%"
-    # 强化符加成提示 (占位符: {bonus})
-    enhance-charm-hint: "&7&o强化符加成: &a+{bonus}%"
+    # 成功率显示 (占位符: {successRate}, {bonus} - 强化符加成，如果没有则为空)
+    # 示例: "&7成功率: &a{successRate}%{bonus}" 会显示为 "成功率: 30%(+20%)" 或 "成功率: 30%"
+    success-rate: "&7成功率: &a{successRate}%{bonus}"
+    # 失败降级概率显示 (占位符: {chance}, {protect} - 保护符保护，如果没有则为空)
+    # 示例: "&7失败降级概率: &c{chance}%{protect}" 会显示为 "失败降级概率: 30%" 或 "失败降级概率: 0%(-30%)"
+    fail-degrade-chance: "&7失败降级概率: &c{chance}%{protect}"
+    # 保护符失效消息 (占位符: {maxLevel})
+    protect-charm-expired: "&c&o保护符失效 (最高保护等级: +{maxLevel})"
+    # 保护符无效消息
+    protect-charm-invalid: "&c&o保护符无效 (类型不匹配)"
+    # 强化符失效消息 (占位符: {maxLevel})
+    enhance-charm-expired: "&c&o强化符失效 (最高强化等级: +{maxLevel})"
+    # 强化符无效消息
+    enhance-charm-invalid: "&c&o强化符无效 (类型不匹配或概率解析失败)"
     # 消耗资源标题
     cost-title: "&7消耗资源:"
     # 金币显示 (占位符: {amount}, {color} - 绿色&a或红色&c)

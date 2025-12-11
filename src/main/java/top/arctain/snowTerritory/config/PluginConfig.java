@@ -56,10 +56,11 @@ public class PluginConfig {
     private String confirmButtonLoreSeparator;
     private String confirmButtonLoreCurrentLevel;
     private String confirmButtonLoreSuccessRate;
-    private String confirmButtonLoreFailRate;
-    private String confirmButtonLoreProtectCharmHint;
     private String confirmButtonLoreFailDegradeChance;
-    private String confirmButtonLoreEnhanceCharmHint;
+    private String confirmButtonLoreProtectCharmExpired;
+    private String confirmButtonLoreProtectCharmInvalid;
+    private String confirmButtonLoreEnhanceCharmExpired;
+    private String confirmButtonLoreEnhanceCharmInvalid;
     private String confirmButtonLoreCostTitle;
     private String confirmButtonLoreCostGold;
     private String confirmButtonLoreCostPoints;
@@ -133,11 +134,12 @@ public class PluginConfig {
         confirmButtonLoreClickHint = config.getString("gui.confirm-button-lore.click-hint", "&7点击确认强化");
         confirmButtonLoreSeparator = config.getString("gui.confirm-button-lore.separator", "<#d6fff6>&m-<#fffad6>&m=<#FFFFFF>&m---------------<#fffad6>&m=<#d6fff6>&m-");
         confirmButtonLoreCurrentLevel = config.getString("gui.confirm-button-lore.current-level", "&7当前等级: &e+{currentLevel} &7→ &a+{nextLevel}");
-        confirmButtonLoreSuccessRate = config.getString("gui.confirm-button-lore.success-rate", "&7成功率: &a{successRate}%");
-        confirmButtonLoreFailRate = config.getString("gui.confirm-button-lore.fail-rate", "&7失败率: &c{failRate}%");
-        confirmButtonLoreProtectCharmHint = config.getString("gui.confirm-button-lore.protect-charm-hint", "&7&o失败时不会降级");
-        confirmButtonLoreFailDegradeChance = config.getString("gui.confirm-button-lore.fail-degrade-chance", "&7&o失败降级概率: &c{chance}%");
-        confirmButtonLoreEnhanceCharmHint = config.getString("gui.confirm-button-lore.enhance-charm-hint", "&7&o强化符加成: &a+{bonus}%");
+        confirmButtonLoreSuccessRate = config.getString("gui.confirm-button-lore.success-rate", "&7成功率: &a{successRate}%{bonus}");
+        confirmButtonLoreFailDegradeChance = config.getString("gui.confirm-button-lore.fail-degrade-chance", "&7失败降级概率: &c{chance}%{protect}");
+        confirmButtonLoreProtectCharmExpired = config.getString("gui.confirm-button-lore.protect-charm-expired", "&c&o保护符失效 (最高保护等级: +{maxLevel})");
+        confirmButtonLoreProtectCharmInvalid = config.getString("gui.confirm-button-lore.protect-charm-invalid", "&c&o保护符无效 (类型不匹配)");
+        confirmButtonLoreEnhanceCharmExpired = config.getString("gui.confirm-button-lore.enhance-charm-expired", "&c&o强化符失效 (最高强化等级: +{maxLevel})");
+        confirmButtonLoreEnhanceCharmInvalid = config.getString("gui.confirm-button-lore.enhance-charm-invalid", "&c&o强化符无效 (类型不匹配或概率解析失败)");
         confirmButtonLoreCostTitle = config.getString("gui.confirm-button-lore.cost-title", "&7消耗资源:");
         confirmButtonLoreCostGold = config.getString("gui.confirm-button-lore.cost-gold", "&7金币: {color}{amount}");
         confirmButtonLoreCostPoints = config.getString("gui.confirm-button-lore.cost-points", "&7点券: {color}{amount}");
@@ -360,20 +362,24 @@ public class PluginConfig {
         return confirmButtonLoreSuccessRate;
     }
 
-    public String getConfirmButtonLoreFailRate() {
-        return confirmButtonLoreFailRate;
-    }
-
-    public String getConfirmButtonLoreProtectCharmHint() {
-        return confirmButtonLoreProtectCharmHint;
-    }
-
     public String getConfirmButtonLoreFailDegradeChance() {
         return confirmButtonLoreFailDegradeChance;
     }
 
-    public String getConfirmButtonLoreEnhanceCharmHint() {
-        return confirmButtonLoreEnhanceCharmHint;
+    public String getConfirmButtonLoreProtectCharmExpired() {
+        return confirmButtonLoreProtectCharmExpired;
+    }
+
+    public String getConfirmButtonLoreProtectCharmInvalid() {
+        return confirmButtonLoreProtectCharmInvalid;
+    }
+
+    public String getConfirmButtonLoreEnhanceCharmExpired() {
+        return confirmButtonLoreEnhanceCharmExpired;
+    }
+
+    public String getConfirmButtonLoreEnhanceCharmInvalid() {
+        return confirmButtonLoreEnhanceCharmInvalid;
     }
 
     public String getConfirmButtonLoreCostTitle() {
