@@ -5,6 +5,7 @@ import top.arctain.snowTerritory.config.PluginConfig;
 import top.arctain.snowTerritory.listeners.GUIListener;
 import top.arctain.snowTerritory.listeners.ItemEditListener;
 import top.arctain.snowTerritory.listeners.PlayerJoinListener;
+import top.arctain.snowTerritory.enderstorage.EnderStorageModule;
 import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.NBTUtils;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,6 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Main extends JavaPlugin {
 
     private PluginConfig pluginConfig;
+    private EnderStorageModule enderStorageModule;
 
     @Override
     public void onEnable() {
@@ -49,11 +51,18 @@ public class Main extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ItemEditListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
 
+        // 初始化 EnderStorage 模块
+        this.enderStorageModule = new EnderStorageModule(this);
+        this.enderStorageModule.enable();
+
         MessageUtils.sendStartupBanner(this);
     }
 
     @Override
     public void onDisable() {
+        if (enderStorageModule != null) {
+            enderStorageModule.disable();
+        }
         MessageUtils.sendShutdownBanner(this);
     }
 
@@ -83,5 +92,9 @@ public class Main extends JavaPlugin {
 
     public PluginConfig getPluginConfig() {
         return pluginConfig;
+    }
+
+    public EnderStorageModule getEnderStorageModule() {
+        return enderStorageModule;
     }
 }

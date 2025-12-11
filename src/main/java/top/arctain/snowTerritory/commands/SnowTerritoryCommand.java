@@ -104,6 +104,10 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         }
 
         config.reloadConfig();
+        // 同步重载 EnderStorage 模块
+        if (plugin.getEnderStorageModule() != null) {
+            plugin.getEnderStorageModule().reload();
+        }
         MessageUtils.sendSuccess(sender, "command.reload-success", "&a✓ &f插件配置已重载！");
         return true;
     }

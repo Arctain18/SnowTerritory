@@ -12,6 +12,11 @@ commands:
     usage: /snowterritory <子命令>
     aliases: [sn]
     permission: mmoitemseditor.use
+  snowterritoryenderstorage:
+    description: EnderStorage 主命令
+    usage: /snowterritoryenderstorage <子命令>
+    aliases: [stes]
+    permission: st.loot.use
 permissions:
   mmoitemseditor.use:
     description: 允许使用 SnowTerritory 命令
@@ -27,5 +32,14 @@ permissions:
     default: op
   mmoitemseditor.openforothers:
     description: 允许为其他玩家打开物品强化界面
+    default: op
+  st.loot.use:
+    description: 使用战利品仓库
+    default: true
+  st.loot.auto:
+    description: 自动拾取到战利品仓库
+    default: op
+  st.loot.admin:
+    description: 管理战利品仓库
     default: op
 
