@@ -1,8 +1,8 @@
-package top.arctain.snowTerritory.data;
+package top.arctain.snowTerritory.reinforce.data;
 
 import net.Indyuce.mmoitems.api.item.mmoitem.MMOItem;
 import org.bukkit.inventory.ItemStack;
-import top.arctain.snowTerritory.utils.Utils;
+import top.arctain.snowTerritory.reinforce.utils.ReinforceUtils;
 
 /**
  * MMOItems 数据封装类
@@ -16,8 +16,8 @@ public class MMOItemData {
 
     public MMOItemData(ItemStack itemStack) {
         this.itemStack = itemStack;
-        this.mmoItem = Utils.getMMOItem(itemStack);
-        this.reinforceLevel = Utils.getCurrentLevel(itemStack);
+        this.mmoItem = ReinforceUtils.getMMOItem(itemStack);
+        this.reinforceLevel = ReinforceUtils.getCurrentLevel(itemStack);
     }
 
     /**
@@ -46,7 +46,7 @@ public class MMOItemData {
      */
     public void setReinforceLevel(int level) {
         this.reinforceLevel = level;
-        Utils.updateItemName(itemStack, level);
+        ReinforceUtils.updateItemName(itemStack, level);
     }
 
     /**
@@ -60,6 +60,7 @@ public class MMOItemData {
      * 检查是否可强化
      */
     public boolean isReinforceable() {
-        return Utils.isReinforceable(itemStack);
+        return ReinforceUtils.isReinforceable(itemStack);
     }
 }
+

@@ -2,10 +2,10 @@ package top.arctain.snowTerritory;
 
 import top.arctain.snowTerritory.commands.SnowTerritoryCommand;
 import top.arctain.snowTerritory.config.PluginConfig;
-import top.arctain.snowTerritory.listeners.GUIListener;
 import top.arctain.snowTerritory.listeners.ItemEditListener;
 import top.arctain.snowTerritory.listeners.PlayerJoinListener;
 import top.arctain.snowTerritory.enderstorage.EnderStorageModule;
+import top.arctain.snowTerritory.reinforce.ReinforceModule;
 import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.NBTUtils;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -14,6 +14,7 @@ public class Main extends JavaPlugin {
 
     private PluginConfig pluginConfig;
     private EnderStorageModule enderStorageModule;
+    private ReinforceModule reinforceModule;
 
     @Override
     public void onEnable() {
@@ -35,6 +36,10 @@ public class Main extends JavaPlugin {
         // 设置 MessageUtils 的配置引用
         MessageUtils.setConfig(pluginConfig);
 
+        // 初始化 Reinforce 模块
+        this.reinforceModule = new ReinforceModule(this);
+        this.reinforceModule.enable();
+
         // 初始化 EnderStorage 模块
         this.enderStorageModule = new EnderStorageModule(this);
         this.enderStorageModule.enable();
@@ -42,7 +47,7 @@ public class Main extends JavaPlugin {
         // 注册主命令
         org.bukkit.command.PluginCommand mainCommand = getServer().getPluginCommand("snowterritory");
         if (mainCommand != null) {
-            SnowTerritoryCommand commandExecutor = new SnowTerritoryCommand(this, pluginConfig);
+            SnowTerritoryCommand commandExecutor = new SnowTerritoryCommand(this, pluginConfig, reinforceModule);
             mainCommand.setExecutor(commandExecutor);
             mainCommand.setTabCompleter(commandExecutor);
             MessageUtils.logSuccess("命令 'snowterritory' 已注册");
@@ -51,7 +56,6 @@ public class Main extends JavaPlugin {
         }
 
         // 注册监听器
-        getServer().getPluginManager().registerEvents(new GUIListener(pluginConfig, this), this);
         getServer().getPluginManager().registerEvents(new ItemEditListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
 
@@ -60,6 +64,9 @@ public class Main extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (reinforceModule != null) {
+            reinforceModule.disable();
+        }
         if (enderStorageModule != null) {
             enderStorageModule.disable();
         }
@@ -92,6 +99,10 @@ public class Main extends JavaPlugin {
 
     public PluginConfig getPluginConfig() {
         return pluginConfig;
+    }
+
+    public ReinforceModule getReinforceModule() {
+        return reinforceModule;
     }
 
     public EnderStorageModule getEnderStorageModule() {

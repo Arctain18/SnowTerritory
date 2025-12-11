@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.config.PluginConfig;
 import top.arctain.snowTerritory.enderstorage.EnderStorageModule;
-import top.arctain.snowTerritory.gui.ItemEditorGUI;
+import top.arctain.snowTerritory.reinforce.ReinforceModule;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.util.ArrayList;
@@ -18,15 +18,15 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
 
     private final Main plugin;
     private final PluginConfig config;
-    private final ItemEditorGUI gui;
     private final ItemIdCommand itemIdCommand;
+    private final ReinforceModule reinforceModule;
     private final EnderStorageModule enderModule;
 
-    public SnowTerritoryCommand(Main plugin, PluginConfig config) {
+    public SnowTerritoryCommand(Main plugin, PluginConfig config, ReinforceModule reinforceModule) {
         this.plugin = plugin;
         this.config = config;
-        this.gui = new ItemEditorGUI(config, plugin);
         this.itemIdCommand = new ItemIdCommand();
+        this.reinforceModule = reinforceModule;
         this.enderModule = plugin.getEnderStorageModule();
     }
 
@@ -58,44 +58,19 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
      * 处理强化命令: /sn reinforce 或 /sn r [玩家名字]
      */
     private boolean handleReinforce(CommandSender sender, String[] args) {
-        // 如果指定了玩家名字，需要权限检查
+        if (reinforceModule == null || reinforceModule.getReinforceCommand() == null) {
+            MessageUtils.sendError(sender, "command.feature-missing", "&c✗ &fReinforce 功能未启用");
+            return true;
+        }
+        // 去除首个 "r" 或 "reinforce"
+        String[] forward = new String[Math.max(0, args.length - 1)];
         if (args.length > 1) {
-            // 只有有权限的玩家或控制台才能为其他玩家打开GUI
-            boolean hasPermission = sender.hasPermission("mmoitemseditor.openforothers");
-            boolean isOp = sender instanceof Player && ((Player) sender).isOp();
-            boolean isConsole = sender instanceof org.bukkit.command.ConsoleCommandSender;
-            
-            if (!hasPermission && !isOp && !isConsole) {
-                MessageUtils.sendError(sender, "command.no-permission", "&c✗ &f您没有权限为其他玩家打开强化界面！");
-                return true;
-            }
-
-            String targetPlayerName = args[1];
-            Player targetPlayer = plugin.getServer().getPlayer(targetPlayerName);
-            
-            if (targetPlayer == null) {
-                MessageUtils.sendError(sender, "command.player-not-found", "&c✗ &f找不到玩家: " + targetPlayerName);
-                return true;
-            }
-
-            gui.openGUI(targetPlayer);
-            MessageUtils.sendSuccess(sender, "command.open-gui-success", "&a✓ &f已为玩家 &e" + targetPlayerName + " &f打开物品强化界面！");
-            return true;
+            System.arraycopy(args, 1, forward, 0, args.length - 1);
         }
-
-        // 没有指定玩家名字，为自己打开GUI
-        if (!(sender instanceof Player)) {
-            MessageUtils.sendError(sender, "command.player-only", "&c✗ &f此命令仅限玩家使用！请指定玩家名字：/{label} r <玩家名字>", "label", "sn");
-            return true;
+        boolean handled = reinforceModule.getReinforceCommand().onCommand(sender, null, "snowterritory reinforce", forward);
+        if (!handled) {
+            MessageUtils.sendError(sender, "reinforce.usage", "&c用法: /sn r [玩家名]");
         }
-
-        Player player = (Player) sender;
-        if (!player.hasPermission("mmoitemseditor.edit") && !player.isOp()) {
-            MessageUtils.sendError(player, "command.no-permission", "&c✗ &f您没有权限使用此命令！");
-            return true;
-        }
-
-        gui.openGUI(player);
         return true;
     }
 
@@ -109,6 +84,10 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         }
 
         config.reloadConfig();
+        // 同步重载 Reinforce 模块
+        if (plugin.getReinforceModule() != null) {
+            plugin.getReinforceModule().reload();
+        }
         // 同步重载 EnderStorage 模块
         if (plugin.getEnderStorageModule() != null) {
             plugin.getEnderStorageModule().reload();

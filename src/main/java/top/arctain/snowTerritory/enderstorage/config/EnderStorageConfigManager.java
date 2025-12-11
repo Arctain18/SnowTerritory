@@ -18,7 +18,6 @@ import java.util.Map;
  */
 public class EnderStorageConfigManager {
 
-    private final Main plugin;
     private final File baseDir;
     private FileConfiguration mainConfig;
     private FileConfiguration whitelistConfig;
@@ -26,7 +25,6 @@ public class EnderStorageConfigManager {
     private ProgressionConfig progressionConfig;
 
     public EnderStorageConfigManager(Main plugin) {
-        this.plugin = plugin;
         this.baseDir = new File(plugin.getDataFolder(), "ender-storage");
     }
 

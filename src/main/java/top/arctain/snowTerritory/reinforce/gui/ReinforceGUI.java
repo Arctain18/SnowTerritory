@@ -1,4 +1,4 @@
-package top.arctain.snowTerritory.gui;
+package top.arctain.snowTerritory.reinforce.gui;
 
 import net.Indyuce.mmoitems.api.item.mmoitem.LiveMMOItem;
 import org.bukkit.Bukkit;
@@ -8,9 +8,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import top.arctain.snowTerritory.Main;
-import top.arctain.snowTerritory.config.PluginConfig;
+import top.arctain.snowTerritory.reinforce.config.ReinforceConfigManager;
+import top.arctain.snowTerritory.reinforce.utils.ReinforceUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
-import top.arctain.snowTerritory.utils.Utils;
 import top.arctain.snowTerritory.utils.ColorUtils;
 
 import java.lang.reflect.Method;
@@ -22,15 +22,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public class ItemEditorGUI {
+public class ReinforceGUI {
 
-    private final PluginConfig config;
+    private final ReinforceConfigManager config;
     private final Main plugin;
     private Object economy;  // Vault经济（使用Object避免类加载时依赖）
     private Object playerPointsAPI;  // PlayerPoints API（使用Object避免类加载时依赖）
     private final Set<UUID> reinforcingPlayers;  // 正在强化的玩家集合，用于防止重复点击
 
-    public ItemEditorGUI(PluginConfig config, Main plugin) {
+    public ReinforceGUI(ReinforceConfigManager config, Main plugin) {
         this.config = config;
         this.plugin = plugin;
         this.reinforcingPlayers = new HashSet<>();
@@ -65,9 +65,9 @@ public class ItemEditorGUI {
 
     private CharmInfo evaluateProtectCharm(ItemStack protectCharm, int nextLevel) {
         if (protectCharm == null) return CharmInfo.invalid();
-        if (!Utils.isPreservationToken(protectCharm, config.getPreservationTokenType())) return CharmInfo.invalid();
+        if (!ReinforceUtils.isPreservationToken(protectCharm, config.getPreservationTokenType())) return CharmInfo.invalid();
 
-        int maxLevel = Utils.parseMaxLevelFromLore(protectCharm);
+        int maxLevel = ReinforceUtils.parseMaxLevelFromLore(protectCharm);
         boolean valid = maxLevel >= 0 && nextLevel <= maxLevel;
         boolean expired = maxLevel >= 0 && nextLevel > maxLevel;
         return new CharmInfo(valid, expired, maxLevel, 0);
@@ -75,10 +75,10 @@ public class ItemEditorGUI {
 
     private CharmInfo evaluateEnhanceCharm(ItemStack enhanceCharm, int nextLevel) {
         if (enhanceCharm == null) return CharmInfo.invalid();
-        if (!Utils.isUpgradeToken(enhanceCharm, config.getUpgradeTokenType())) return CharmInfo.invalid();
+        if (!ReinforceUtils.isUpgradeToken(enhanceCharm, config.getUpgradeTokenType())) return CharmInfo.invalid();
 
-        int maxLevel = Utils.parseMaxLevelFromLore(enhanceCharm);
-        int bonus = Utils.parseProbabilityBoostFromLore(enhanceCharm);
+        int maxLevel = ReinforceUtils.parseMaxLevelFromLore(enhanceCharm);
+        int bonus = ReinforceUtils.parseProbabilityBoostFromLore(enhanceCharm);
         boolean valid = maxLevel >= 0 && nextLevel <= maxLevel && bonus > 0;
         boolean expired = maxLevel >= 0 && nextLevel > maxLevel;
         return new CharmInfo(valid, expired, maxLevel, bonus);
@@ -237,8 +237,8 @@ public class ItemEditorGUI {
         ItemStack enhanceCharm = gui.getItem(config.getSlotEnhanceCharm());
 
         // 只有当武器存在且可强化时才显示信息
-        if (weapon != null && Utils.isReinforceable(weapon)) {
-            int currentLevel = Utils.getCurrentLevel(weapon);
+        if (weapon != null && ReinforceUtils.isReinforceable(weapon)) {
+            int currentLevel = ReinforceUtils.getCurrentLevel(weapon);
             int nextLevel = currentLevel + 1;
             
             // 验证保护符
@@ -382,14 +382,14 @@ public class ItemEditorGUI {
         }
 
         // 检查是否为MMOItems物品
-        if (weapon == null || !Utils.isMMOItem(weapon)) {
+        if (weapon == null || !ReinforceUtils.isMMOItem(weapon)) {
             reinforcingPlayers.remove(playerUUID);  // 移除标记
             MessageUtils.sendError(player, "reinforce.invalid-item", "&c✗ &f请放置有效的MMO物品作为武器！");
             return;
         }
 
         // 检查是否可强化
-        if (!Utils.isReinforceable(weapon)) {
+        if (!ReinforceUtils.isReinforceable(weapon)) {
             reinforcingPlayers.remove(playerUUID);  // 移除标记
             MessageUtils.sendError(player, "reinforce.not-reinforceable", "&c✗ &f此物品不可强化！");
             return;
@@ -421,7 +421,7 @@ public class ItemEditorGUI {
         }
 
         // 验证保护符和强化符（需要在消耗之前验证）
-        int currentLevel = Utils.getCurrentLevel(weapon);
+        int currentLevel = ReinforceUtils.getCurrentLevel(weapon);
         int nextLevel = currentLevel + 1;
         
         CharmInfo protectCharmInfo = evaluateProtectCharm(protectCharm, nextLevel);
@@ -476,36 +476,36 @@ public class ItemEditorGUI {
         }
 
         // 执行强化
-        Utils.ReinforceResult result = Utils.attemptReinforce(baseSuccessRate, failDegradeChance, maintainChance);
+        ReinforceUtils.ReinforceResult result = ReinforceUtils.attemptReinforce(baseSuccessRate, failDegradeChance, maintainChance);
         
         try {
             LiveMMOItem mmoItem = new LiveMMOItem(weapon);  // 获取LiveMMOItem用于修改
             
             switch (result) {
                 case SUCCESS:
-                    Utils.modifyMMOAttribute(mmoItem, config.getAttributeBoostPercent(), config.getReinforceableAttributes());
+                    ReinforceUtils.modifyMMOAttribute(mmoItem, config.getAttributeBoostPercent(), config.getReinforceableAttributes());
                     // 从LiveMMOItem获取更新后的ItemStack
-                    ItemStack updatedWeapon = Utils.getUpdatedItemStack(mmoItem);
+                    ItemStack updatedWeapon = ReinforceUtils.getUpdatedItemStack(mmoItem);
                     if (updatedWeapon != null) {
-                        Utils.updateItemName(updatedWeapon, currentLevel + 1);
+                        ReinforceUtils.updateItemName(updatedWeapon, currentLevel + 1);
                         weapon = updatedWeapon;  // 更新weapon引用
                     } else {
                         // 如果无法获取更新后的ItemStack，至少更新名字
-                        Utils.updateItemName(weapon, currentLevel + 1);
+                        ReinforceUtils.updateItemName(weapon, currentLevel + 1);
                     }
                     MessageUtils.sendReinforceSuccess(player, currentLevel + 1);
                     break;
                 case FAIL_DEGRADE:
                     int newLevel = Math.max(0, currentLevel - 1);
-                    Utils.modifyMMOAttribute(mmoItem, 1 / config.getAttributeBoostPercent(), config.getReinforceableAttributes());
+                    ReinforceUtils.modifyMMOAttribute(mmoItem, 1 / config.getAttributeBoostPercent(), config.getReinforceableAttributes());
                     // 从LiveMMOItem获取更新后的ItemStack
-                    ItemStack updatedWeapon2 = Utils.getUpdatedItemStack(mmoItem);
+                    ItemStack updatedWeapon2 = ReinforceUtils.getUpdatedItemStack(mmoItem);
                     if (updatedWeapon2 != null) {
-                        Utils.updateItemName(updatedWeapon2, newLevel);
+                        ReinforceUtils.updateItemName(updatedWeapon2, newLevel);
                         weapon = updatedWeapon2;  // 更新weapon引用
                     } else {
                         // 如果无法获取更新后的ItemStack，至少更新名字
-                        Utils.updateItemName(weapon, newLevel);
+                        ReinforceUtils.updateItemName(weapon, newLevel);
                     }
                     MessageUtils.sendReinforceFail(player, newLevel);
                     break;
@@ -532,3 +532,4 @@ public class ItemEditorGUI {
         }
     }
 }
+

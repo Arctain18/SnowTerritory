@@ -1,4 +1,4 @@
-package top.arctain.snowTerritory.listeners;
+package top.arctain.snowTerritory.reinforce.listener;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Item;
@@ -13,8 +13,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.InventoryView;
 import top.arctain.snowTerritory.Main;
-import top.arctain.snowTerritory.config.PluginConfig;
-import top.arctain.snowTerritory.gui.ItemEditorGUI;
+import top.arctain.snowTerritory.reinforce.config.ReinforceConfigManager;
+import top.arctain.snowTerritory.reinforce.gui.ReinforceGUI;
 import top.arctain.snowTerritory.utils.ColorUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
@@ -22,16 +22,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class GUIListener implements Listener {
+public class ReinforceGuiListener implements Listener {
 
-    private final PluginConfig config;
-    private final ItemEditorGUI guiHandler;
+    private final ReinforceConfigManager config;
+    private final ReinforceGUI guiHandler;
     private final Main plugin;
 
-    public GUIListener(PluginConfig config, Main plugin) {
+    public ReinforceGuiListener(ReinforceConfigManager config, Main plugin, ReinforceGUI guiHandler) {
         this.config = config;
         this.plugin = plugin;
-        this.guiHandler = new ItemEditorGUI(config, plugin);
+        this.guiHandler = guiHandler;
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -233,3 +233,4 @@ public class GUIListener implements Listener {
         return remaining.values().iterator().next();
     }
 }
+

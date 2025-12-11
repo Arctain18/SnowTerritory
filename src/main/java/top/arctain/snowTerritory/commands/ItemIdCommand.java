@@ -6,8 +6,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import top.arctain.snowTerritory.reinforce.utils.ReinforceUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
-import top.arctain.snowTerritory.utils.Utils;
 
 public class ItemIdCommand implements CommandExecutor {
 
@@ -33,7 +33,7 @@ public class ItemIdCommand implements CommandExecutor {
         }
 
         // 检查是否为 MMOItems 物品
-        if (!Utils.isMMOItem(item)) {
+        if (!ReinforceUtils.isMMOItem(item)) {
             MessageUtils.sendWarning(player, "item.not-mmoitem", "&e⚠ &f这不是一个 MMOItems 物品！");
             return true;
         }

@@ -29,12 +29,10 @@ public class LootStorageGUI {
 
     public static final NamespacedKey KEY_ITEM = new NamespacedKey("snowterritory", "enderstorage_item");
 
-    private final Main plugin;
     private final LootStorageService service;
     private final MessageProvider messages;
 
     public LootStorageGUI(Main plugin, EnderStorageConfigManager configManager, LootStorageService service) {
-        this.plugin = plugin;
         this.service = service;
         String lang = configManager.getMainConfig().getString("features.default-language", "zh_CN");
         this.messages = new MessageProvider(configManager.getMessagePacks(), lang);

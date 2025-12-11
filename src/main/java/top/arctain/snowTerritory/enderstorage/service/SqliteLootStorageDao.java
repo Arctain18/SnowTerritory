@@ -16,11 +16,9 @@ import java.util.UUID;
 
 public class SqliteLootStorageDao implements LootStorageDao {
 
-    private final Main plugin;
     private final HikariDataSource dataSource;
 
     public SqliteLootStorageDao(Main plugin, File dbFile) {
-        this.plugin = plugin;
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl("jdbc:sqlite:" + dbFile.getAbsolutePath());
         config.setPoolName("ST-EnderStorage");

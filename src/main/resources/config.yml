@@ -260,11 +260,11 @@ messages:
     # 帮助标题
     title: "SnowTerritory 命令帮助"
     # 强化命令帮助
-    reinforce: "&e/snowterritory reinforce &7- &f打开物品强化界面"
+    reinforce: "&e/sn reinforce &7- &f打开物品强化界面"
     # 重载命令帮助
-    reload: "&e/snowterritory reload &7- &f重载插件配置"
+    reload: "&e/sn reload &7- &f重载插件配置"
     # 查看ID命令帮助
-    checkid: "&e/snowterritory checkID &7- &f查看手中物品的MMOItems ID"
+    checkid: "&e/sn checkID &7- &f查看手中物品的MMOItems ID"
     # 战利品仓库命令帮助
     enderstorage: "&e/sn es &7- &f打开战利品仓库界面"
   
