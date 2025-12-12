@@ -13,6 +13,7 @@ import top.arctain.snowTerritory.enderstorage.gui.LootStorageGUI;
 import top.arctain.snowTerritory.enderstorage.gui.LootStorageGUI.LootHolder;
 import top.arctain.snowTerritory.enderstorage.service.LootStorageService;
 import top.arctain.snowTerritory.utils.MessageUtils;
+import top.arctain.snowTerritory.utils.Utils;
 
 public class LootGuiListener implements Listener {
 
@@ -111,6 +112,11 @@ public class LootGuiListener implements Listener {
         int remaining = amount;
         for (ItemStack item : player.getInventory().getContents()) {
             if (item == null) continue;
+            // 必须先检查是否是MMOItems物品
+            if (!Utils.isMMOItem(item)) {
+                continue;
+            }
+            // 然后检查是否在whitelist中
             String match = service.matchItemKey(item);
             if (match == null || !match.equals(key)) continue;
             int take = Math.min(item.getAmount(), remaining);

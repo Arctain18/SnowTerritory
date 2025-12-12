@@ -31,14 +31,21 @@ public final class DefaultFiles {
             """;
 
     public static final String DEFAULT_WHITELIST = """
-            bone:
-              type: BONE
-              mmo_type: ""
-              id: ""
-              display: "&f骷髅骨头"
-              lore:
-                - "&7示例描述"
-              default_max: 256
+            MM_DROPS:
+              平原荒骨:
+                lore:
+                  - "test"
+                  - "test2"
+                default_max: 256
+              平原腐肉:
+                lore:
+                  - "test"
+                  - "test2"
+                default_max: 256
+              铁锭:
+                lore:
+                  - "test"
+                default_max: 256
             """;
 
     public static final String DEFAULT_SIZE = """

@@ -51,17 +51,30 @@ public class LootStorageServiceImpl implements LootStorageService {
     private Map<String, WhitelistEntry> loadWhitelist() {
         Map<String, WhitelistEntry> result = new HashMap<>();
         FileConfiguration cfg = configManager.getWhitelistConfig();
-        for (String key : cfg.getKeys(false)) {
-            String base = key + ".";
-            String display = cfg.getString(base + "display", key);
-            String mmoId = cfg.getString(base + "id", "");
-            String mmoType = cfg.getString(base + "mmo_type", "");
-            String type = cfg.getString(base + "type", "STONE");
-            int max = cfg.getInt(base + "default_max", 256);
-            try {
-                result.put(key, new WhitelistEntry(key, display, mmoType, mmoId, org.bukkit.Material.valueOf(type), max));
-            } catch (IllegalArgumentException ex) {
-                MessageUtils.logWarning("白名单物品类型无效: " + type + " @ " + key);
+        // 第一级key是mmoType
+        for (String mmoType : cfg.getKeys(false)) {
+            if (!cfg.isConfigurationSection(mmoType)) {
+                continue;
+            }
+            org.bukkit.configuration.ConfigurationSection typeSection = cfg.getConfigurationSection(mmoType);
+            if (typeSection == null) {
+                continue;
+            }
+            // 第二级key是mmoItemId
+            for (String mmoItemId : typeSection.getKeys(false)) {
+                if (!typeSection.isConfigurationSection(mmoItemId)) {
+                    continue;
+                }
+                org.bukkit.configuration.ConfigurationSection itemSection = typeSection.getConfigurationSection(mmoItemId);
+                if (itemSection == null) {
+                    continue;
+                }
+                // 生成key为"mmoType:mmoItemId"格式
+                String key = mmoType + ":" + mmoItemId;
+                int max = itemSection.getInt("default_max", 256);
+                // 不需要type和display，保持和对应物品相同
+                // display使用mmoItemId，material设为null（因为MMOItems物品不需要material）
+                result.put(key, new WhitelistEntry(key, mmoItemId, mmoType, mmoItemId, null, max));
             }
         }
         return result;
@@ -122,20 +135,24 @@ public class LootStorageServiceImpl implements LootStorageService {
             return null;
         }
         boolean isMmo = Utils.isMMOItem(stack);
-        for (WhitelistEntry entry : whitelist.values()) {
-            if (isMmo && entry.getMmoItemId() != null && !entry.getMmoItemId().isEmpty()) {
-                try {
-                    net.Indyuce.mmoitems.api.Type type = net.Indyuce.mmoitems.MMOItems.getType(stack);
-                    String id = net.Indyuce.mmoitems.MMOItems.getID(stack);
-                    if (type != null && id != null
-                            && id.equalsIgnoreCase(entry.getMmoItemId())
-                            && (entry.getMmoType() == null || entry.getMmoType().isEmpty() || type.getId().equalsIgnoreCase(entry.getMmoType()))) {
-                        return entry.getKey();
+        if (isMmo) {
+            try {
+                net.Indyuce.mmoitems.api.Type type = net.Indyuce.mmoitems.MMOItems.getType(stack);
+                String id = net.Indyuce.mmoitems.MMOItems.getID(stack);
+                if (type != null && id != null) {
+                    // 生成key为"mmoType:mmoItemId"格式
+                    String key = type.getId() + ":" + id;
+                    // 检查白名单中是否存在该key
+                    if (whitelist.containsKey(key)) {
+                        return key;
                     }
-                } catch (Exception ignored) {
                 }
+            } catch (Exception ignored) {
             }
-            if (entry.getMaterial() == stack.getType()) {
+        }
+        // 如果不是MMOItems物品，检查是否有匹配的Material（向后兼容）
+        for (WhitelistEntry entry : whitelist.values()) {
+            if (entry.getMaterial() != null && entry.getMaterial() == stack.getType()) {
                 return entry.getKey();
             }
         }

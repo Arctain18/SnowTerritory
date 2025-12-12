@@ -6,6 +6,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import top.arctain.snowTerritory.enderstorage.config.EnderStorageConfigManager;
 import top.arctain.snowTerritory.enderstorage.service.LootStorageService;
 import top.arctain.snowTerritory.utils.MessageUtils;
+import top.arctain.snowTerritory.utils.Utils;
 
 /**
  * 占位监听：后续可替换为 MythicMobs 掉落 API。
@@ -31,6 +32,11 @@ public class MythicDropListener implements Listener {
         // 拦截白名单物品
         int slotLimit = service.resolveSlots(event.getEntity().getKiller());
         event.getDrops().removeIf(itemStack -> {
+            // 必须先检查是否是MMOItems物品
+            if (!Utils.isMMOItem(itemStack)) {
+                return false;
+            }
+            // 然后检查是否在whitelist中
             String key = service.matchItemKey(itemStack);
             if (key == null) return false;
             int perItemMax = service.resolvePerItemMax(event.getEntity().getKiller(), key);

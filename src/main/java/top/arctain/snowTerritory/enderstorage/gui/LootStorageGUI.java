@@ -31,9 +31,11 @@ public class LootStorageGUI {
 
     private final LootStorageService service;
     private final MessageProvider messages;
+    private final EnderStorageConfigManager configManager;
 
     public LootStorageGUI(Main plugin, EnderStorageConfigManager configManager, LootStorageService service) {
         this.service = service;
+        this.configManager = configManager;
         String lang = configManager.getMainConfig().getString("features.default-language", "zh_CN");
         this.messages = new MessageProvider(configManager.getMessagePacks(), lang);
     }
@@ -78,8 +80,26 @@ public class LootStorageGUI {
         ItemStack base = buildRealItem(entry);
         ItemMeta meta = base.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(MessageUtils.colorize(entry.getDisplay()));
+            // 保持物品本身的显示名称，不覆盖
+            // 如果物品没有显示名称，则使用entry.getDisplay()作为后备
+            String displayName = meta.getDisplayName();
+            if (displayName == null || displayName.isEmpty()) {
+                displayName = entry.getDisplay();
+            }
             List<String> lore = new ArrayList<>();
+            // 如果配置中有lore，先添加配置的lore
+            org.bukkit.configuration.file.FileConfiguration whitelistConfig = configManager.getWhitelistConfig();
+            String[] keyParts = entry.getKey().split(":", 2);
+            if (keyParts.length == 2) {
+                String mmoType = keyParts[0];
+                String mmoItemId = keyParts[1];
+                List<String> configLore = whitelistConfig.getStringList(mmoType + "." + mmoItemId + ".lore");
+                if (configLore != null && !configLore.isEmpty()) {
+                    for (String loreLine : configLore) {
+                        lore.add(MessageUtils.colorize(loreLine));
+                    }
+                }
+            }
             lore.add(MessageUtils.colorize("&7数量: &e" + amount + " / " + entry.getDefaultMax()));
             lore.add(MessageUtils.colorize("&8| &7左键 ▸ 存入 8"));
             lore.add(MessageUtils.colorize("&8| &7SHIFT+左键 ▸ 存入 64"));
