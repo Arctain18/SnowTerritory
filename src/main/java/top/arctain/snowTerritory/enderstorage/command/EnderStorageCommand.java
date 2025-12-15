@@ -1,5 +1,6 @@
 package top.arctain.snowTerritory.enderstorage.command;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -15,11 +16,13 @@ import java.util.List;
 
 public class EnderStorageCommand implements CommandExecutor, TabCompleter {
 
+    private final org.bukkit.plugin.Plugin plugin;
     private final LootStorageService service;
     private final MessageProvider messages;
     private final top.arctain.snowTerritory.enderstorage.gui.LootStorageGUI gui;
 
-    public EnderStorageCommand(EnderStorageConfigManager configManager, LootStorageService service, top.arctain.snowTerritory.enderstorage.gui.LootStorageGUI gui) {
+    public EnderStorageCommand(org.bukkit.plugin.Plugin plugin, EnderStorageConfigManager configManager, LootStorageService service, top.arctain.snowTerritory.enderstorage.gui.LootStorageGUI gui) {
+        this.plugin = plugin;
         this.service = service;
         this.gui = gui;
         String lang = configManager.getMainConfig().getString("features.default-language", "zh_CN");
@@ -64,8 +67,45 @@ public class EnderStorageCommand implements CommandExecutor, TabCompleter {
             MessageUtils.sendConfigMessage(sender, "enderstorage.no-permission", messages.get(sender, "no-permission", "&c✗ &f没有权限"));
             return true;
         }
-        gui.open(player, 1);
+        // 检查玩家是否在 trmenu 中，如果是，需要延迟更长时间以确保 trmenu 完全关闭
+        // trmenu 的 ListenerBukkitInventory 会在 InventoryOpenEvent 时关闭菜单，并在 4 tick 后强制关闭窗口
+        // 因此我们需要延迟至少 5 tick 来避免冲突
+        long delay = isPlayerInTrMenu(player) ? 5L : 2L;
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            // 再次检查玩家是否在线，避免异步问题
+            if (player.isOnline()) {
+                gui.open(player, 1);
+            }
+        }, delay);
         return true;
+    }
+
+    /**
+     * 检查玩家是否在 trmenu 中
+     * 通过检查玩家当前打开的 Inventory 的 holder 类型来判断
+     */
+    private boolean isPlayerInTrMenu(Player player) {
+        try {
+            // 检查 trmenu 是否已加载
+            if (Bukkit.getPluginManager().getPlugin("TrMenu") == null) {
+                return false;
+            }
+            // 如果玩家打开了 GUI，检查是否是 trmenu 的 GUI
+            if (player.getOpenInventory() != null && player.getOpenInventory().getTopInventory() != null) {
+                // trmenu 使用特定的 holder 类型，通过反射检查
+                org.bukkit.inventory.InventoryHolder holder = player.getOpenInventory().getTopInventory().getHolder();
+                if (holder != null) {
+                    String className = holder.getClass().getName();
+                    // trmenu 的 holder 类名包含 "trplugins.menu" 或 "StaticInventory"
+                    if (className.contains("trplugins.menu") || className.contains("StaticInventory")) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // 如果检查失败，假设不在 trmenu 中，使用较短的延迟
+        }
+        return false;
     }
 
     private boolean handleGive(CommandSender sender, String[] args) {

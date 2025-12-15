@@ -1,5 +1,6 @@
 package top.arctain.snowTerritory.reinforce.command;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -30,7 +31,7 @@ public class ReinforceCommand implements CommandExecutor, TabCompleter {
             boolean hasPermission = sender.hasPermission("mmoitemseditor.openforothers");
             boolean isOp = sender instanceof Player && ((Player) sender).isOp();
             boolean isConsole = sender instanceof org.bukkit.command.ConsoleCommandSender;
-            
+
             if (!hasPermission && !isOp && !isConsole) {
                 MessageUtils.sendError(sender, "command.no-permission", "&c✗ &f您没有权限为其他玩家打开强化界面！");
                 return true;
@@ -38,13 +39,19 @@ public class ReinforceCommand implements CommandExecutor, TabCompleter {
 
             String targetPlayerName = args[0];
             Player targetPlayer = plugin.getServer().getPlayer(targetPlayerName);
-            
+
             if (targetPlayer == null) {
                 MessageUtils.sendError(sender, "command.player-not-found", "&c✗ &f找不到玩家: " + targetPlayerName);
                 return true;
             }
 
-            gui.openGUI(targetPlayer);
+            // 检查玩家是否在 trmenu 中，如果是，需要延迟更长时间以确保 trmenu 完全关闭
+            long delay = isPlayerInTrMenu(targetPlayer) ? 5L : 2L;
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (targetPlayer.isOnline()) {
+                    gui.openGUI(targetPlayer);
+                }
+            }, delay);
             MessageUtils.sendSuccess(sender, "command.open-gui-success", "&a✓ &f已为玩家 &e" + targetPlayerName + " &f打开物品强化界面！");
             return true;
         }
@@ -61,8 +68,42 @@ public class ReinforceCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        gui.openGUI(player);
+        // 检查玩家是否在 trmenu 中，如果是，需要延迟更长时间以确保 trmenu 完全关闭
+        long delay = isPlayerInTrMenu(player) ? 5L : 2L;
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) {
+                gui.openGUI(player);
+            }
+        }, delay);
         return true;
+    }
+
+    /**
+     * 检查玩家是否在 trmenu 中
+     * 通过检查玩家当前打开的 Inventory 的 holder 类型来判断
+     */
+    private boolean isPlayerInTrMenu(Player player) {
+        try {
+            // 检查 trmenu 是否已加载
+            if (plugin.getServer().getPluginManager().getPlugin("TrMenu") == null) {
+                return false;
+            }
+            // 如果玩家打开了 GUI，检查是否是 trmenu 的 GUI
+            if (player.getOpenInventory() != null && player.getOpenInventory().getTopInventory() != null) {
+                // trmenu 使用特定的 holder 类型，通过反射检查
+                org.bukkit.inventory.InventoryHolder holder = player.getOpenInventory().getTopInventory().getHolder();
+                if (holder != null) {
+                    String className = holder.getClass().getName();
+                    // trmenu 的 holder 类名包含 "trplugins.menu" 或 "StaticInventory"
+                    if (className.contains("trplugins.menu") || className.contains("StaticInventory")) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // 如果检查失败，假设不在 trmenu 中，使用较短的延迟
+        }
+        return false;
     }
 
     @Override

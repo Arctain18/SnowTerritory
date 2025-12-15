@@ -34,7 +34,7 @@ public class EnderStorageModule {
         configManager.loadAll();
         lootStorageService.initialize();
         this.lootStorageGUI = new LootStorageGUI(plugin, configManager, lootStorageService);
-        this.enderCommand = new EnderStorageCommand(configManager, lootStorageService, lootStorageGUI);
+        this.enderCommand = new EnderStorageCommand(plugin, configManager, lootStorageService, lootStorageGUI);
 
         registerCommand();
         registerListeners();
@@ -50,7 +50,7 @@ public class EnderStorageModule {
         configManager.loadAll();
         lootStorageService.reload();
         this.lootStorageGUI = new LootStorageGUI(plugin, configManager, lootStorageService);
-        this.enderCommand = new EnderStorageCommand(configManager, lootStorageService, lootStorageGUI);
+        this.enderCommand = new EnderStorageCommand(plugin, configManager, lootStorageService, lootStorageGUI);
     }
 
     private void registerCommand() {
