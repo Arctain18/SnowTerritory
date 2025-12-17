@@ -350,18 +350,12 @@ public class QuestServiceImpl implements QuestService {
         return QuestType.MATERIAL;
     }
 
-    /**
-     * 添加悬赏任务到列表
-     */
     private void addBountyQuest(Quest quest) {
         synchronized (bountyQuests) {
             bountyQuests.add(quest);
         }
     }
 
-    /**
-     * 广播悬赏任务
-     */
     private void broadcastBountyQuest(Quest quest) {
         String message = formatBountyAnnouncement(quest);
         String colored = ColorUtils.colorize(message);
@@ -373,18 +367,12 @@ public class QuestServiceImpl implements QuestService {
         MessageUtils.logInfo("悬赏任务已发布: " + quest.getMaterialKey() + " x" + quest.getRequiredAmount());
     }
 
-    /**
-     * 格式化悬赏任务公告
-     */
     private String formatBountyAnnouncement(Quest quest) {
         String materialName = quest.getMaterialKey().split(":")[1]; // 提取物品名称
         return String.format("&6[悬赏任务] &e收集 %s x%d &7- &f完成任务可获得丰厚奖励！",
                 materialName, quest.getRequiredAmount());
     }
 
-    /**
-     * 生成任务
-     */
     private Quest generateQuest(UUID playerId, QuestType type, QuestReleaseMethod releaseMethod) {
         if (type == QuestType.MATERIAL) {
             return generateMaterialQuest(playerId, releaseMethod);
@@ -395,9 +383,6 @@ public class QuestServiceImpl implements QuestService {
         return null;
     }
 
-    /**
-     * 生成材料任务
-     */
     private Quest generateMaterialQuest(UUID playerId, QuestReleaseMethod releaseMethod) {
         FileConfiguration whitelist = configManager.getMaterialsWhitelist();
         FileConfiguration tasksMaterial = configManager.getTasksMaterial();
@@ -445,9 +430,6 @@ public class QuestServiceImpl implements QuestService {
         return new MaterialSelection(materialKeys, materialInfos);
     }
 
-    /**
-     * 从类型中收集材料
-     */
     private void collectMaterialsFromType(String type, ConfigurationSection typeSection,
                                           List<String> materialKeys, Map<String, MaterialInfo> materialInfos) {
         for (String name : typeSection.getKeys(false)) {
@@ -460,9 +442,6 @@ public class QuestServiceImpl implements QuestService {
         }
     }
 
-    /**
-     * 提取材料信息
-     */
     private MaterialInfo extractMaterialInfo(ConfigurationSection itemSection) {
         int min = itemSection != null ? itemSection.getInt("min", 16) : 16;
         int max = itemSection != null ? itemSection.getInt("max", 256) : 256;
@@ -470,25 +449,16 @@ public class QuestServiceImpl implements QuestService {
         return new MaterialInfo(min, max, materialLevel);
     }
 
-    /**
-     * 随机选择材料
-     */
     private String selectRandomMaterial(MaterialSelection selection) {
         Random random = new Random();
         return selection.getRandomKey(random);
     }
 
-    /**
-     * 生成随机数量
-     */
     private int generateRandomAmount(MaterialInfo info) {
         Random random = new Random();
         return info.min + random.nextInt(info.max - info.min + 1);
     }
 
-    /**
-     * 创建任务对象
-     */
     private Quest createQuest(UUID playerId, QuestReleaseMethod releaseMethod,
                              String materialKey, int requiredAmount, long timeLimit, int level) {
         UUID questId = UUID.randomUUID();
@@ -498,9 +468,6 @@ public class QuestServiceImpl implements QuestService {
                 materialKey, requiredAmount, 0, startTime, timeLimit, level, QuestStatus.ACTIVE);
     }
 
-    /**
-     * 分发奖励
-     */
     private void distributeRewards(Player player, Quest quest) {
         if (player == null || !player.isOnline()) {
             return;
@@ -512,9 +479,6 @@ public class QuestServiceImpl implements QuestService {
         sendCompletionMessage(player, quest, calc);
     }
 
-    /**
-     * 计算奖励
-     */
     private QuestUtils.RewardCalculation calculateReward(Quest quest) {
         FileConfiguration rewardsDefault = configManager.getRewardsDefault();
         FileConfiguration rewardsLevel = configManager.getRewardsLevel();
@@ -524,9 +488,6 @@ public class QuestServiceImpl implements QuestService {
         return QuestUtils.calculateReward(quest, rewardsDefault, rewardsLevel, timeBonus, bountyConfig);
     }
 
-    /**
-     * 发放成就点数
-     */
     private void giveQuestPoints(Player player, QuestUtils.RewardCalculation calc) {
         if (calc.getQuestPoint() <= 0) {
             return;
@@ -536,9 +497,6 @@ public class QuestServiceImpl implements QuestService {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
     }
 
-    /**
-     * 分发货币
-     */
     private void giveCurrency(Player player, QuestUtils.RewardCalculation calc) {
         FileConfiguration rewardsDefault = configManager.getRewardsDefault();
         int baseCurrency = rewardsDefault.getInt("default.currency.amount", 1);
@@ -556,17 +514,11 @@ public class QuestServiceImpl implements QuestService {
         }
     }
 
-    /**
-     * 计算总货币数量
-     */
     private int calculateTotalCurrency(int baseCurrency, QuestUtils.RewardCalculation calc) {
         double multiplier = calc.getLevelBonus() * calc.getBountyBonus() * calc.getTimeBonus();
         return (int) Math.round(baseCurrency * multiplier);
     }
 
-    /**
-     * 发放货币堆叠
-     */
     private void giveCurrencyStack(Player player, QuestUtils.CurrencyStack stack, String currencyType) {
         try {
             ItemStack item = createCurrencyItem(stack, currencyType);
@@ -581,9 +533,6 @@ public class QuestServiceImpl implements QuestService {
         }
     }
 
-    /**
-     * 创建货币物品
-     */
     private ItemStack createCurrencyItem(QuestUtils.CurrencyStack stack, String currencyType) {
         net.Indyuce.mmoitems.api.Type mmoType = MMOItems.plugin.getTypes().get(currencyType);
         if (mmoType == null) {
@@ -602,9 +551,6 @@ public class QuestServiceImpl implements QuestService {
         return item;
     }
 
-    /**
-     * 给予玩家物品
-     */
     private void giveItemToPlayer(Player player, ItemStack item) {
         HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(item);
         if (leftover.isEmpty()) {
@@ -616,9 +562,6 @@ public class QuestServiceImpl implements QuestService {
         }
     }
 
-    /**
-     * 发送完成消息
-     */
     private void sendCompletionMessage(Player player, Quest quest, QuestUtils.RewardCalculation calc) {
         FileConfiguration timeBonus = configManager.getBonusTimeBonus();
         String rating = QuestUtils.getTimeRatingDisplay(quest.getElapsedTime(), timeBonus);
@@ -628,9 +571,6 @@ public class QuestServiceImpl implements QuestService {
         player.sendMessage(ColorUtils.colorize(message));
     }
 
-    /**
-     * 材料信息
-     */
     private static class MaterialInfo {
         final int min;
         final int max;
@@ -643,9 +583,6 @@ public class QuestServiceImpl implements QuestService {
         }
     }
 
-    /**
-     * 材料选择结果
-     */
     private static class MaterialSelection {
         private final List<String> materialKeys;
         private final Map<String, MaterialInfo> materialInfos;
