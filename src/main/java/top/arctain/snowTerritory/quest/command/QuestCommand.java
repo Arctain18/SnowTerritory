@@ -123,37 +123,38 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(ColorUtils.colorize(messages.get(player, "quest-list-header",
                 "&6=== 你的任务列表 ===")));
 
-        // 显示普通任务
-        for (Quest quest : quests) {
-            if (quest.isExpired()) {
-                continue;
-            }
-            String materialName = quest.getMaterialKey().split(":")[1];
-            String questDesc = String.format("收集 %s x%d", materialName, quest.getRequiredAmount());
-            String message = messages.get(player, "quest-list-item",
-                    "&7- &e%quest% &7(进度: %current%/%required%)");
-            message = message.replace("%quest%", questDesc)
-                    .replace("%current%", String.valueOf(quest.getCurrentAmount()))
-                    .replace("%required%", String.valueOf(quest.getRequiredAmount()));
-            player.sendMessage(ColorUtils.colorize(message));
-        }
+        displayQuests(player, quests);
+        displayBountyQuests(player, bountyQuests);
 
-        // 显示悬赏任务
+        return true;
+    }
+
+    private void displayBountyQuests(Player player, List<Quest> bountyQuests) {
         for (Quest quest : bountyQuests) {
             if (quest.isExpired()) {
                 continue;
             }
-            String materialName = quest.getMaterialKey().split(":")[1];
-            String questDesc = String.format("[悬赏] 收集 %s x%d", materialName, quest.getRequiredAmount());
-            String message = messages.get(player, "quest-list-item",
-                    "&7- &e%quest% &7(进度: %current%/%required%)");
-            message = message.replace("%quest%", questDesc)
-                    .replace("%current%", String.valueOf(quest.getCurrentAmount()))
-                    .replace("%required%", String.valueOf(quest.getRequiredAmount()));
-            player.sendMessage(ColorUtils.colorize(message));
+            displayQuest(player, quest, "[悬赏] 提交材料");
         }
+    }
 
-        return true;
+    private void displayQuests(Player player, List<Quest> quests) {
+        for (Quest quest : quests) {
+            if (quest.isExpired()) {
+                continue;
+            }
+            displayQuest(player, quest, "提交材料");
+        }
+    }
+
+    private void displayQuest(Player player, Quest quest, String questType) {
+        String materialName = quest.getMaterialKey().split(":")[1];
+        String questDesc = String.format("%s %s x%d", questType, materialName, quest.getRequiredAmount());
+        String message = messages.get(player, "quest-list-item",
+                "&7- &e%quest% &7(进度: %current%/%required%)");
+        message = message.replace("%quest%", questDesc)
+                .replace("%current%", String.valueOf(quest.getCurrentAmount()))
+                .replace("%required%", String.valueOf(quest.getRequiredAmount()));
     }
 
     /**

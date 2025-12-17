@@ -352,6 +352,7 @@ public class QuestServiceImpl implements QuestService {
 
     private void addBountyQuest(Quest quest) {
         synchronized (bountyQuests) {
+            bountyQuests.removeIf(q -> q.getStatus() == QuestStatus.ACTIVE);
             bountyQuests.add(quest);
         }
     }
@@ -368,9 +369,12 @@ public class QuestServiceImpl implements QuestService {
     }
 
     private String formatBountyAnnouncement(Quest quest) {
-        String materialName = quest.getMaterialKey().split(":")[1]; // 提取物品名称
-        return String.format("&6[悬赏任务] &e收集 %s x%d &7- &f完成任务可获得丰厚奖励！",
-                materialName, quest.getRequiredAmount());
+        FileConfiguration bountyConfig = configManager.getBountyConfig();
+        String template = bountyConfig.getString("bounty.messages.announcement", 
+                "&6[悬赏任务] &e收集 %material% x%amount% &7- &f完成任务可获得丰厚奖励！");
+        String materialName = quest.getMaterialKey().split(":")[1];
+        return template.replace("%material%", materialName)
+                       .replace("%amount%", String.valueOf(quest.getRequiredAmount()));
     }
 
     private Quest generateQuest(UUID playerId, QuestType type, QuestReleaseMethod releaseMethod) {
@@ -559,10 +563,21 @@ public class QuestServiceImpl implements QuestService {
 
     private void sendCompletionMessage(Player player, Quest quest, QuestUtils.RewardCalculation calc) {
         FileConfiguration timeBonus = configManager.getBonusTimeBonus();
+        FileConfiguration rewardsDefault = configManager.getRewardsDefault();
         String rating = QuestUtils.getTimeRatingDisplay(quest.getElapsedTime(), timeBonus);
         double multiplier = calc.getLevelBonus() * calc.getBountyBonus() * calc.getTimeBonus();
         
-        String message = String.format("&a✓ &f任务完成！评级: &e%s &7(奖励倍数: %.2fx)", rating, multiplier);
+        int baseQuestPoint = rewardsDefault.getInt("default.questpoint", 12);
+        int totalQuestPoint = (int) Math.round(baseQuestPoint * multiplier);
+        int baseCurrency = rewardsDefault.getInt("default.currency.amount", 1);
+        int totalCurrency = (int) Math.round(baseCurrency * multiplier);
+        
+        String template = rewardsDefault.getString("default.messages.completion", 
+                "&a✓ &f任务完成！评级: &e%rating% &7(奖励倍数: %.2fx) &f获得: &b%questpoint% 成就点 &f+ &e%currency% 货币");
+        String message = template.replace("%rating%", rating)
+                                 .replace("%multiplier%", String.format("%.2f", multiplier))
+                                 .replace("%questpoint%", String.valueOf(totalQuestPoint))
+                                 .replace("%currency%", String.valueOf(totalCurrency));
         player.sendMessage(ColorUtils.colorize(message));
     }
 

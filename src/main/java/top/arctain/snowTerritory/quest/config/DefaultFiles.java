@@ -40,6 +40,10 @@ public final class DefaultFiles {
                 type: CURRENCY
                 stack-0: 星尘-0
                 stack-1: 星尘-1
+              # 消息配置
+              messages:
+                # 任务完成提示 (%rating%=评级, %multiplier%=倍数, %questpoint%=成就点, %currency%=货币数量)
+                completion: "&a✓ &f任务完成！评级: &e%rating% &7(奖励倍数: %multiplier%x) &f获得: &b%questpoint% 成就点 &f+ &e%currency% 货币"
             """;
 
     public static final String DEFAULT_REWARDS_LEVEL = """
@@ -104,6 +108,10 @@ public final class DefaultFiles {
               bounty-bonus: 1.5
               # 允许的任务类型: MATERIAL, KILL, BOTH
               allowed-types: MATERIAL
+              # 消息配置
+              messages:
+                # 悬赏公告 (%material%=物品名, %amount%=数量)
+                announcement: "&6[悬赏任务] &e收集 %material% x%amount% &7- &f完成任务可获得丰厚奖励！"
             """;
 
     public static final String DEFAULT_TASKS_MATERIAL = """
