@@ -157,7 +157,7 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * 处理完成任务
+     * 处理完成任务（自动领取所有已完成的悬赏任务）
      */
     private boolean handleComplete(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
@@ -166,31 +166,14 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (args.length < 2) {
-            player.sendMessage(ColorUtils.colorize("&c用法: /sn q complete <quest-id>"));
-            return true;
-        }
-
-        UUID questId;
-        try {
-            questId = UUID.fromString(args[1]);
-        } catch (IllegalArgumentException e) {
-            player.sendMessage(ColorUtils.colorize("&c✗ &f无效的任务ID"));
-            return true;
-        }
-
-        // 先尝试完成普通任务
-        boolean completed = service.completeQuest(player.getUniqueId(), questId);
+        int claimed = service.claimCompletedBountyQuests(player);
         
-        if (!completed) {
-            // 尝试完成悬赏任务
-            completed = service.completeBountyQuest(player, questId);
-        }
-
-        if (!completed) {
-            player.sendMessage(ColorUtils.colorize(messages.get(player, "quest-not-found",
-                    "&c✗ &f未找到任务或任务未完成")));
-            return true;
+        if (claimed == 0) {
+            player.sendMessage(ColorUtils.colorize(messages.get(player, "no-completed-bounty",
+                    "&c✗ &f没有已完成的悬赏任务可领取")));
+        } else {
+            player.sendMessage(ColorUtils.colorize(messages.get(player, "bounty-claimed",
+                    "&a✓ &f已领取 %count% 个悬赏任务奖励").replace("%count%", String.valueOf(claimed))));
         }
 
         return true;

@@ -204,23 +204,17 @@ public class QuestListener implements Listener {
         return null;
     }
 
-    /**
-     * 发送进度消息
-     */
     private void sendProgressMessages(Quest updatedQuest, int toSubmit) {
         if (updatedQuest == null) {
             return;
         }
 
         sendSubmissionMessage(updatedQuest, toSubmit);
-        if (updatedQuest.isCompleted()) {
-            sendCompletionMessage(updatedQuest);
+        if (isBountyQuestCompleted(updatedQuest)) {
+            sendBountyQuestCompletionMessage(updatedQuest);
         }
     }
 
-    /**
-     * 发送材料提交消息
-     */
     private void sendSubmissionMessage(Quest updatedQuest, int toSubmit) {
         String progressMsg = messages.get(currentContext.player, "material-submitted",
                 "&a✓ &f已提交 &e%amount%x %item% &7(进度: %current%/%required%)");
@@ -231,19 +225,14 @@ public class QuestListener implements Listener {
         currentContext.player.sendMessage(ColorUtils.colorize(progressMsg));
     }
 
-    /**
-     * 发送任务完成消息
-     */
-    private void sendCompletionMessage(Quest quest) {
-        String completionMsg;
-        if (quest.getReleaseMethod() == QuestReleaseMethod.BOUNTY) {
-            completionMsg = messages.get(currentContext.player, "quest-completed",
-                    "&a✓ &f悬赏任务完成！使用 &e/sn q complete <id> &f领取奖励");
-        } else {
-            completionMsg = messages.get(currentContext.player, "quest-completed",
-                    "&a✓ &f任务完成！奖励已发放");
-        }
-        currentContext.player.sendMessage(ColorUtils.colorize(completionMsg));
+    private boolean isBountyQuestCompleted(Quest updatedQuest) {
+        return updatedQuest.isCompleted() && updatedQuest.getReleaseMethod() == QuestReleaseMethod.BOUNTY;
+    }
+
+    private void sendBountyQuestCompletionMessage(Quest updatedQuest) {
+        String msg = messages.get(currentContext.player, "bounty-quest-completed",
+                "&a✓ &f悬赏任务完成！使用 &e/sn q complete &f领取奖励");
+        currentContext.player.sendMessage(ColorUtils.colorize(msg));
     }
 }
 

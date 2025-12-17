@@ -227,6 +227,21 @@ public class QuestServiceImpl implements QuestService {
         return true;
     }
 
+    @Override
+    public int claimCompletedBountyQuests(Player player) {
+        int claimed = 0;
+        synchronized (bountyQuests) {
+            for (Quest quest : bountyQuests) {
+                if (quest.getStatus() == QuestStatus.ACTIVE && quest.isCompleted() && !quest.isExpired()) {
+                    distributeRewards(player, quest);
+                    quest.setStatus(QuestStatus.COMPLETED);
+                    claimed++;
+                }
+            }
+        }
+        return claimed;
+    }
+
     /**
      * 根据任务ID查找悬赏任务
      */

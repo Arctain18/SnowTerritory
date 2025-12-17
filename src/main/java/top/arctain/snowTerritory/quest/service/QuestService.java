@@ -63,6 +63,12 @@ public interface QuestService {
     boolean completeBountyQuest(Player player, UUID questId);
     
     /**
+     * 自动领取所有已完成的悬赏任务奖励
+     * @return 领取的任务数量
+     */
+    int claimCompletedBountyQuests(Player player);
+    
+    /**
      * 开始悬赏任务发布调度
      */
     void startBountyScheduler();
