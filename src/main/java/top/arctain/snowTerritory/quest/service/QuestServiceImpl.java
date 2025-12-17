@@ -232,19 +232,25 @@ public class QuestServiceImpl implements QuestService {
         int claimed = 0;
         synchronized (bountyQuests) {
             for (Quest quest : bountyQuests) {
-                if (quest.getStatus() == QuestStatus.ACTIVE && quest.isCompleted() && !quest.isExpired()) {
-                    distributeRewards(player, quest);
-                    quest.setStatus(QuestStatus.COMPLETED);
-                    claimed++;
-                }
+                claimed = claimSingleBountyQuest(player, quest, claimed);
             }
         }
         return claimed;
     }
 
-    /**
-     * 根据任务ID查找悬赏任务
-     */
+    private int claimSingleBountyQuest(Player player, Quest quest, int claimed) {
+        if (isBountyQuestCompleted(quest)) {
+            distributeRewards(player, quest);
+            quest.setStatus(QuestStatus.COMPLETED);
+            claimed++;
+        }
+        return claimed;
+    }
+
+    private boolean isBountyQuestCompleted(Quest quest) {
+        return quest.getStatus() == QuestStatus.ACTIVE && quest.isCompleted() && !quest.isExpired();
+    }
+
     private Quest findBountyQuestById(UUID questId) {
         synchronized (bountyQuests) {
             return bountyQuests.stream()
@@ -274,16 +280,10 @@ public class QuestServiceImpl implements QuestService {
         scheduleNextBounty(minInterval, maxInterval);
     }
 
-    /**
-     * 将分钟转换为tick
-     */
     private int convertMinutesToTicks(int minutes) {
         return minutes * 60 * 20;
     }
 
-    /**
-     * 验证间隔配置是否有效
-     */
     private boolean isValidInterval(int minInterval, int maxInterval) {
         return minInterval > 0 && maxInterval > 0 && minInterval <= maxInterval;
     }
@@ -296,9 +296,6 @@ public class QuestServiceImpl implements QuestService {
         }
     }
 
-    /**
-     * 调度下一个悬赏任务
-     */
     private void scheduleNextBounty(int minInterval, int maxInterval) {
         Random random = new Random();
         int delay = minInterval + random.nextInt(maxInterval - minInterval + 1);
@@ -309,9 +306,6 @@ public class QuestServiceImpl implements QuestService {
         }, delay).getTaskId();
     }
 
-    /**
-     * 发布悬赏任务
-     */
     private void publishBountyQuest() {
         FileConfiguration bountyConfig = configManager.getBountyConfig();
         if (bountyConfig == null) {
@@ -332,9 +326,6 @@ public class QuestServiceImpl implements QuestService {
         broadcastBountyQuest(bounty);
     }
 
-    /**
-     * 确定悬赏任务类型
-     */
     private QuestType determineBountyQuestType(FileConfiguration bountyConfig) {
         String allowedTypes = bountyConfig.getString("bounty.allowed-types", "MATERIAL");
         
