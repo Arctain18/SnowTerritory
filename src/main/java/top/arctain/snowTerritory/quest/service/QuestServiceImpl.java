@@ -534,19 +534,14 @@ public class QuestServiceImpl implements QuestService {
     }
 
     private ItemStack createCurrencyItem(QuestUtils.CurrencyStack stack, String currencyType) {
-        net.Indyuce.mmoitems.api.Type mmoType = MMOItems.plugin.getTypes().get(currencyType);
-        if (mmoType == null) {
-            MessageUtils.logWarning("货币类型不存在: " + currencyType);
+        MMOItem mmoitem = MMOItems.plugin.getMMOItem(MMOItems.plugin.getTypes().get(currencyType), stack.getItemId());
+        
+        if (mmoitem == null) {
+            MessageUtils.logWarning("货币物品不存在: " + currencyType + " " + stack.getItemId());
             return null;
         }
-        
-        MMOItem mmoItem = MMOItems.plugin.getMMOItem(mmoType, stack.getItemId());
-        if (mmoItem == null) {
-            MessageUtils.logWarning("货币物品不存在: " + stack.getItemId());
-            return null;
-        }
-        
-        ItemStack item = mmoItem.newBuilder().build();
+
+        ItemStack item = mmoitem.newBuilder().build();
         item.setAmount(stack.getCount());
         return item;
     }
