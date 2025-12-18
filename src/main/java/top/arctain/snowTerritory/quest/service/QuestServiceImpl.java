@@ -273,14 +273,17 @@ public class QuestServiceImpl implements QuestService {
         int claimed = 0;
         synchronized (bountyQuests) {
             for (Quest quest : bountyQuests) {
-                if (isActiveAndNotExpired(quest) && quest.isCompleted()) {
+                if (isBountyQuestCompleted(quest)) {
                     rewardDistributor.distribute(player, quest);
-                    quest.setStatus(QuestStatus.COMPLETED);
                     claimed++;
                 }
             }
         }
         return claimed;
+    }
+
+    private boolean isBountyQuestCompleted(Quest quest) {
+        return quest.getStatus() == QuestStatus.COMPLETED && quest.getReleaseMethod() == QuestReleaseMethod.BOUNTY;
     }
     
     private Quest findBountyQuestById(UUID questId) {

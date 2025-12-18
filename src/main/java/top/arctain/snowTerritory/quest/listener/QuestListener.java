@@ -11,6 +11,7 @@ import top.arctain.snowTerritory.quest.config.MessageProvider;
 import top.arctain.snowTerritory.quest.config.QuestConfigManager;
 import top.arctain.snowTerritory.quest.data.Quest;
 import top.arctain.snowTerritory.quest.data.QuestReleaseMethod;
+import top.arctain.snowTerritory.quest.data.QuestStatus;
 import top.arctain.snowTerritory.quest.data.QuestType;
 import top.arctain.snowTerritory.quest.service.QuestService;
 import top.arctain.snowTerritory.quest.utils.QuestUtils;
@@ -212,6 +213,7 @@ public class QuestListener implements Listener {
         sendSubmissionMessage(updatedQuest, toSubmit);
         if (isBountyQuestCompleted(updatedQuest)) {
             sendBountyQuestCompletionMessage(updatedQuest);
+            updatedQuest.setStatus(QuestStatus.COMPLETED);
         }
     }
 
