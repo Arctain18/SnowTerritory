@@ -51,6 +51,9 @@ public class MessageUtils {
             } else if (key.startsWith("enderstorage.") || key.startsWith("ender-storage.")) {
                 prefixKey = "prefix.enderstorage";
                 defaultPrefix = "&{#4a95ff}ST &{#3ab835}Ender&{#6dc97f}Storage &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";
+            } else if (key.startsWith("quest.")) {
+                prefixKey = "prefix.quest";
+                defaultPrefix = "&{#4a95ff}ST &{#FFD700}Quest &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";
             } else {
                 prefixKey = "prefix.default";
                 defaultPrefix = "<g:#FFFFFF:#4A95FF>SnowTerritory</g> &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";

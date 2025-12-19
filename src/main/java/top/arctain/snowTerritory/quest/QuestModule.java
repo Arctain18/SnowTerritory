@@ -3,7 +3,6 @@ package top.arctain.snowTerritory.quest;
 import org.bukkit.plugin.PluginManager;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.quest.command.QuestCommand;
-import top.arctain.snowTerritory.quest.config.MessageProvider;
 import top.arctain.snowTerritory.quest.config.QuestConfigManager;
 import top.arctain.snowTerritory.quest.listener.QuestListener;
 import top.arctain.snowTerritory.quest.service.QuestService;
@@ -31,11 +30,8 @@ public class QuestModule {
         configManager.loadAll();
         questService.initialize();
         
-        String lang = configManager.getMainConfig().getString("features.default-language", "zh_CN");
-        MessageProvider messages = new MessageProvider(configManager.getMessagePacks(), lang);
-        
         this.questCommand = new QuestCommand(plugin, configManager, questService);
-        this.questListener = new QuestListener(plugin, questService, configManager, messages);
+        this.questListener = new QuestListener(plugin, questService, configManager, null);
 
         registerListeners();
 
@@ -50,11 +46,8 @@ public class QuestModule {
         configManager.loadAll();
         questService.reload();
         
-        String lang = configManager.getMainConfig().getString("features.default-language", "zh_CN");
-        MessageProvider messages = new MessageProvider(configManager.getMessagePacks(), lang);
-        
         this.questCommand = new QuestCommand(plugin, configManager, questService);
-        this.questListener = new QuestListener(plugin, questService, configManager, messages);
+        this.questListener = new QuestListener(plugin, questService, configManager, null);
     }
 
     private void registerListeners() {

@@ -5,12 +5,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import top.arctain.snowTerritory.quest.config.MessageProvider;
 import top.arctain.snowTerritory.quest.config.QuestConfigManager;
 import top.arctain.snowTerritory.quest.data.Quest;
+import top.arctain.snowTerritory.quest.data.QuestStatus;
 import top.arctain.snowTerritory.quest.data.QuestType;
 import top.arctain.snowTerritory.quest.service.QuestService;
-import top.arctain.snowTerritory.utils.ColorUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.util.ArrayList;
@@ -23,12 +22,9 @@ import java.util.UUID;
 public class QuestCommand implements CommandExecutor, TabCompleter {
 
     private final QuestService service;
-    private final MessageProvider messages;
 
     public QuestCommand(org.bukkit.plugin.Plugin plugin, QuestConfigManager configManager, QuestService service) {
         this.service = service;
-        String lang = configManager.getMainConfig().getString("features.default-language", "zh_CN");
-        this.messages = new MessageProvider(configManager.getMessagePacks(), lang);
     }
 
     @Override
@@ -51,12 +47,12 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
             case "reload" -> {
                 if (!sender.hasPermission("st.quest.admin")) {
                     MessageUtils.sendConfigMessage(sender, "quest.no-permission",
-                            messages.get(sender, "no-permission", "&c✗ &f没有权限"));
+                            "&c✗ &f没有权限");
                     return true;
                 }
                 service.reload();
                 MessageUtils.sendConfigMessage(sender, "quest.reload-done",
-                        messages.get(sender, "reload-done", "&a✓ &f任务配置已重载"));
+                        "&a✓ &f任务配置已重载");
                 return true;
             }
             default -> {
@@ -71,7 +67,7 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
     private boolean handleAccept(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             MessageUtils.sendConfigMessage(sender, "quest.player-only",
-                    messages.get(sender, "player-only", "&c✗ &f此命令仅限玩家使用"));
+                    "&c✗ &f此命令仅限玩家使用");
             return true;
         }
 
@@ -81,23 +77,23 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
             if (typeStr.equals("KILL")) {
                 type = QuestType.KILL;
                 // TODO: 击杀任务尚未实现
-                player.sendMessage(ColorUtils.colorize("&c✗ &f击杀任务尚未实现"));
+                MessageUtils.sendConfigMessage(player, "quest.kill-not-implemented",
+                        "&c✗ &f击杀任务尚未实现");
                 return true;
             }
         }
 
         Quest quest = service.acceptNormalQuest(player, type);
         if (quest == null) {
-            player.sendMessage(ColorUtils.colorize(messages.get(player, "quest-already-active",
-                    "&c✗ &f你已有进行中的任务")));
+            MessageUtils.sendConfigMessage(player, "quest.already-active",
+                    "&c✗ &f你已有进行中的任务");
             return true;
         }
 
         String materialName = quest.getMaterialKey().split(":")[1];
-        String message = messages.get(player, "quest-accepted",
-                "&a✓ &f已接取任务: &e%quest%");
-        message = message.replace("%quest%", String.format("收集 %s x%d", materialName, quest.getRequiredAmount()));
-        player.sendMessage(ColorUtils.colorize(message));
+        MessageUtils.sendConfigMessage(player, "quest.accepted",
+                "&a✓ &f已接取任务: &e{quest}",
+                "quest", String.format("收集 %s x%d", materialName, quest.getRequiredAmount()));
         return true;
     }
 
@@ -107,23 +103,23 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
     private boolean handleList(CommandSender sender) {
         if (!(sender instanceof Player player)) {
             MessageUtils.sendConfigMessage(sender, "quest.player-only",
-                    messages.get(sender, "player-only", "&c✗ &f此命令仅限玩家使用"));
+                    "&c✗ &f此命令仅限玩家使用");
             return true;
         }
 
-        List<Quest> quests = service.getActiveQuests(player.getUniqueId());
+        List<Quest> allQuests = service.getAllQuests(player.getUniqueId());
         List<Quest> bountyQuests = service.getActiveBountyQuests();
 
-        if (quests.isEmpty() && bountyQuests.isEmpty()) {
-            player.sendMessage(ColorUtils.colorize(messages.get(player, "quest-list-empty",
-                    "&7暂无进行中的任务")));
+        if (allQuests.isEmpty() && bountyQuests.isEmpty()) {
+            MessageUtils.sendConfigMessage(player, "quest.list-empty",
+                    "&7暂无任务");
             return true;
         }
 
-        player.sendMessage(ColorUtils.colorize(messages.get(player, "quest-list-header",
-                "&6=== 你的任务列表 ===")));
+        MessageUtils.sendConfigMessage(player, "quest.list-header",
+                "&6=== 你的任务列表 ===");
 
-        displayQuests(player, quests);
+        displayQuests(player, allQuests);
         displayBountyQuests(player, bountyQuests);
 
         return true;
@@ -131,30 +127,52 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
 
     private void displayBountyQuests(Player player, List<Quest> bountyQuests) {
         for (Quest quest : bountyQuests) {
-            if (quest.isExpired()) {
-                continue;
-            }
-            displayQuest(player, quest, "[悬赏] 提交材料");
+            displayQuest(player, quest, "[悬赏] 提交材料", true);
         }
     }
 
     private void displayQuests(Player player, List<Quest> quests) {
         for (Quest quest : quests) {
-            if (quest.isExpired()) {
-                continue;
-            }
-            displayQuest(player, quest, "提交材料");
+            displayQuest(player, quest, "提交材料", false);
         }
     }
 
-    private void displayQuest(Player player, Quest quest, String questType) {
+    private void displayQuest(Player player, Quest quest, String questType, boolean isBounty) {
         String materialName = quest.getMaterialKey().split(":")[1];
         String questDesc = String.format("%s %s x%d", questType, materialName, quest.getRequiredAmount());
-        String message = messages.get(player, "quest-list-item",
-                "&7- &e%quest% &7(进度: %current%/%required%)");
-        message = message.replace("%quest%", questDesc)
-                .replace("%current%", String.valueOf(quest.getCurrentAmount()))
-                .replace("%required%", String.valueOf(quest.getRequiredAmount()));
+        
+        QuestStatus status = quest.getStatus();
+        String statusText = getStatusText(status, quest);
+        
+        // 显示任务信息和状态
+        MessageUtils.sendConfigMessage(player, "quest.list-item",
+                "&7- &e{quest} &7{status}",
+                "quest", questDesc,
+                "status", statusText);
+        
+        // 如果是激活状态，显示进度
+        if (status == QuestStatus.ACTIVE && !quest.isExpired()) {
+            MessageUtils.sendConfigMessage(player, "quest.list-progress",
+                    "&7  进度: &e{current}&7/&e{required}",
+                    "current", String.valueOf(quest.getCurrentAmount()),
+                    "required", String.valueOf(quest.getRequiredAmount()));
+        }
+    }
+    
+    private String getStatusText(QuestStatus status, Quest quest) {
+        switch (status) {
+            case ACTIVE:
+                if (quest.isExpired()) {
+                    return "&8[已过期]";
+                }
+                return "&a[进行中]";
+            case COMPLETED:
+                return "&a[已完成]";
+            case EXPIRED:
+                return "&8[已过期]";
+            default:
+                return "&7[未知]";
+        }
     }
 
     /**
@@ -163,18 +181,19 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
     private boolean handleComplete(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             MessageUtils.sendConfigMessage(sender, "quest.player-only",
-                    messages.get(sender, "player-only", "&c✗ &f此命令仅限玩家使用"));
+                    "&c✗ &f此命令仅限玩家使用");
             return true;
         }
 
         int claimed = service.claimCompletedBountyQuests(player);
         
         if (claimed == 0) {
-            player.sendMessage(ColorUtils.colorize(messages.get(player, "no-completed-bounty",
-                    "&c✗ &f没有已完成的悬赏任务可领取")));
+            MessageUtils.sendConfigMessage(player, "quest.no-completed-bounty",
+                    "&c✗ &f没有已完成的悬赏任务可领取");
         } else {
-            player.sendMessage(ColorUtils.colorize(messages.get(player, "bounty-claimed",
-                    "&a✓ &f已领取 %count% 个悬赏任务奖励").replace("%count%", String.valueOf(claimed))));
+            MessageUtils.sendConfigMessage(player, "quest.bounty-claimed",
+                    "&a✓ &f已领取 {count} 个悬赏任务奖励",
+                    "count", String.valueOf(claimed));
         }
 
         return true;

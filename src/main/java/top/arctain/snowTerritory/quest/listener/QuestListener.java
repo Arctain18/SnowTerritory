@@ -7,7 +7,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import top.arctain.snowTerritory.Main;
-import top.arctain.snowTerritory.quest.config.MessageProvider;
 import top.arctain.snowTerritory.quest.config.QuestConfigManager;
 import top.arctain.snowTerritory.quest.data.Quest;
 import top.arctain.snowTerritory.quest.data.QuestReleaseMethod;
@@ -15,7 +14,7 @@ import top.arctain.snowTerritory.quest.data.QuestStatus;
 import top.arctain.snowTerritory.quest.data.QuestType;
 import top.arctain.snowTerritory.quest.service.QuestService;
 import top.arctain.snowTerritory.quest.utils.QuestUtils;
-import top.arctain.snowTerritory.utils.ColorUtils;
+import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.util.List;
 
@@ -26,14 +25,13 @@ import java.util.List;
 public class QuestListener implements Listener {
 
     private final QuestService questService;
-    private final MessageProvider messages;
     
     // 当前事件处理的上下文（事件处理器在单线程中同步执行，因此可以安全使用）
     private MaterialSubmissionContext currentContext;
 
-    public QuestListener(Main plugin, QuestService questService, QuestConfigManager configManager, MessageProvider messages) {
+    public QuestListener(Main plugin, QuestService questService, QuestConfigManager configManager, top.arctain.snowTerritory.quest.config.MessageProvider messages) {
         this.questService = questService;
-        this.messages = messages;
+        // MessageProvider 参数保留以保持向后兼容，但不再使用
     }
 
     /**
@@ -144,11 +142,13 @@ public class QuestListener implements Listener {
 
     private boolean validateQuestState(Quest quest) {
         if (quest.isCompleted()) {
-            currentContext.player.sendMessage(ColorUtils.colorize(messages.get(currentContext.player, "quest-already-completed", "&c✗ &f任务已完成")));
+            MessageUtils.sendConfigMessage(currentContext.player, "quest.already-completed",
+                    "&c✗ &f任务已完成");
             return false;
         }
         if (quest.isExpired()) {
-            currentContext.player.sendMessage(ColorUtils.colorize(messages.get(currentContext.player, "quest-expired", "&c✗ &f任务已过期")));
+            MessageUtils.sendConfigMessage(currentContext.player, "quest.expired",
+                    "&c✗ &f任务已过期");
             return false;
         }
         return true;
@@ -218,13 +218,12 @@ public class QuestListener implements Listener {
     }
 
     private void sendSubmissionMessage(Quest updatedQuest, int toSubmit) {
-        String progressMsg = messages.get(currentContext.player, "material-submitted",
-                "&a✓ &f已提交 &e%amount%x %item% &7(进度: %current%/%required%)");
-        progressMsg = progressMsg.replace("%amount%", String.valueOf(toSubmit))
-                .replace("%item%", currentContext.materialName)
-                .replace("%current%", String.valueOf(updatedQuest.getCurrentAmount()))
-                .replace("%required%", String.valueOf(updatedQuest.getRequiredAmount()));
-        currentContext.player.sendMessage(ColorUtils.colorize(progressMsg));
+        MessageUtils.sendConfigMessage(currentContext.player, "quest.material-submitted",
+                "&a✓ &f已提交 &e{amount}x {item} &7(进度: {current}/{required})",
+                "amount", String.valueOf(toSubmit),
+                "item", currentContext.materialName,
+                "current", String.valueOf(updatedQuest.getCurrentAmount()),
+                "required", String.valueOf(updatedQuest.getRequiredAmount()));
     }
 
     private boolean isBountyQuestCompleted(Quest updatedQuest) {
@@ -232,9 +231,8 @@ public class QuestListener implements Listener {
     }
 
     private void sendBountyQuestCompletionMessage(Quest updatedQuest) {
-        String msg = messages.get(currentContext.player, "bounty-quest-completed",
+        MessageUtils.sendConfigMessage(currentContext.player, "quest.bounty-completed",
                 "&a✓ &f悬赏任务完成！使用 &e/sn q complete &f领取奖励");
-        currentContext.player.sendMessage(ColorUtils.colorize(msg));
     }
 }
 

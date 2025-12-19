@@ -15,7 +15,6 @@ import top.arctain.snowTerritory.quest.service.reward.DefaultRewardDistributor;
 import top.arctain.snowTerritory.quest.service.reward.RewardDistributor;
 import top.arctain.snowTerritory.quest.service.scheduler.BountyScheduler;
 import top.arctain.snowTerritory.quest.service.scheduler.DefaultBountyScheduler;
-import top.arctain.snowTerritory.utils.ColorUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.util.*;
@@ -124,6 +123,13 @@ public class QuestServiceImpl implements QuestService {
         return playerQuests.getOrDefault(playerId, Collections.emptyList()).stream()
                 .filter(this::isActiveAndNotExpired)
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<Quest> getAllQuests(UUID playerId) {
+        Objects.requireNonNull(playerId, "playerId不能为null");
+        
+        return new ArrayList<>(playerQuests.getOrDefault(playerId, Collections.emptyList()));
     }
     
     @Override
@@ -356,22 +362,17 @@ public class QuestServiceImpl implements QuestService {
     }
     
     private void broadcastBountyQuest(Quest quest) {
-        String message = formatBountyAnnouncement(quest);
-        String colored = ColorUtils.colorize(message);
-        
-        Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(colored));
-        MessageUtils.logInfo("悬赏任务已发布: " + quest.getMaterialKey() + " x" + quest.getRequiredAmount());
-    }
-    
-    private String formatBountyAnnouncement(Quest quest) {
-        FileConfiguration bountyConfig = configManager.getBountyConfig();
-        String template = bountyConfig.getString("bounty.messages.announcement",
-                "&6[悬赏任务] &e收集 %material% x%amount% &7- &f完成任务可获得丰厚奖励！");
-        
         String materialName = extractMaterialName(quest.getMaterialKey());
-        return template
-                .replace("%material%", materialName)
-                .replace("%amount%", String.valueOf(quest.getRequiredAmount()));
+        
+        // 向所有在线玩家发送悬赏任务公告
+        for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
+            MessageUtils.sendConfigMessage(player, "quest.bounty-announcement",
+                    "&6[悬赏任务] &e收集 {material} x{amount} &7- &f完成任务可获得丰厚奖励！",
+                    "material", materialName,
+                    "amount", String.valueOf(quest.getRequiredAmount()));
+        }
+        
+        MessageUtils.logInfo("悬赏任务已发布: " + quest.getMaterialKey() + " x" + quest.getRequiredAmount());
     }
     
     private String extractMaterialName(String materialKey) {

@@ -38,6 +38,11 @@ public interface QuestService {
     List<Quest> getActiveQuests(UUID playerId);
     
     /**
+     * 获取玩家的所有任务（包括所有状态：ACTIVE, COMPLETED, EXPIRED）
+     */
+    List<Quest> getAllQuests(UUID playerId);
+    
+    /**
      * 获取玩家的指定类型活跃任务
      */
     Quest getActiveQuest(UUID playerId, QuestType type);

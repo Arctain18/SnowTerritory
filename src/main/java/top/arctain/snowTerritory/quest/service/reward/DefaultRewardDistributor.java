@@ -9,7 +9,6 @@ import org.bukkit.inventory.ItemStack;
 import top.arctain.snowTerritory.quest.config.QuestConfigManager;
 import top.arctain.snowTerritory.quest.data.Quest;
 import top.arctain.snowTerritory.quest.utils.QuestUtils;
-import top.arctain.snowTerritory.utils.ColorUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.util.HashMap;
@@ -122,16 +121,12 @@ public class DefaultRewardDistributor implements RewardDistributor {
         int totalQuestPoint = (int) Math.round(rewardsDefault.getInt("default.questpoint", 12) * multiplier);
         int totalCurrency = (int) Math.round(rewardsDefault.getInt("default.currency.amount", 1) * multiplier);
         
-        String template = rewardsDefault.getString("default.messages.completion",
-                "&a✓ &f任务完成！评级: &e%rating% &7(奖励倍数: %multiplier%x) &f获得: &b%questpoint% 成就点 &f+ &e%currency% 货币");
-        
-        String message = template
-                .replace("%rating%", rating)
-                .replace("%multiplier%", String.format("%.2f", multiplier))
-                .replace("%questpoint%", String.valueOf(totalQuestPoint))
-                .replace("%currency%", String.valueOf(totalCurrency));
-        
-        player.sendMessage(ColorUtils.colorize(message));
+        MessageUtils.sendConfigMessage(player, "quest.completion",
+                "&a✓ &f任务完成！评级: &e{rating} &7(奖励倍数: {multiplier}x) &f获得: &b{questpoint} 成就点 &f+ &e{currency} 货币",
+                "rating", rating,
+                "multiplier", String.format("%.2f", multiplier),
+                "questpoint", String.valueOf(totalQuestPoint),
+                "currency", String.valueOf(totalCurrency));
     }
 }
 
