@@ -57,27 +57,27 @@ public final class DefaultFiles {
 
     public static final String DEFAULT_BONUS_TIME_BONUS = """
             1:
-              display: "Ultra Extreme+"
+              display: "&c&lUltra&r {#E260FC>}Ext{#9560FC<>}reme+{#607AFC<}"
               max-limit: 300000
               time-bonus: 2.0
             2:
-              display: "Extreme"
+              display: "{#E260FC>}Ext{#9560FC<>}reme{#607AFC<}"
               max-limit: 600000
               time-bonus: 1.8
             3:
-              display: "Master"
+              display: "&{#607AFC}Master"
               max-limit: 900000
               time-bonus: 1.5
             4:
-              display: "Normal"
+              display: "&fNormal"
               max-limit: 1200000
               time-bonus: 1.2
             5:
-              display: "Adequate"
+              display: "&{#FCE260}Adequate"
               max-limit: 1800000
               time-bonus: 1.0
             6:
-              display: "Poor"
+              display: "&4Poor"
               max-limit: -1
               time-bonus: 0.8
             """;
@@ -119,7 +119,7 @@ public final class DefaultFiles {
             # 任务将从 materials/whitelist.yml 中随机选择材料
             material:
               # 默认时间限制（毫秒），-1表示无限制
-              default-time-limit: 3600000
+              default-time-limit: -1
             """;
 
     public static final String DEFAULT_TASKS_KILL = """

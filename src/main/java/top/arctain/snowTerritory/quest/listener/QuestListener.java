@@ -90,7 +90,11 @@ public class QuestListener implements Listener {
                 return;
             }
 
-            submitMaterials(matchingQuest, toSubmit);
+            submitMaterials(toSubmit);
+            
+            Quest updatedQuest = getUpdatedQuest(matchingQuest);
+            sendProgressMessages(updatedQuest, toSubmit);
+            
         } finally {
             // 清理上下文，避免内存泄漏
             currentContext = null;
@@ -163,15 +167,12 @@ public class QuestListener implements Listener {
     /**
      * 提交材料并更新任务进度
      */
-    private void submitMaterials(Quest matchingQuest, int toSubmit) {
+    private void submitMaterials(int toSubmit) {
         boolean updated = questService.updateQuestProgress(currentContext.player.getUniqueId(), currentContext.itemKey, toSubmit);
         if (!updated) {
             return;
         }
-
         removeItemsFromHand(toSubmit);
-        Quest updatedQuest = getUpdatedQuest(matchingQuest);
-        sendProgressMessages(updatedQuest, toSubmit);
     }
 
     private void removeItemsFromHand(int amount) {
