@@ -10,6 +10,7 @@ import top.arctain.snowTerritory.config.PluginConfig;
 import top.arctain.snowTerritory.enderstorage.EnderStorageModule;
 import top.arctain.snowTerritory.quest.QuestModule;
 import top.arctain.snowTerritory.reinforce.ReinforceModule;
+import top.arctain.snowTerritory.stocks.StocksModule;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
     private final ReinforceModule reinforceModule;
     private final EnderStorageModule enderModule;
     private final QuestModule questModule;
+    private final StocksModule stocksModule;
 
     public SnowTerritoryCommand(Main plugin, PluginConfig config, ReinforceModule reinforceModule) {
         this.plugin = plugin;
@@ -31,6 +33,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         this.reinforceModule = reinforceModule;
         this.enderModule = plugin.getEnderStorageModule();
         this.questModule = plugin.getQuestModule();
+        this.stocksModule = plugin.getStocksModule();
     }
 
     @Override
@@ -53,6 +56,8 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             return handleEnderStorage(sender, args);
         } else if (subCommand.equals("q") || subCommand.equals("quest")) {
             return handleQuest(sender, args);
+        } else if (subCommand.equals("stock") || subCommand.equals("stocks")) {
+            return handleStock(sender, args);
         } else {
             MessageUtils.sendError(sender, "command.unknown-command", "&c✗ &f未知的子命令！输入 /{label} 查看帮助。", "label", label);
             return true;
@@ -100,6 +105,10 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         // 同步重载 Quest 模块
         if (plugin.getQuestModule() != null) {
             plugin.getQuestModule().reload();
+        }
+        // 同步重载 Stocks 模块
+        if (plugin.getStocksModule() != null) {
+            plugin.getStocksModule().reload();
         }
         MessageUtils.sendSuccess(sender, "command.reload-success", "&a✓ &f插件配置已重载！");
         return true;
@@ -171,6 +180,22 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         return questModule.getQuestCommand().onCommand(sender, null, "snowterritory quest", forward);
     }
 
+    /**
+     * 处理 Stock 子命令: /sn stock ...
+     */
+    private boolean handleStock(CommandSender sender, String[] args) {
+        if (stocksModule == null || stocksModule.getStockCommand() == null) {
+            MessageUtils.sendError(sender, "command.feature-missing", "&c✗ &fStocks 功能未启用");
+            return true;
+        }
+        // 去除首个 "stock" 或 "stocks"
+        String[] forward = new String[Math.max(0, args.length - 1)];
+        if (args.length > 1) {
+            System.arraycopy(args, 1, forward, 0, args.length - 1);
+        }
+        return stocksModule.getStockCommand().onCommand(sender, null, "snowterritory stock", forward);
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
@@ -192,6 +217,9 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             if ("q".startsWith(input) || "quest".startsWith(input)) {
                 completions.add("quest");
             }
+            if ("stock".startsWith(input) || "stocks".startsWith(input)) {
+                completions.add("stock");
+            }
             
             return completions;
         }
@@ -208,6 +236,15 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         if (args.length == 2 && (args[0].equalsIgnoreCase("q") || args[0].equalsIgnoreCase("quest"))) {
             if (questModule != null && questModule.getQuestCommand() != null) {
                 return questModule.getQuestCommand().onTabComplete(sender, null, "quest", new String[]{args[1]});
+            }
+        }
+        
+        // /sn stock 子命令补全
+        if (args.length >= 2 && (args[0].equalsIgnoreCase("stock") || args[0].equalsIgnoreCase("stocks"))) {
+            if (stocksModule != null && stocksModule.getStockCommand() != null) {
+                String[] forward = new String[args.length - 1];
+                System.arraycopy(args, 1, forward, 0, args.length - 1);
+                return stocksModule.getStockCommand().onTabComplete(sender, null, "stock", forward);
             }
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("es") && args[1].equalsIgnoreCase("give")) {

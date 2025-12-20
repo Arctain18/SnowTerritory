@@ -142,6 +142,11 @@ public class ColorUtils {
                     result.append(currentSegment.applyGradient());
                     currentSegment = null;
                 }
+                // 结束标记后的内容需要单独添加（因为正则匹配到的content是结束标记后的文本）
+                // 注意：这里content是结束标记{#RRGGBB<}之后的文本
+                if (content != null && !content.isEmpty()) {
+                    result.append(content);
+                }
             }
             
             lastIndex = matcher.end();

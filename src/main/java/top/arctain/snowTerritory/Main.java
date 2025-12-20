@@ -7,6 +7,7 @@ import top.arctain.snowTerritory.listeners.PlayerJoinListener;
 import top.arctain.snowTerritory.enderstorage.EnderStorageModule;
 import top.arctain.snowTerritory.quest.QuestModule;
 import top.arctain.snowTerritory.reinforce.ReinforceModule;
+import top.arctain.snowTerritory.stocks.StocksModule;
 import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.NBTUtils;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -17,6 +18,7 @@ public class Main extends JavaPlugin {
     private EnderStorageModule enderStorageModule;
     private ReinforceModule reinforceModule;
     private QuestModule questModule;
+    private StocksModule stocksModule;
 
     @Override
     public void onEnable() {
@@ -50,6 +52,10 @@ public class Main extends JavaPlugin {
         this.questModule = new QuestModule(this);
         this.questModule.enable();
 
+        // 初始化 Stocks 模块
+        this.stocksModule = new StocksModule(this);
+        this.stocksModule.enable();
+
         // 注册主命令
         org.bukkit.command.PluginCommand mainCommand = getServer().getPluginCommand("snowterritory");
         if (mainCommand != null) {
@@ -78,6 +84,9 @@ public class Main extends JavaPlugin {
         }
         if (questModule != null) {
             questModule.disable();
+        }
+        if (stocksModule != null) {
+            stocksModule.disable();
         }
         MessageUtils.sendShutdownBanner(this);
     }
@@ -127,5 +136,9 @@ public class Main extends JavaPlugin {
 
     public QuestModule getQuestModule() {
         return questModule;
+    }
+
+    public StocksModule getStocksModule() {
+        return stocksModule;
     }
 }
