@@ -363,22 +363,15 @@ public class QuestServiceImpl implements QuestService {
     }
     
     private void broadcastBountyQuest(Quest quest) {
-        String materialName = extractMaterialName(quest.getMaterialKey());
         
         // 向所有在线玩家发送悬赏任务公告
         for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
             MessageUtils.sendConfigMessage(player, "quest.bounty-announcement",
-                    "&6[悬赏任务] &e收集 {material} x{amount} &7- &f完成任务可获得丰厚奖励！",
-                    "material", materialName,
-                    "amount", String.valueOf(quest.getRequiredAmount()));
+                    "&6[悬赏任务] &e{quest} &7- &f完成任务可获得丰厚奖励！",
+                    "quest", quest.getDescription());
         }
         
-        MessageUtils.logInfo("悬赏任务已发布: " + quest.getMaterialKey() + " x" + quest.getRequiredAmount());
-    }
-    
-    private String extractMaterialName(String materialKey) {
-        int colonIndex = materialKey.indexOf(':');
-        return colonIndex >= 0 ? materialKey.substring(colonIndex + 1) : materialKey;
+        MessageUtils.logInfo("悬赏任务已发布: " + quest.getDescription());
     }
     
     // ==================== 任务生成 ====================

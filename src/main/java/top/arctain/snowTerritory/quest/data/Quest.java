@@ -84,6 +84,27 @@ public class Quest {
     public QuestStatus getStatus() {
         return status;
     }
+
+    public String getDescription() {
+        String questDesc = "";
+        if (releaseMethod.equals(QuestReleaseMethod.BOUNTY)) {
+            questDesc = "[悬赏] ";
+        }
+        switch (type) {
+            case QuestType.MATERIAL:
+                questDesc += String.format("&{#5BBFC7}交付 %s x%d", materialName, requiredAmount);
+                break;
+            case QuestType.KILL:
+                questDesc += String.format("&{#C7625B}击杀 %s x%d", materialName, requiredAmount);
+                break;
+            case QuestType.COLLECT:
+                questDesc += String.format("&{#C0C75B}采集 %s x%d", materialName, requiredAmount);
+                break;
+            default:
+                break;
+        }
+        return questDesc;
+    }
     
     public void setStatus(QuestStatus status) {
         this.status = status;

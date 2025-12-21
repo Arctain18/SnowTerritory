@@ -9,6 +9,7 @@ import top.arctain.snowTerritory.quest.config.QuestConfigManager;
 import top.arctain.snowTerritory.quest.data.Quest;
 import top.arctain.snowTerritory.quest.data.QuestStatus;
 import top.arctain.snowTerritory.quest.data.QuestType;
+import top.arctain.snowTerritory.quest.data.QuestReleaseMethod;
 import top.arctain.snowTerritory.quest.service.QuestService;
 import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.DisplayUtils;
@@ -93,10 +94,9 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        String materialName = quest.getMaterialKey().split(":")[1];
         MessageUtils.sendConfigMessage(player, "quest.accepted",
                 "&a✓ &f已接取任务: &e{quest}",
-                "quest", String.format("收集 %s x%d", materialName, quest.getRequiredAmount()));
+                "quest", quest.getDescription());
         return true;
     }
 
@@ -122,32 +122,28 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         MessageUtils.sendConfigMessage(player, "quest.list-header",
                 "     &7========= &f进行中的任务 &7=========");
 
+        displayQuests(player, bountyQuests);
         displayQuests(player, allQuests);
-        displayBountyQuests(player, bountyQuests);
 
         return true;
     }
 
-    private void displayBountyQuests(Player player, List<Quest> bountyQuests) {
-        for (Quest quest : bountyQuests) {
-            displayQuest(player, quest, "[悬赏] &{#5BBFC7}交付", true);
-        }
-    }
-
     private void displayQuests(Player player, List<Quest> quests) {
         for (Quest quest : quests) {
-            displayQuest(player, quest, "&{#5BBFC7}交付", false);
+            displayQuest(player, quest);
         }
     }
 
-    private void displayQuest(Player player, Quest quest, String questType, boolean isBounty) {
-        String materialName = quest.getMaterialName();
-        String questDesc = String.format("%s %s &7x%d", questType, materialName, quest.getRequiredAmount());
+    private void displayQuest(Player player, Quest quest) {
+
+        String questDesc = quest.getDescription();
+        String statusText = getStatusText(quest.getStatus(), quest);
         
-        QuestStatus status = quest.getStatus();
-        String statusText = getStatusText(status, quest);
-        
-        displayQuest(player, questDesc, statusText);
+        MessageUtils.sendConfigMessage(player, "quest.list-item",
+                "&7&l·&r {quest} &7{status}",
+                "quest", questDesc,
+                "status", statusText);
+
         if (service.isActiveAndNotExpired(quest)) {
             displayQuestProgress(player, quest);
         }
@@ -157,7 +153,7 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
 
         String progressBar = DisplayUtils.progressBar(DisplayUtils.BarStyle.BARS, 
             "&c", "&e", "&a", 
-            quest.getCurrentAmount(), quest.getRequiredAmount(), 20)
+            quest.getCurrentAmount(), quest.getRequiredAmount(), 50)
             + "&7 (&e" + Integer.toString(quest.getCurrentAmount()) + "&7/&e" + Integer.toString(quest.getRequiredAmount()) + "&7)";
         MessageUtils.sendConfigMessage(player, "quest.list-progress",
                 "&7  &l·&r 进度: &e{progressBar}",
@@ -170,13 +166,6 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
                 "currentRating", currentRating);
     }
 
-    private void displayQuest(Player player, String questDesc, String statusText) {
-        MessageUtils.sendConfigMessage(player, "quest.list-item",
-                "&7&l·&r {quest} &7{status}",
-                "quest", questDesc,
-                "status", statusText);
-    }
-    
     private String getStatusText(QuestStatus status, Quest quest) {
         switch (status) {
             case ACTIVE:

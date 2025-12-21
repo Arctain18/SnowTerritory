@@ -12,6 +12,8 @@ public enum QuestType {
     /**
      * 击杀任务 - 击杀指定数量的怪物 (TODO)
      */
-    KILL
+    KILL, 
+
+    COLLECT
 }
 
