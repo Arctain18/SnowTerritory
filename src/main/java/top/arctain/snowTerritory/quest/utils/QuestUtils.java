@@ -42,7 +42,7 @@ public class QuestUtils {
         return null;
     }
 
-        /**
+    /**
      * 根据 key (TYPE:NAME) 获取 MMOItem 的展示名称
      */
     public static String getMMOItemDisplayName(String key) {
@@ -118,11 +118,6 @@ public class QuestUtils {
     /**
      * 计算任务难度
      * 根据需求数量计算难度(1-32)，32个等级均匀分布，从min到max线性映射
-     * 
-     * @param requiredAmount 需求数量
-     * @param min 最小数量
-     * @param max 最大数量
-     * @return 难度等级 (1-32)
      */
     public static int calculateDifficulty(int requiredAmount, int min, int max) {
         if (min >= max) {
@@ -143,6 +138,10 @@ public class QuestUtils {
         
         // 确保在1-32范围内
         return Math.max(1, Math.min(32, difficulty));
+    }
+
+    public static int calculateRequiredAmount(int difficulty, int min, int max) {
+        return min + (int)((difficulty - 1) * (max - min) / 31.0);
     }
 
     /**

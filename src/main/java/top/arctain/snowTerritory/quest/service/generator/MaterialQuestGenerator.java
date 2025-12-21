@@ -58,32 +58,31 @@ public class MaterialQuestGenerator implements QuestGenerator {
             return null;
         }
         
-        // 获取玩家等级上限（如果是普通任务）
         int maxMaterialLevel = 1;
         if (playerId != null && releaseMethod == QuestReleaseMethod.NORMAL) {
             maxMaterialLevel = databaseDao.getMaxMaterialLevel(playerId);
         }
         
-        // 收集材料，过滤掉超过玩家等级上限的材料
-        List<MaterialEntry> materials = collectMaterials(materialsSection, maxMaterialLevel);
+        List<MaterialEntry> materials = collectMaterials(materialsSection);
         if (materials.isEmpty()) {
             return null;
         }
-        
+
+        int requiredAmount = 0;
         MaterialEntry selected = materials.get(random.nextInt(materials.size()));
-        
-        // 先随机生成需求数量
-        int requiredAmount = selected.min + random.nextInt(selected.max - selected.min + 1);
-        
-        // 计算难度
-        int difficulty;
-        if (releaseMethod == QuestReleaseMethod.BOUNTY) {
-            // 悬赏任务固定难度16
-            difficulty = BOUNTY_FIXED_DIFFICULTY;
-        } else {
-            // 普通任务根据数量计算难度
-            difficulty = QuestUtils.calculateDifficulty(requiredAmount, selected.min, selected.max);
+
+        if (releaseMethod == QuestReleaseMethod.NORMAL) {
+            selected = removeMaterialsOutOfRange(maxMaterialLevel, materials);
         }
+        
+        int difficulty = 1;
+        requiredAmount = calculateRequiredAmount(selected);
+        difficulty = QuestUtils.calculateDifficulty(requiredAmount, selected.min, selected.max);
+
+        if (releaseMethod == QuestReleaseMethod.BOUNTY) {
+            difficulty = BOUNTY_FIXED_DIFFICULTY;
+            requiredAmount = QuestUtils.calculateRequiredAmount(difficulty, selected.min, selected.max);
+        } 
         
         // 任务等级 = 材料等级（从配置读取）
         int level = selected.materialLevel;
@@ -109,13 +108,28 @@ public class MaterialQuestGenerator implements QuestGenerator {
                 QuestStatus.ACTIVE
         );
     }
+
+    private int calculateRequiredAmount(MaterialEntry selected) {
+        return (int) (selected.min + random.nextInt(selected.max - selected.min + 1) * 0.5 + 0.5);
+    }
+
+    private MaterialEntry removeMaterialsOutOfRange(int maxMaterialLevel, List<MaterialEntry> materials) {
+        MaterialEntry selected;
+        for (MaterialEntry material : materials) {
+            if (material.materialLevel >= maxMaterialLevel) {
+                materials.remove(material);
+            }
+        }
+        selected = materials.get(random.nextInt(materials.size()));
+        return selected;
+    }
     
     @Override
     public boolean supports(QuestType type) {
         return type == QuestType.MATERIAL;
     }
     
-    private List<MaterialEntry> collectMaterials(ConfigurationSection materialsSection, int maxMaterialLevel) {
+    private List<MaterialEntry> collectMaterials(ConfigurationSection materialsSection) {
         List<MaterialEntry> materials = new ArrayList<>();
         
         for (String type : materialsSection.getKeys(false)) {
@@ -127,11 +141,8 @@ public class MaterialQuestGenerator implements QuestGenerator {
             for (String name : typeSection.getKeys(false)) {
                 ConfigurationSection itemSection = typeSection.getConfigurationSection(name);
                 MaterialEntry entry = createMaterialEntry(type, name, itemSection);
+                materials.add(entry);
                 
-                // 过滤：只选择material-level <= 玩家等级上限的材料
-                if (entry.materialLevel <= maxMaterialLevel) {
-                    materials.add(entry);
-                }
             }
         }
         
