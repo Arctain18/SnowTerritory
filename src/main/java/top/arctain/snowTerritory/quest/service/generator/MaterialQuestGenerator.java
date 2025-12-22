@@ -115,11 +115,7 @@ public class MaterialQuestGenerator implements QuestGenerator {
 
     private MaterialEntry removeMaterialsOutOfRange(int maxMaterialLevel, List<MaterialEntry> materials) {
         MaterialEntry selected;
-        for (MaterialEntry material : materials) {
-            if (material.materialLevel >= maxMaterialLevel) {
-                materials.remove(material);
-            }
-        }
+        materials.removeIf(material -> material.materialLevel > maxMaterialLevel);
         selected = materials.get(random.nextInt(materials.size()));
         return selected;
     }
