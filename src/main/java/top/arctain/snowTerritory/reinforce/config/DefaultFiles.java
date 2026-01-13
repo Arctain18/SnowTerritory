@@ -150,6 +150,17 @@ public final class DefaultFiles {
                 # 材料显示 (占位符: {current}, {required}, {color} - 绿色&a或红色&c)
                 cost-materials: "&7材料: {color}{current}&7/{required}"
             
+              # 玩家信息显示配置
+              player-info:
+                enabled: true
+                slot: 49  # 54格GUI最下面一排中间
+                format:
+                  - "&7玩家: &e{playerName}"
+                  - "&7等级: &a{playerLevel}"
+                  - "&7职业: &b{className} &7(Lv.{classLevel})"
+                  - "&7金币: &6{gold}"
+                  - "&7点券: &d{points}"
+              
               # 自定义槽位 (装饰用，支持16进制颜色 &x&F&F&0&0&0&0)
               # 格式: 槽位号: { material: 材料, name: 显示名称, lore: [描述行1, 描述行2, ...] }
               # 支持范围表达式: 槽位范围: { material: 材料, name: 显示名称, lore: [描述行1, 描述行2, ...] }

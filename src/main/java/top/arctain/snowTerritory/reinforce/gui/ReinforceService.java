@@ -1,5 +1,6 @@
 package top.arctain.snowTerritory.reinforce.gui;
 
+import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.item.mmoitem.LiveMMOItem;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -7,9 +8,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.reinforce.config.ReinforceConfigManager;
-import top.arctain.snowTerritory.reinforce.service.CharmService;
-import top.arctain.snowTerritory.reinforce.service.EconomyService;
-import top.arctain.snowTerritory.reinforce.service.PlayerPointsService;
+import top.arctain.snowTerritory.reinforce.service.*;
 import top.arctain.snowTerritory.reinforce.utils.ReinforceUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
@@ -29,6 +28,7 @@ public class ReinforceService {
     private final PlayerPointsService playerPointsService;
     private final CharmService charmService;
     private final ConfirmButtonLoreService confirmButtonLoreService;
+    private final CostCalculationService costCalculationService;
 
     // 正在强化的玩家集合，用于防止重复点击
     private final Set<UUID> reinforcingPlayers = new HashSet<>();
@@ -38,13 +38,15 @@ public class ReinforceService {
                             EconomyService economyService,
                             PlayerPointsService playerPointsService,
                             CharmService charmService,
-                            ConfirmButtonLoreService confirmButtonLoreService) {
+                            ConfirmButtonLoreService confirmButtonLoreService,
+                            CostCalculationService costCalculationService) {
         this.config = config;
         this.plugin = plugin;
         this.economyService = economyService;
         this.playerPointsService = playerPointsService;
         this.charmService = charmService;
         this.confirmButtonLoreService = confirmButtonLoreService;
+        this.costCalculationService = costCalculationService;
     }
 
     /**
@@ -84,20 +86,38 @@ public class ReinforceService {
             return;
         }
 
-        // 检查消耗（如果启用了经济系统）
-        if (economyService.isEnabled() && config.getCostVaultGold() > 0) {
-            if (economyService.getBalance(player) < config.getCostVaultGold()) {
+        // 获取物品ID和当前等级
+        String itemId = MMOItems.getID(weapon);
+        int currentLevel = ReinforceUtils.getCurrentLevel(weapon);
+        int nextLevel = currentLevel + 1;
+
+        // 检查消耗（使用新的消耗计算逻辑）
+        double goldCost = 0;
+        int pointsCost = 0;
+        
+        if (itemId != null) {
+            // 使用物品特定配置
+            goldCost = costCalculationService.calculateGoldCost(player, itemId, nextLevel);
+            pointsCost = costCalculationService.calculatePointsCost(player, itemId, nextLevel);
+        } else {
+            // 回退到全局配置
+            goldCost = config.getCostVaultGold();
+            pointsCost = config.getCostPlayerPoints();
+        }
+        
+        if (economyService.isEnabled() && goldCost > 0) {
+            if (economyService.getBalance(player) < goldCost) {
                 reinforcingPlayers.remove(playerUUID);  // 移除标记
                 MessageUtils.sendError(player, "reinforce.insufficient-gold", "&c✗ &f金币不足！需要: &e{cost}",
-                        "cost", MessageUtils.formatNumber(config.getCostVaultGold()));
+                        "cost", MessageUtils.formatNumber((long) goldCost));
                 return;
             }
         }
-        if (playerPointsService.isEnabled() && config.getCostPlayerPoints() > 0) {
-            if (playerPointsService.getPoints(player.getUniqueId()) < config.getCostPlayerPoints()) {
+        if (playerPointsService.isEnabled() && pointsCost > 0) {
+            if (playerPointsService.getPoints(player.getUniqueId()) < pointsCost) {
                 reinforcingPlayers.remove(playerUUID);  // 移除标记
                 MessageUtils.sendError(player, "reinforce.insufficient-points", "&c✗ &f点券不足！需要: &e{cost}",
-                        "cost", MessageUtils.formatNumber(config.getCostPlayerPoints()));
+                        "cost", MessageUtils.formatNumber(pointsCost));
                 return;
             }
         }
@@ -110,18 +130,15 @@ public class ReinforceService {
         }
 
         // 验证保护符和强化符（需要在消耗之前验证）
-        int currentLevel = ReinforceUtils.getCurrentLevel(weapon);
-        int nextLevel = currentLevel + 1;
-
         CharmService.CharmInfo protectCharmInfo = charmService.evaluateProtectCharm(protectCharm, nextLevel);
         CharmService.CharmInfo enhanceCharmInfo = charmService.evaluateEnhanceCharm(enhanceCharm, nextLevel);
 
-        // 扣除消耗
-        if (economyService.isEnabled() && config.getCostVaultGold() > 0) {
-            economyService.withdraw(player, config.getCostVaultGold());
+        // 扣除消耗（使用计算出的消耗值）
+        if (economyService.isEnabled() && goldCost > 0) {
+            economyService.withdraw(player, goldCost);
         }
-        if (playerPointsService.isEnabled() && config.getCostPlayerPoints() > 0) {
-            playerPointsService.takePoints(player.getUniqueId(), config.getCostPlayerPoints());
+        if (playerPointsService.isEnabled() && pointsCost > 0) {
+            playerPointsService.takePoints(player.getUniqueId(), pointsCost);
         }
         for (int i = 0; i < 6; i++) {
             if (materials[i] != null) gui.setItem(config.getSlotMaterials()[i], null);  // 消耗材料

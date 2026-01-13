@@ -144,6 +144,22 @@
             <version>6.9.5-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <!-- MMOCore API - 硬依赖，如果 MMOCore 插件不存在，请注释此依赖并确保不使用 MMOCoreService -->
+        <!-- 编译时需要 MMOCore API，运行时如果插件不存在，相关功能将被禁用 -->
+        <!-- 如果无法从 Maven 仓库下载，可以使用 system scope 从本地 JAR 加载：
+             1. 将 MMOCore 插件的 JAR 文件放到项目根目录的 libs/ 文件夹
+             2. 将下面的 scope 改为 system，并取消注释 systemPath
+        -->
+        <dependency>
+            <groupId>net.Indyuce</groupId>
+            <artifactId>MMOCore-API</artifactId>
+            <version>1.13.1-SNAPSHOT</version>
+            <!-- <scope>provided</scope>
+            <optional>true</optional> -->
+            <!-- 如果使用 system scope，取消下面的注释并注释掉上面的 scope -->
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/[M]MMOCore-1.13.1-SNAPSHOT.jar</systemPath>
+        </dependency>
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
@@ -172,6 +188,12 @@
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.46.0.0</version>
+        </dependency>
+        <!-- exp4j 表达式解析器 -->
+        <dependency>
+            <groupId>net.objecthunter</groupId>
+            <artifactId>exp4j</artifactId>
+            <version>0.4.8</version>
         </dependency>
     </dependencies>
 

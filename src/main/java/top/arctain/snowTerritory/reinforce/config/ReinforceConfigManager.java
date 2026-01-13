@@ -1,9 +1,11 @@
 package top.arctain.snowTerritory.reinforce.config;
 
 import lombok.Getter;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import top.arctain.snowTerritory.Main;
+import top.arctain.snowTerritory.reinforce.service.ExpressionService;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.io.File;
@@ -22,6 +24,10 @@ public class ReinforceConfigManager {
     private final File baseDir;
     private File configFile;
     private FileConfiguration config;
+    
+    // 新增：消耗配置管理器
+    @Getter
+    private CostConfigManager costConfigManager;
 
     // 从配置加载的可修改数据
     private Map<Integer, Double> reinforceSuccessRates;  // 不同等级的成功概率（key: 等级, value: 概率0.0-1.0）
@@ -66,6 +72,11 @@ public class ReinforceConfigManager {
     private String confirmButtonLoreCostPoints;
     private String confirmButtonLoreCostMaterials;
     
+    // 玩家信息显示配置
+    private boolean playerInfoEnabled;
+    private int playerInfoSlot;
+    private List<String> playerInfoFormat;
+    
     // 消息配置
     private Map<String, String> messages;  // 消息映射表
 
@@ -77,6 +88,10 @@ public class ReinforceConfigManager {
         this.customSlots = new HashMap<>();
         this.slotMaterials = new int[6];
         this.messages = new HashMap<>();
+        
+        // 初始化ExpressionService和CostConfigManager
+        ExpressionService expressionService = new ExpressionService();
+        this.costConfigManager = new CostConfigManager(plugin, expressionService);
     }
 
     public void loadAll() {
@@ -143,6 +158,31 @@ public class ReinforceConfigManager {
         confirmButtonLoreCostGold = config.getString("gui.confirm-button-lore.cost-gold", "&7金币: {color}{amount}");
         confirmButtonLoreCostPoints = config.getString("gui.confirm-button-lore.cost-points", "&7点券: {color}{amount}");
         confirmButtonLoreCostMaterials = config.getString("gui.confirm-button-lore.cost-materials", "&7材料: {color}{current}&7/{required}");
+
+        // 加载玩家信息显示配置
+        ConfigurationSection playerInfoSection = config.getConfigurationSection("gui.player-info");
+        if (playerInfoSection != null) {
+            playerInfoEnabled = playerInfoSection.getBoolean("enabled", true);
+            playerInfoSlot = playerInfoSection.getInt("slot", 49); // 54格GUI最下面一排中间
+            playerInfoFormat = playerInfoSection.getStringList("format");
+            if (playerInfoFormat.isEmpty()) {
+                // 默认格式
+                playerInfoFormat = List.of(
+                    "&7玩家: &e{playerName}",
+                    "&7等级: &a{playerLevel}",
+                    "&7职业: &b{className} &7(Lv.{classLevel})",
+                    "&7金币: &6{gold}",
+                    "&7点券: &d{points}"
+                );
+            }
+        } else {
+            playerInfoEnabled = false;
+            playerInfoSlot = 49;
+            playerInfoFormat = List.of();
+        }
+
+        // 加载消耗配置
+        costConfigManager.loadAll();
 
         // 获取所有功能槽位集合（自定义槽位不能覆盖这些槽位）
         Set<Integer> functionalSlots = getFunctionalSlots();
@@ -221,6 +261,11 @@ public class ReinforceConfigManager {
         // 添加取消按钮槽位
         functionalSlots.add(slotCancel);
         
+        // 添加玩家信息显示槽位（如果启用）
+        if (playerInfoEnabled) {
+            functionalSlots.add(playerInfoSlot);
+        }
+        
         return functionalSlots;
     }
     
@@ -276,6 +321,7 @@ public class ReinforceConfigManager {
 
     public void reload() {
         loadAll();  // 重用加载逻辑进行重载
+        costConfigManager.reload();  // 重载消耗配置
         MessageUtils.logSuccess("Reinforce 配置已重载");
     }
 

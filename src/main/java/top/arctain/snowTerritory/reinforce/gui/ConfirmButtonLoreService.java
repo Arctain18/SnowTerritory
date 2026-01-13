@@ -1,13 +1,12 @@
 package top.arctain.snowTerritory.reinforce.gui;
 
+import net.Indyuce.mmoitems.MMOItems;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import top.arctain.snowTerritory.reinforce.config.ReinforceConfigManager;
-import top.arctain.snowTerritory.reinforce.service.CharmService;
-import top.arctain.snowTerritory.reinforce.service.EconomyService;
-import top.arctain.snowTerritory.reinforce.service.PlayerPointsService;
+import top.arctain.snowTerritory.reinforce.service.*;
 import top.arctain.snowTerritory.reinforce.utils.ReinforceUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
@@ -23,15 +22,21 @@ public class ConfirmButtonLoreService {
     private final EconomyService economyService;
     private final PlayerPointsService playerPointsService;
     private final CharmService charmService;
+    private final CostCalculationService costCalculationService;
+    private final MMOCoreService mmocoreService;
 
     public ConfirmButtonLoreService(ReinforceConfigManager config,
                                     EconomyService economyService,
                                     PlayerPointsService playerPointsService,
-                                    CharmService charmService) {
+                                    CharmService charmService,
+                                    CostCalculationService costCalculationService,
+                                    MMOCoreService mmocoreService) {
         this.config = config;
         this.economyService = economyService;
         this.playerPointsService = playerPointsService;
         this.charmService = charmService;
+        this.costCalculationService = costCalculationService;
+        this.mmocoreService = mmocoreService;
     }
 
     /**
@@ -56,6 +61,9 @@ public class ConfirmButtonLoreService {
         if (weapon != null && ReinforceUtils.isReinforceable(weapon)) {
             int currentLevel = ReinforceUtils.getCurrentLevel(weapon);
             int nextLevel = currentLevel + 1;
+            
+            // 获取物品ID
+            String itemId = MMOItems.getID(weapon);
 
             // 验证保护符
             CharmService.CharmInfo protectCharmInfo = charmService.evaluateProtectCharm(protectCharm, nextLevel);
@@ -129,9 +137,22 @@ public class ConfirmButtonLoreService {
                 }
             }
 
-            // 显示消耗资源
+            // 显示消耗资源（使用新的消耗计算逻辑）
             List<String> costLines = new ArrayList<>();
-            if (economyService.isEnabled() && config.getCostVaultGold() > 0) {
+            
+            // 计算金币消耗
+            if (itemId != null && costCalculationService.hasGoldCost(itemId)) {
+                double goldCost = costCalculationService.calculateGoldCost(player, itemId, nextLevel);
+                if (goldCost > 0) {
+                    double balance = economyService.getBalance(player);
+                    String color = balance >= goldCost ? "&a" : "&c";
+                    String goldText = config.getConfirmButtonLoreCostGold()
+                            .replace("{color}", color)
+                            .replace("{amount}", MessageUtils.formatNumber((long) goldCost));
+                    costLines.add(MessageUtils.colorize(goldText));
+                }
+            } else if (economyService.isEnabled() && config.getCostVaultGold() > 0) {
+                // 回退到全局配置
                 double balance = economyService.getBalance(player);
                 String color = balance >= config.getCostVaultGold() ? "&a" : "&c";
                 String goldText = config.getConfirmButtonLoreCostGold()
@@ -139,7 +160,20 @@ public class ConfirmButtonLoreService {
                         .replace("{amount}", MessageUtils.formatNumber(config.getCostVaultGold()));
                 costLines.add(MessageUtils.colorize(goldText));
             }
-            if (playerPointsService.isEnabled() && config.getCostPlayerPoints() > 0) {
+            
+            // 计算点券消耗
+            if (itemId != null && costCalculationService.hasPointsCost(itemId)) {
+                int pointsCost = costCalculationService.calculatePointsCost(player, itemId, nextLevel);
+                if (pointsCost > 0) {
+                    int points = playerPointsService.getPoints(player.getUniqueId());
+                    String color = points >= pointsCost ? "&a" : "&c";
+                    String pointsText = config.getConfirmButtonLoreCostPoints()
+                            .replace("{color}", color)
+                            .replace("{amount}", MessageUtils.formatNumber(pointsCost));
+                    costLines.add(MessageUtils.colorize(pointsText));
+                }
+            } else if (playerPointsService.isEnabled() && config.getCostPlayerPoints() > 0) {
+                // 回退到全局配置
                 int points = playerPointsService.getPoints(player.getUniqueId());
                 String color = points >= config.getCostPlayerPoints() ? "&a" : "&c";
                 String pointsText = config.getConfirmButtonLoreCostPoints()

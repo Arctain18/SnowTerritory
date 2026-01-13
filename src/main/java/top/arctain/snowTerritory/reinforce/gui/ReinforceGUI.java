@@ -8,13 +8,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.reinforce.config.ReinforceConfigManager;
-import top.arctain.snowTerritory.reinforce.service.EconomyService;
-import top.arctain.snowTerritory.reinforce.service.PlayerPointsService;
-import top.arctain.snowTerritory.reinforce.service.CharmService;
+import top.arctain.snowTerritory.reinforce.service.*;
 import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.ColorUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class ReinforceGUI {
 
@@ -23,6 +23,8 @@ public class ReinforceGUI {
     private final EconomyService economyService;     // Vault 经济服务
     private final PlayerPointsService playerPointsService; // PlayerPoints 服务
     private final CharmService charmService; // 符文判定服务
+    private final MMOCoreService mmocoreService; // MMOCore 服务
+    private final CostCalculationService costCalculationService; // 消耗计算服务
     private final ConfirmButtonLoreService confirmButtonLoreService; // 确认按钮 lore 服务
     private final ReinforceService reinforceService; // 强化核心服务
 
@@ -32,8 +34,30 @@ public class ReinforceGUI {
         this.economyService = new EconomyService();
         this.playerPointsService = new PlayerPointsService();
         this.charmService = new CharmService(config);
-        this.confirmButtonLoreService = new ConfirmButtonLoreService(config, economyService, playerPointsService, charmService);
-        this.reinforceService = new ReinforceService(config, plugin, economyService, playerPointsService, charmService, confirmButtonLoreService);
+        this.mmocoreService = new MMOCoreService();
+        this.costCalculationService = new CostCalculationService(
+            config, 
+            config.getCostConfigManager(), 
+            mmocoreService,
+            new ExpressionService()
+        );
+        this.confirmButtonLoreService = new ConfirmButtonLoreService(
+            config, 
+            economyService, 
+            playerPointsService, 
+            charmService,
+            costCalculationService,
+            mmocoreService
+        );
+        this.reinforceService = new ReinforceService(
+            config, 
+            plugin, 
+            economyService, 
+            playerPointsService, 
+            charmService, 
+            confirmButtonLoreService,
+            costCalculationService
+        );
     }
 
     public void openGUI(Player player) {
@@ -62,8 +86,60 @@ public class ReinforceGUI {
         }
         gui.setItem(config.getSlotCancel(), cancelButton);
 
+        // 添加玩家信息显示
+        updatePlayerInfo(player, gui);
+
         // 空槽位已由玩家放置，无需预填充
         player.openInventory(gui);
+    }
+
+    /**
+     * 更新玩家信息显示
+     */
+    public void updatePlayerInfo(Player player, Inventory gui) {
+        if (!config.isPlayerInfoEnabled()) {
+            return;
+        }
+
+        int slot = config.getPlayerInfoSlot();
+        if (slot < 0 || slot >= gui.getSize()) {
+            return;
+        }
+
+        // 获取玩家信息
+        String playerName = player.getName();
+        int playerLevel = mmocoreService.getPlayerLevel(player);
+        String className = mmocoreService.getClassName(player);
+        int classLevel = 0;
+        if (className != null) {
+            classLevel = config.getCostConfigManager().getClassLevel(className);
+        }
+        double gold = economyService.getBalance(player);
+        int points = playerPointsService.getPoints(player.getUniqueId());
+
+        // 创建显示物品
+        ItemStack infoItem = new ItemStack(Material.PLAYER_HEAD);
+        ItemMeta meta = infoItem.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(MessageUtils.colorize("&7玩家信息"));
+            
+            // 构建lore
+            List<String> lore = new ArrayList<>();
+            for (String line : config.getPlayerInfoFormat()) {
+                String formatted = line
+                    .replace("{playerName}", playerName)
+                    .replace("{playerLevel}", String.valueOf(playerLevel))
+                    .replace("{className}", className != null ? className : "无")
+                    .replace("{classLevel}", String.valueOf(classLevel))
+                    .replace("{gold}", MessageUtils.formatNumber((long) gold))
+                    .replace("{points}", MessageUtils.formatNumber(points));
+                lore.add(MessageUtils.colorize(formatted));
+            }
+            meta.setLore(lore);
+            infoItem.setItemMeta(meta);
+        }
+
+        gui.setItem(slot, infoItem);
     }
 
     public void updateConfirmButtonLore(Player player, Inventory gui) {

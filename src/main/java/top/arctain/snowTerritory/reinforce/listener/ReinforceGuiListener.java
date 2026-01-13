@@ -81,11 +81,12 @@ public class ReinforceGuiListener implements Listener {
             return;
         }
         
-        // 如果是可编辑槽位，在物品放入后更新确认按钮的lore
+        // 如果是可编辑槽位，在物品放入后更新确认按钮的lore和玩家信息
         // 使用调度器延迟执行，确保物品已经放入
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (player.getOpenInventory().getTopInventory() == topInv) {
                 guiHandler.updateConfirmButtonLore(player, topInv);
+                guiHandler.updatePlayerInfo(player, topInv);
             }
         });
     }
@@ -114,10 +115,11 @@ public class ReinforceGuiListener implements Listener {
         );
         
         if (isEditableSlot) {
-            // 在拖拽完成后更新确认按钮的lore
+            // 在拖拽完成后更新确认按钮的lore和玩家信息
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (player.getOpenInventory().getTopInventory() == topInv) {
                     guiHandler.updateConfirmButtonLore(player, topInv);
+                    guiHandler.updatePlayerInfo(player, topInv);
                 }
             });
         }
