@@ -8,6 +8,7 @@ import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.Set;
 public class ReinforceConfigManager {
 
     private final Main plugin;
+    private final File baseDir;
     private File configFile;
     private FileConfiguration config;
 
@@ -69,7 +71,8 @@ public class ReinforceConfigManager {
 
     public ReinforceConfigManager(Main plugin) {
         this.plugin = plugin;
-        this.configFile = new File(plugin.getDataFolder(), "config.yml");
+        this.baseDir = new File(plugin.getDataFolder(), "reinforce");
+        this.configFile = new File(baseDir, "config.yml");
         this.reinforceSuccessRates = new HashMap<>();
         this.customSlots = new HashMap<>();
         this.slotMaterials = new int[6];
@@ -77,10 +80,8 @@ public class ReinforceConfigManager {
     }
 
     public void loadAll() {
-        if (!configFile.exists()) {
-            plugin.saveResource("config.yml", false);
-        }
-        config = YamlConfiguration.loadConfiguration(configFile);
+        ensureDefaults();
+        loadMainConfig();
 
         // 加载强化相关
         reinforceFailDegradeChance = config.getDouble("reinforce.fail-degrade-chance", 0.3);
@@ -155,7 +156,40 @@ public class ReinforceConfigManager {
         // 加载消息配置
         loadMessages();
 
-        MessageUtils.logSuccess("Reinforce 配置已加载");
+        MessageUtils.logSuccess("Reinforce 配置已加载，配置目录: plugins/SnowTerritory/reinforce/");
+    }
+    
+    /**
+     * 确保默认配置文件存在
+     */
+    private void ensureDefaults() {
+        if (!baseDir.exists() && !baseDir.mkdirs()) {
+            MessageUtils.logWarning("创建 reinforce 目录失败: " + baseDir.getAbsolutePath());
+        }
+        copyIfMissing(configFile, DefaultFiles.DEFAULT_CONFIG);
+    }
+    
+    /**
+     * 如果文件不存在，则创建默认配置文件
+     */
+    private void copyIfMissing(File target, String content) {
+        try {
+            if (!target.exists()) {
+                if (target.getParentFile() != null) {
+                    target.getParentFile().mkdirs();
+                }
+                Files.writeString(target.toPath(), content);
+            }
+        } catch (IOException e) {
+            MessageUtils.logError("写入默认配置失败: " + target.getAbsolutePath() + " - " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 加载主配置文件
+     */
+    private void loadMainConfig() {
+        this.config = YamlConfiguration.loadConfiguration(configFile);
     }
     
     /**
