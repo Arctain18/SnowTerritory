@@ -48,7 +48,6 @@ public class MaterialQuestGenerator implements QuestGenerator {
         
         FileConfiguration whitelist = configManager.getMaterialsWhitelist();
         FileConfiguration tasksMaterial = configManager.getTasksMaterial();
-        
         if (whitelist == null || tasksMaterial == null) {
             return null;
         }
