@@ -24,9 +24,6 @@ public class CostConfigManager {
     @Getter
     private final Map<String, ItemCostConfig> itemCostConfigs = new HashMap<>();
     
-    @Getter
-    private final Map<String, Integer> classNameToLevelMap = new HashMap<>();
-    
     private final ExpressionService expressionService;
 
     public CostConfigManager(Main plugin, ExpressionService expressionService) {
@@ -40,20 +37,16 @@ public class CostConfigManager {
      */
     public void loadAll() {
         itemCostConfigs.clear();
-        classNameToLevelMap.clear();
         
         // 确保目录存在
         if (!baseDir.exists() && !baseDir.mkdirs()) {
             MessageUtils.logWarning("创建 reinforce 目录失败: " + baseDir.getAbsolutePath());
             return;
         }
-        
-        // 加载classLevel.yml
-        loadClassLevelConfig();
-        
-        // 扫描并加载所有yml文件（排除classLevel.yml和config.yml）
+
+        // 扫描并加载所有yml文件（排除config.yml）
         File[] files = baseDir.listFiles((dir, name) -> 
-            name.endsWith(".yml") && !name.equals("classLevel.yml") && !name.equals("config.yml")
+            name.endsWith(".yml") && !name.equals("config.yml")
         );
         
         if (files != null) {
@@ -63,69 +56,6 @@ public class CostConfigManager {
         }
         
         MessageUtils.logSuccess("已加载 " + itemCostConfigs.size() + " 个物品的消耗配置");
-    }
-
-    /**
-     * 加载classLevel.yml配置文件
-     */
-    private void loadClassLevelConfig() {
-        File classLevelFile = new File(baseDir, "classLevel.yml");
-        if (!classLevelFile.exists()) {
-            // 创建默认classLevel.yml
-            createDefaultClassLevelFile(classLevelFile);
-        }
-        
-        FileConfiguration config = YamlConfiguration.loadConfiguration(classLevelFile);
-        for (String key : config.getKeys(false)) {
-            if (key.startsWith("level-")) {
-                try {
-                    int level = Integer.parseInt(key.substring(6));
-                    List<String> classNames = config.getStringList(key);
-                    for (String className : classNames) {
-                        if (className != null && !className.isEmpty()) {
-                            classNameToLevelMap.put(className, level);
-                        }
-                    }
-                } catch (NumberFormatException e) {
-                    MessageUtils.logWarning("无效的职业等级配置: " + key);
-                }
-            }
-        }
-        
-        MessageUtils.logSuccess("已加载 " + classNameToLevelMap.size() + " 个职业等级映射");
-    }
-
-    /**
-     * 创建默认classLevel.yml文件
-     */
-    private void createDefaultClassLevelFile(File file) {
-        try {
-            if (file.getParentFile() != null) {
-                file.getParentFile().mkdirs();
-            }
-            
-            String defaultContent = """
-                    # 职业等级映射配置
-                    # 格式: level-X 下为职业名称列表
-                    level-1:
-                      - 苍灵
-                      - 弦鸣
-                      - 铁血
-                    level-2:
-                      - 光影
-                      - 织梦
-                      - 断岳
-                    level-3:
-                      - 浮生
-                      - 窃梦
-                      - 碎星
-                    """;
-            
-            java.nio.file.Files.writeString(file.toPath(), defaultContent);
-            MessageUtils.logInfo("已创建默认 classLevel.yml 配置文件");
-        } catch (Exception e) {
-            MessageUtils.logError("创建默认 classLevel.yml 失败: " + e.getMessage());
-        }
     }
 
     /**
@@ -163,14 +93,6 @@ public class CostConfigManager {
             
             itemCostConfigs.put(itemId, itemConfig);
         }
-    }
-
-    /**
-     * 根据职业名称获取职业等级
-     */
-    public int getClassLevel(String className) {
-        if (className == null) return 0;
-        return classNameToLevelMap.getOrDefault(className, 0);
     }
 
     /**

@@ -81,17 +81,10 @@ public class CostCalculationService {
     private double calculateCost(Player player, CostConfig costConfig, int reinforceLevel) {
         // 获取玩家信息
         int playerLevel = mmocoreService.getPlayerLevel(player);
-        String className = mmocoreService.getClassName(player);
-        int classLevel = 0;
-        
-        if (className != null) {
-            classLevel = costConfigManager.getClassLevel(className);
-        }
         
         // 准备变量
         Map<String, Double> baseVariables = new HashMap<>();
         baseVariables.put("playerLevel", (double) playerLevel);
-        baseVariables.put("classLevel", (double) classLevel);
         
         // 计算基础消耗
         double baseCost = expressionService.evaluate(costConfig.getBaseExpression(), baseVariables);

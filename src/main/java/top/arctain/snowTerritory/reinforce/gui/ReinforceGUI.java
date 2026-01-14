@@ -110,10 +110,6 @@ public class ReinforceGUI {
         String playerName = player.getName();
         int playerLevel = mmocoreService.getPlayerLevel(player);
         String className = mmocoreService.getClassName(player);
-        int classLevel = 0;
-        if (className != null) {
-            classLevel = config.getCostConfigManager().getClassLevel(className);
-        }
         double gold = economyService.getBalance(player);
         int points = playerPointsService.getPoints(player.getUniqueId());
 
@@ -130,7 +126,6 @@ public class ReinforceGUI {
                     .replace("{playerName}", playerName)
                     .replace("{playerLevel}", String.valueOf(playerLevel))
                     .replace("{className}", className != null ? className : "无")
-                    .replace("{classLevel}", String.valueOf(classLevel))
                     .replace("{gold}", MessageUtils.formatNumber((long) gold))
                     .replace("{points}", MessageUtils.formatNumber(points));
                 lore.add(MessageUtils.colorize(formatted));
