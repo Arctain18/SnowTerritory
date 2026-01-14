@@ -10,6 +10,8 @@ import top.arctain.snowTerritory.reinforce.service.ExpressionService;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -44,9 +46,12 @@ public class CostConfigManager {
             return;
         }
 
-        // 扫描并加载所有yml文件（排除config.yml）
+        // 自动生成示例配置文件（如果不存在）
+        ensureExampleFile();
+
+        // 扫描并加载所有yml文件（排除config.yml和example-cost.yml）
         File[] files = baseDir.listFiles((dir, name) -> 
-            name.endsWith(".yml") && !name.equals("config.yml")
+            name.endsWith(".yml") && !name.equals("config.yml") && !name.equals("example-cost.yml")
         );
         
         if (files != null) {
@@ -56,6 +61,24 @@ public class CostConfigManager {
         }
         
         MessageUtils.logSuccess("已加载 " + itemCostConfigs.size() + " 个物品的消耗配置");
+    }
+
+    /**
+     * 确保示例配置文件存在
+     */
+    private void ensureExampleFile() {
+        File exampleFile = new File(baseDir, "example-cost.yml");
+        if (!exampleFile.exists()) {
+            try {
+                if (exampleFile.getParentFile() != null) {
+                    exampleFile.getParentFile().mkdirs();
+                }
+                Files.writeString(exampleFile.toPath(), DefaultFiles.DEFAULT_ITEM_COST_EXAMPLE);
+                MessageUtils.logInfo("已创建物品消耗配置示例文件: example-cost.yml");
+            } catch (IOException e) {
+                MessageUtils.logError("创建示例配置文件失败: " + e.getMessage());
+            }
+        }
     }
 
     /**
