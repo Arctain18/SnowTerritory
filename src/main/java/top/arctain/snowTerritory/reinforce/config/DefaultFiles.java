@@ -141,14 +141,16 @@ public final class DefaultFiles {
                 enhance-charm-expired: "&c&o强化符失效 (最高强化等级: +{maxLevel})"
                 # 强化符无效消息
                 enhance-charm-invalid: "&c&o强化符无效 (类型不匹配或概率解析失败)"
-                # 消耗资源标题
-                cost-title: "&7消耗资源:"
+              # 消耗资源标题（本次升级）
+              cost-title: "&7消耗资源:"
                 # 金币显示 (占位符: {amount}, {color} - 绿色&a或红色&c)
                 cost-gold: "&7金币: {color}{amount}"
                 # 点券显示 (占位符: {amount}, {color} - 绿色&a或红色&c)
                 cost-points: "&7点券: {color}{amount}"
                 # 材料显示 (占位符: {current}, {required}, {color} - 绿色&a或红色&c)
                 cost-materials: "&7材料: {color}{current}&7/{required}"
+              # 下一级升级预估消耗标题（只显示金币和点券）
+              next-cost-title: "&7下一级升级预估消耗:"
             
               # 玩家信息显示配置
               player-info:

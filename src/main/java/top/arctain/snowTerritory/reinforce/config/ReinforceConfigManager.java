@@ -71,6 +71,7 @@ public class ReinforceConfigManager {
     private String confirmButtonLoreCostGold;
     private String confirmButtonLoreCostPoints;
     private String confirmButtonLoreCostMaterials;
+    private String confirmButtonLoreNextCostTitle;
     
     // 玩家信息显示配置
     private boolean playerInfoEnabled;
@@ -158,6 +159,7 @@ public class ReinforceConfigManager {
         confirmButtonLoreCostGold = config.getString("gui.confirm-button-lore.cost-gold", "&7金币: {color}{amount}");
         confirmButtonLoreCostPoints = config.getString("gui.confirm-button-lore.cost-points", "&7点券: {color}{amount}");
         confirmButtonLoreCostMaterials = config.getString("gui.confirm-button-lore.cost-materials", "&7材料: {color}{current}&7/{required}");
+        confirmButtonLoreNextCostTitle = config.getString("gui.confirm-button-lore.next-cost-title", "&7下一级升级预估消耗:");
 
         // 加载玩家信息显示配置
         ConfigurationSection playerInfoSection = config.getConfigurationSection("gui.player-info");

@@ -61,126 +61,48 @@ public class ConfirmButtonLoreService {
         if (weapon != null && ReinforceUtils.isReinforceable(weapon)) {
             int currentLevel = ReinforceUtils.getCurrentLevel(weapon);
             int nextLevel = currentLevel + 1;
+            int nextNextLevel = nextLevel + 1;
             
-            // 获取物品ID
             String itemId = MMOItems.getID(weapon);
 
-            // 验证保护符
             CharmService.CharmInfo protectCharmInfo = charmService.evaluateProtectCharm(protectCharm, nextLevel);
-
-            // 验证强化符
             CharmService.CharmInfo enhanceCharmInfo = charmService.evaluateEnhanceCharm(enhanceCharm, nextLevel);
 
-            // 计算成功率
-            double baseSuccessRate = config.getSuccessRateForLevel(nextLevel);
-            if (enhanceCharmInfo.valid) {
-                baseSuccessRate += enhanceCharmInfo.bonus / 100.0; // 强化符增加概率（百分比转小数）
-            }
-            double successRate = Math.min(1.0, baseSuccessRate); // 确保不超过100%
-
-            // 计算失败率
-            double failDegradeChance = config.getReinforceFailDegradeChance();
-            if (protectCharmInfo.valid) {
-                failDegradeChance = 0.0; // 保护符：失败不降级
-            }
+            double successRate = calculateSuccessRate(nextLevel, enhanceCharmInfo);
+            double failDegradeChance = calculateFailDegradeChance(protectCharmInfo);
 
             lore.add(MessageUtils.colorize(config.getConfirmButtonLoreSeparator()));
 
-            // 当前等级
             String currentLevelText = config.getConfirmButtonLoreCurrentLevel()
                     .replace("{currentLevel}", String.valueOf(currentLevel))
                     .replace("{nextLevel}", String.valueOf(nextLevel));
             lore.add(MessageUtils.colorize(currentLevelText));
 
-            // 成功率（包含强化符加成）
-            String bonusText = "";
-            if (enhanceCharmInfo.valid) {
-                bonusText = "&7(&a+" + enhanceCharmInfo.bonus + "%&7)";
-            }
+            String bonusText = getBonusText(enhanceCharmInfo);
             String successRateText = config.getConfirmButtonLoreSuccessRate()
                     .replace("{successRate}", String.format("%.1f", successRate * 100))
                     .replace("{bonus}", bonusText);
             lore.add(MessageUtils.colorize(successRateText));
 
-            // 失败降级概率（包含保护符保护）
-            String protectText = "";
-            if (protectCharmInfo.valid) {
-                double originalFailDegradeChance = config.getReinforceFailDegradeChance();
-                if (originalFailDegradeChance > 0) {
-                    protectText = "&7(&c-" + String.format("%.1f", originalFailDegradeChance * 100) + "%&7)";
-                }
-            }
+            String protectText = getProtectText(protectCharmInfo);
             String failDegradeText = config.getConfirmButtonLoreFailDegradeChance()
                     .replace("{chance}", String.format("%.1f", failDegradeChance * 100))
                     .replace("{protect}", protectText);
             lore.add(MessageUtils.colorize(failDegradeText));
 
-            // 如果有保护符但无效，显示失效信息
             if (protectCharm != null && !protectCharmInfo.valid) {
-                if (protectCharmInfo.expired) {
-                    String expiredText = config.getConfirmButtonLoreProtectCharmExpired()
-                            .replace("{maxLevel}", String.valueOf(protectCharmInfo.maxLevel));
-                    lore.add(MessageUtils.colorize(expiredText));
-                } else {
-                    lore.add(MessageUtils.colorize(config.getConfirmButtonLoreProtectCharmInvalid()));
-                }
+                invalidProtectCharm(lore, protectCharmInfo);
             }
 
-            // 如果有强化符但无效，显示失效信息
             if (enhanceCharm != null && !enhanceCharmInfo.valid) {
-                if (enhanceCharmInfo.expired) {
-                    String expiredText = config.getConfirmButtonLoreEnhanceCharmExpired()
-                            .replace("{maxLevel}", String.valueOf(enhanceCharmInfo.maxLevel));
-                    lore.add(MessageUtils.colorize(expiredText));
-                } else {
-                    lore.add(MessageUtils.colorize(config.getConfirmButtonLoreEnhanceCharmInvalid()));
-                }
+                invalidEnhanceCharm(lore, enhanceCharmInfo);
             }
 
-            // 显示消耗资源（使用新的消耗计算逻辑）
             List<String> costLines = new ArrayList<>();
             
-            // 计算金币消耗
-            if (itemId != null && costCalculationService.hasGoldCost(itemId)) {
-                double goldCost = costCalculationService.calculateGoldCost(player, itemId, nextLevel);
-                if (goldCost > 0) {
-                    double balance = economyService.getBalance(player);
-                    String color = balance >= goldCost ? "&a" : "&c";
-                    String goldText = config.getConfirmButtonLoreCostGold()
-                            .replace("{color}", color)
-                            .replace("{amount}", MessageUtils.formatNumber((long) goldCost));
-                    costLines.add(MessageUtils.colorize(goldText));
-                }
-            } else if (economyService.isEnabled() && config.getCostVaultGold() > 0) {
-                // 回退到全局配置
-                double balance = economyService.getBalance(player);
-                String color = balance >= config.getCostVaultGold() ? "&a" : "&c";
-                String goldText = config.getConfirmButtonLoreCostGold()
-                        .replace("{color}", color)
-                        .replace("{amount}", MessageUtils.formatNumber(config.getCostVaultGold()));
-                costLines.add(MessageUtils.colorize(goldText));
-            }
+            calculateGoldCost(player, nextLevel, itemId, costLines);
+            calculatePlayerPointsCount(player, nextLevel, itemId, costLines);
             
-            // 计算点券消耗
-            if (itemId != null && costCalculationService.hasPointsCost(itemId)) {
-                int pointsCost = costCalculationService.calculatePointsCost(player, itemId, nextLevel);
-                if (pointsCost > 0) {
-                    int points = playerPointsService.getPoints(player.getUniqueId());
-                    String color = points >= pointsCost ? "&a" : "&c";
-                    String pointsText = config.getConfirmButtonLoreCostPoints()
-                            .replace("{color}", color)
-                            .replace("{amount}", MessageUtils.formatNumber(pointsCost));
-                    costLines.add(MessageUtils.colorize(pointsText));
-                }
-            } else if (playerPointsService.isEnabled() && config.getCostPlayerPoints() > 0) {
-                // 回退到全局配置
-                int points = playerPointsService.getPoints(player.getUniqueId());
-                String color = points >= config.getCostPlayerPoints() ? "&a" : "&c";
-                String pointsText = config.getConfirmButtonLoreCostPoints()
-                        .replace("{color}", color)
-                        .replace("{amount}", MessageUtils.formatNumber(config.getCostPlayerPoints()));
-                costLines.add(MessageUtils.colorize(pointsText));
-            }
             if (config.getCostMaterials() > 0) {
                 int materialCount = 0;
                 for (int i = 0; i < 6; i++) {
@@ -200,13 +122,151 @@ public class ConfirmButtonLoreService {
             if (!costLines.isEmpty()) {
                 lore.add(""); // 空行分隔
                 lore.add(MessageUtils.colorize(config.getConfirmButtonLoreSeparator()));
-                lore.add(MessageUtils.colorize(config.getConfirmButtonLoreCostTitle()));
+                lore.add(MessageUtils.colorize(config.getConfirmButtonLoreCostTitle())); // 本次升级消耗
                 lore.addAll(costLines);
+            }
+
+            // 预估下一级（再往上一档）升级所需的货币消耗（仅展示金币和点券）
+            List<String> nextCostLines = new ArrayList<>();
+
+            if (itemId != null) {
+                // 金币预估消耗
+                if (costCalculationService.hasGoldCost(itemId)) {
+                    double nextGoldCost = costCalculationService.calculateGoldCost(player, itemId, nextNextLevel);
+                    if (nextGoldCost > 0) {
+                        double balance = economyService.getBalance(player);
+                        String color = balance >= nextGoldCost ? "&a" : "&c";
+                        String goldText = config.getConfirmButtonLoreCostGold()
+                                .replace("{color}", color)
+                                .replace("{amount}", MessageUtils.formatNumber((long) nextGoldCost));
+                        nextCostLines.add(MessageUtils.colorize(goldText));
+                    }
+                }
+
+                // 点券预估消耗
+                if (costCalculationService.hasPointsCost(itemId)) {
+                    int nextPointsCost = costCalculationService.calculatePointsCost(player, itemId, nextNextLevel);
+                    if (nextPointsCost > 0) {
+                        int points = playerPointsService.getPoints(player.getUniqueId());
+                        String color = points >= nextPointsCost ? "&a" : "&c";
+                        String pointsText = config.getConfirmButtonLoreCostPoints()
+                                .replace("{color}", color)
+                                .replace("{amount}", MessageUtils.formatNumber(nextPointsCost));
+                        nextCostLines.add(MessageUtils.colorize(pointsText));
+                    }
+                }
+            }
+
+            if (!nextCostLines.isEmpty()) {
+                lore.add(""); // 空行分隔
+                lore.add(MessageUtils.colorize(config.getConfirmButtonLoreSeparator()));
+                lore.add(MessageUtils.colorize(config.getConfirmButtonLoreNextCostTitle())); // 下一级升级预估消耗
+                lore.addAll(nextCostLines);
             }
         }
 
         confirmMeta.setLore(lore);
         confirmButton.setItemMeta(confirmMeta);
         gui.setItem(config.getSlotConfirm(), confirmButton);
+    }
+
+    private void calculatePlayerPointsCount(Player player, int nextLevel, String itemId, List<String> costLines) {
+        if (itemId != null && costCalculationService.hasPointsCost(itemId)) {
+            int pointsCost = costCalculationService.calculatePointsCost(player, itemId, nextLevel);
+            if (pointsCost > 0) {
+                int points = playerPointsService.getPoints(player.getUniqueId());
+                String color = points >= pointsCost ? "&a" : "&c";
+                String pointsText = config.getConfirmButtonLoreCostPoints()
+                        .replace("{color}", color)
+                        .replace("{amount}", MessageUtils.formatNumber(pointsCost));
+                costLines.add(MessageUtils.colorize(pointsText));
+            }
+        } else if (playerPointsService.isEnabled() && config.getCostPlayerPoints() > 0) {
+            // 回退到全局配置
+            int points = playerPointsService.getPoints(player.getUniqueId());
+            String color = points >= config.getCostPlayerPoints() ? "&a" : "&c";
+            String pointsText = config.getConfirmButtonLoreCostPoints()
+                    .replace("{color}", color)
+                    .replace("{amount}", MessageUtils.formatNumber(config.getCostPlayerPoints()));
+            costLines.add(MessageUtils.colorize(pointsText));
+        }
+    }
+
+    private void calculateGoldCost(Player player, int nextLevel, String itemId, List<String> costLines) {
+        if (itemId != null && costCalculationService.hasGoldCost(itemId)) {
+            double goldCost = costCalculationService.calculateGoldCost(player, itemId, nextLevel);
+            if (goldCost > 0) {
+                double balance = economyService.getBalance(player);
+                String color = balance >= goldCost ? "&a" : "&c";
+                String goldText = config.getConfirmButtonLoreCostGold()
+                        .replace("{color}", color)
+                        .replace("{amount}", MessageUtils.formatNumber((long) goldCost));
+                costLines.add(MessageUtils.colorize(goldText));
+            }
+        } else if (economyService.isEnabled() && config.getCostVaultGold() > 0) {
+            // 回退到全局配置
+            double balance = economyService.getBalance(player);
+            String color = balance >= config.getCostVaultGold() ? "&a" : "&c";
+            String goldText = config.getConfirmButtonLoreCostGold()
+                    .replace("{color}", color)
+                    .replace("{amount}", MessageUtils.formatNumber(config.getCostVaultGold()));
+            costLines.add(MessageUtils.colorize(goldText));
+        }
+    }
+
+    private void invalidEnhanceCharm(List<String> lore, CharmService.CharmInfo enhanceCharmInfo) {
+        if (enhanceCharmInfo.expired) {
+            String expiredText = config.getConfirmButtonLoreEnhanceCharmExpired()
+                    .replace("{maxLevel}", String.valueOf(enhanceCharmInfo.maxLevel));
+            lore.add(MessageUtils.colorize(expiredText));
+        } else {
+            lore.add(MessageUtils.colorize(config.getConfirmButtonLoreEnhanceCharmInvalid()));
+        }
+    }
+
+    private void invalidProtectCharm(List<String> lore, CharmService.CharmInfo protectCharmInfo) {
+        if (protectCharmInfo.expired) {
+            String expiredText = config.getConfirmButtonLoreProtectCharmExpired()
+                    .replace("{maxLevel}", String.valueOf(protectCharmInfo.maxLevel));
+            lore.add(MessageUtils.colorize(expiredText));
+        } else {
+            lore.add(MessageUtils.colorize(config.getConfirmButtonLoreProtectCharmInvalid()));
+        }
+    }
+
+    private String getProtectText(CharmService.CharmInfo protectCharmInfo) {
+        String protectText = "";
+        if (protectCharmInfo.valid) {
+            double originalFailDegradeChance = config.getReinforceFailDegradeChance();
+            if (originalFailDegradeChance > 0) {
+                protectText = "&7(&c-" + String.format("%.1f", originalFailDegradeChance * 100) + "%&7)";
+            }
+        }
+        return protectText;
+    }
+
+    private String getBonusText(CharmService.CharmInfo enhanceCharmInfo) {
+        String bonusText = "";
+        if (enhanceCharmInfo.valid) {
+            bonusText = "&7(&a+" + enhanceCharmInfo.bonus + "%&7)";
+        }
+        return bonusText;
+    }
+
+    private double calculateFailDegradeChance(CharmService.CharmInfo protectCharmInfo) {
+        double failDegradeChance = config.getReinforceFailDegradeChance();
+        if (protectCharmInfo.valid) {
+            failDegradeChance = 0.0; // 保护符：失败不降级
+        }
+        return failDegradeChance;
+    }
+
+    private double calculateSuccessRate(int nextLevel, CharmService.CharmInfo enhanceCharmInfo) {
+        double baseSuccessRate = config.getSuccessRateForLevel(nextLevel);
+        if (enhanceCharmInfo.valid) {
+            baseSuccessRate += enhanceCharmInfo.bonus / 100.0; // 强化符增加概率（百分比转小数）
+        }
+        double successRate = Math.min(1.0, baseSuccessRate); // 确保不超过100%
+        return successRate;
     }
 }
