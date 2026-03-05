@@ -133,8 +133,8 @@ public class MythicDropListener implements Listener {
         }
         int perItemMax = service.resolvePerItemMax(player, key);
         service.add(player.getUniqueId(), key, itemStack.getAmount(), perItemMax, slotLimit);
-        MessageUtils.sendConfigMessage(player, "enderstorage.loot-gained", 
-                "&a+" + itemStack.getAmount() + "x " + key + " 已存入战利品仓库", 
+        MessageUtils.sendConfigMessage(player, "enderstorage.loot-gained",
+                "&a+{amount}x {item} 已存入战利品仓库",
                 "amount", String.valueOf(itemStack.getAmount()), "item", key);
         return configManager.getMainConfig().getBoolean("features.cancel-entity-drop", true);
     }

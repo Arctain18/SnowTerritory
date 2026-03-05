@@ -43,7 +43,7 @@ public class QuestModule {
         questService.initialize();
         
         this.questCommand = new QuestCommand(plugin, configManager, questService, databaseDao);
-        this.questListener = new QuestListener(plugin, questService, configManager, null);
+        this.questListener = new QuestListener(plugin, questService, configManager);
 
         registerListeners();
 
@@ -62,7 +62,7 @@ public class QuestModule {
         questService.reload();
         
         this.questCommand = new QuestCommand(plugin, configManager, questService, databaseDao);
-        this.questListener = new QuestListener(plugin, questService, configManager, null);
+        this.questListener = new QuestListener(plugin, questService, configManager);
     }
 
     private void registerListeners() {

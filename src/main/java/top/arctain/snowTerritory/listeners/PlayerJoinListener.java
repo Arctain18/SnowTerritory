@@ -90,14 +90,12 @@ public class PlayerJoinListener implements Listener {
                 }
             }
         } catch (Exception e) {
-            // 忽略错误
+            top.arctain.snowTerritory.utils.MessageUtils.logDebug("获取构建日期失败: " + e.getMessage());
         }
         return "未知";
     }
 
-    /**
-     * 获取jar文件大小（按KB计算，带千位分隔符）
-     */
+    /** 获取jar文件大小（按KB计算，带千位分隔符） */
     private String getJarSize() {
         try {
             // 通过类文件路径获取jar文件
@@ -112,14 +110,11 @@ public class PlayerJoinListener implements Listener {
                 }
             }
         } catch (Exception e) {
-            // 忽略错误
+            top.arctain.snowTerritory.utils.MessageUtils.logDebug("获取jar大小失败: " + e.getMessage());
         }
         return "未知";
     }
 
-    /**
-     * 格式化数字，添加千位分隔符
-     */
     private String formatNumber(long number) {
         return String.format("%,d", number);
     }

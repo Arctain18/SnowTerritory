@@ -3,21 +3,17 @@ package top.arctain.snowTerritory.enderstorage.config;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import top.arctain.snowTerritory.Main;
+import top.arctain.snowTerritory.utils.ConfigUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * 管理 ender-storage 配置的加载与默认文件生成。
- * 所有配置放在 plugins/SnowTerritory/ender-storage/ 下。
- */
+/** 管理 enderstorage 配置的加载与默认文件生成。配置路径: plugins/SnowTerritory/enderstorage/ */
 public class EnderStorageConfigManager {
 
     private final File baseDir;
@@ -27,7 +23,7 @@ public class EnderStorageConfigManager {
     private ProgressionConfig progressionConfig;
 
     public EnderStorageConfigManager(Main plugin) {
-        this.baseDir = new File(plugin.getDataFolder(), "ender-storage");
+        this.baseDir = new File(plugin.getDataFolder(), "enderstorage");
     }
 
     public void loadAll() {
@@ -40,26 +36,13 @@ public class EnderStorageConfigManager {
 
     private void ensureDefaults() {
         if (!baseDir.exists() && !baseDir.mkdirs()) {
-            MessageUtils.logWarning("创建 ender-storage 目录失败: " + baseDir.getAbsolutePath());
+            MessageUtils.logWarning("创建 enderstorage 目录失败: " + baseDir.getAbsolutePath());
         }
-        copyIfMissing(new File(baseDir, "config.yml"), DefaultFiles.DEFAULT_CONFIG);
-        copyIfMissing(new File(baseDir, "gui.yml"), DefaultFiles.DEFAULT_GUI);
-        copyIfMissing(new File(baseDir, "progression/size.yml"), DefaultFiles.DEFAULT_SIZE);
-        copyIfMissing(new File(baseDir, "progression/stack.yml"), DefaultFiles.DEFAULT_STACK);
-        copyIfMissing(new File(baseDir, "messages/zh_CN.yml"), DefaultFiles.DEFAULT_MESSAGES_ZH);
-    }
-
-    private void copyIfMissing(File target, String content) {
-        try {
-            if (!target.exists()) {
-                if (target.getParentFile() != null) {
-                    target.getParentFile().mkdirs();
-                }
-                Files.writeString(target.toPath(), content);
-            }
-        } catch (IOException e) {
-            MessageUtils.logError("写入默认配置失败: " + target.getAbsolutePath() + " - " + e.getMessage());
-        }
+        ConfigUtils.copyIfMissing(new File(baseDir, "config.yml"), DefaultFiles.DEFAULT_CONFIG);
+        ConfigUtils.copyIfMissing(new File(baseDir, "gui.yml"), DefaultFiles.DEFAULT_GUI);
+        ConfigUtils.copyIfMissing(new File(baseDir, "progression/size.yml"), DefaultFiles.DEFAULT_SIZE);
+        ConfigUtils.copyIfMissing(new File(baseDir, "progression/stack.yml"), DefaultFiles.DEFAULT_STACK);
+        ConfigUtils.copyIfMissing(new File(baseDir, "messages/zh_CN.yml"), DefaultFiles.DEFAULT_MESSAGES_ZH);
     }
 
     private void loadMainConfig() {
@@ -111,11 +94,7 @@ public class EnderStorageConfigManager {
 
     // ===== GUI 辅助方法 =====
 
-    /**
-     * 获取默认物品 lore 模板
-     * 优先使用 gui.yml 中的 gui.default-lore；如果未配置则使用内置默认值。
-     * 支持占位符: %amount% (当前数量), %max% (最大数量)
-     */
+    /** 获取默认物品 lore 模板，占位符: {amount} {max} */
     public List<String> getDefaultItemLoreTemplate() {
         List<String> configured;
         if (guiConfig == null) {
@@ -124,9 +103,8 @@ public class EnderStorageConfigManager {
             configured = guiConfig.getStringList("gui.default-lore");
         }
         if (configured == null || configured.isEmpty()) {
-            // 内置默认模板，与旧版本的硬编码提示保持一致
             return java.util.Arrays.asList(
-                    "&7数量: &e%amount% / %max%",
+                    "&7数量: &e{amount} / {max}",
                     "&8| &7左键 ▸ 存入 8",
                     "&8| &7SHIFT+左键 ▸ 存入 64",
                     "&8| &7右键 ▸ 取出 8",

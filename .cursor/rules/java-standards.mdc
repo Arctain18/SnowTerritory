@@ -1,0 +1,37 @@
+---
+description: SnowTerritory Java 编码规范
+globs: **/*.java
+alwaysApply: false
+---
+
+# Java 编码规范
+
+遵循 RULE.md，仅保留必要注释。
+
+## 命名
+
+- 类/接口：PascalCase（`QuestService`，非 `questService`）
+- 工具类：`*Utils` 后缀，PascalCase（`MmoItemsUtils`，非 `mmoitemsUtils`）
+- 常量：UPPER_SNAKE_CASE
+
+## 注释
+
+- 类：一行说明职责
+- 方法：仅公共 API 或复杂逻辑，说明「做什么」非「怎么做」
+- 禁止逐行翻译、无信息量注释
+
+## 结构
+
+- 构造函数 → 公共方法 → 私有方法
+- 逻辑块间 1 空行
+
+## 异常与空值
+
+- 不吞异常，catch 中至少 log 或 rethrow
+- 对外 API 入参做 null 校验
+
+## 禁止
+
+- 禁止 `System.out.println`，用 `MessageUtils.logInfo()`
+- 禁止硬编码魔法数字，提取为常量或配置
+- 禁止在监听器/命令中写长逻辑，委托给 Service

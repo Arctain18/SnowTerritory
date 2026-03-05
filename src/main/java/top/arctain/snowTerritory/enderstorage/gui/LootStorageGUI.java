@@ -15,7 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.enderstorage.config.EnderStorageConfigManager;
-import top.arctain.snowTerritory.enderstorage.config.MessageProvider;
+import top.arctain.snowTerritory.config.ModuleMessageProvider;
 import top.arctain.snowTerritory.enderstorage.config.WhitelistEntry;
 import top.arctain.snowTerritory.enderstorage.service.LootStorageService;
 import top.arctain.snowTerritory.utils.MessageUtils;
@@ -30,14 +30,14 @@ public class LootStorageGUI {
     public static final NamespacedKey KEY_ITEM = new NamespacedKey("snowterritory", "enderstorage_item");
 
     private final LootStorageService service;
-    private final MessageProvider messages;
+    private final ModuleMessageProvider messages;
     private final EnderStorageConfigManager configManager;
 
     public LootStorageGUI(Main plugin, EnderStorageConfigManager configManager, LootStorageService service) {
         this.service = service;
         this.configManager = configManager;
         String lang = configManager.getMainConfig().getString("features.default-language", "zh_CN");
-        this.messages = new MessageProvider(configManager.getMessagePacks(), lang);
+        this.messages = new ModuleMessageProvider(configManager.getMessagePacks(), lang);
     }
 
     public void open(Player player, int page) {
@@ -61,8 +61,9 @@ public class LootStorageGUI {
         int end = Math.min(orderedKeys.size(), start + perPage);
 
         int size = configManager.getGuiSize();
+        String title = configManager.getGuiTitle().replace("{page}", String.valueOf(currentPage));
         Inventory inv = Bukkit.createInventory(new LootHolder(player.getUniqueId(), currentPage), size,
-                MessageUtils.colorize(configManager.getGuiTitle()));
+                MessageUtils.colorize(title));
 
         // 1. 放置翻页按钮
         int prevSlot = configManager.getPreviousPageSlot();
@@ -134,8 +135,8 @@ public class LootStorageGUI {
             if (entry.getLore() != null && !entry.getLore().isEmpty()) {
                 for (String line : entry.getLore()) {
                     String processed = line
-                            .replace("%amount%", String.valueOf(amount))
-                            .replace("%max%", String.valueOf(entry.getDefaultMax()));
+                            .replace("{amount}", String.valueOf(amount))
+                            .replace("{max}", String.valueOf(entry.getDefaultMax()));
                     lore.add(MessageUtils.colorize(processed));
                 }
             }
@@ -143,8 +144,8 @@ public class LootStorageGUI {
             // 2. 然后添加默认 lore 模板（显示在自定义 lore 下方）
             for (String line : configManager.getDefaultItemLoreTemplate()) {
                 String processed = line
-                        .replace("%amount%", String.valueOf(amount))
-                        .replace("%max%", String.valueOf(entry.getDefaultMax()));
+                        .replace("{amount}", String.valueOf(amount))
+                        .replace("{max}", String.valueOf(entry.getDefaultMax()));
                 lore.add(MessageUtils.colorize(processed));
             }
             

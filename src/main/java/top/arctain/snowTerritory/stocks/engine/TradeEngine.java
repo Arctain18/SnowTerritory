@@ -2,6 +2,7 @@ package top.arctain.snowTerritory.stocks.engine;
 
 import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.stocks.model.*;
+import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.stocks.price.PriceService;
 import top.arctain.snowTerritory.stocks.storage.MemoryStockStorage;
 import top.arctain.snowTerritory.stocks.storage.StockStorage;
@@ -47,7 +48,7 @@ public class TradeEngine {
                     Thread.currentThread().interrupt();
                     break;
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    MessageUtils.logError("交易引擎执行任务异常: " + e.getMessage());
                 }
             }
         }, "StockTradeEngine");

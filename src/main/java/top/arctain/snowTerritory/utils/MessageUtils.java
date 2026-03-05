@@ -48,7 +48,7 @@ public class MessageUtils {
             if (key.startsWith("reinforce.")) {
                 prefixKey = "prefix.reinforce";
                 defaultPrefix = "&{#4a95ff}ST &{#C9AE59}Reinforce &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";
-            } else if (key.startsWith("enderstorage.") || key.startsWith("ender-storage.")) {
+            } else if (key.startsWith("enderstorage.")) {
                 prefixKey = "prefix.enderstorage";
                 defaultPrefix = "&{#4a95ff}ST &{#3ab835}Ender&{#6dc97f}Storage &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";
             } else if (key.startsWith("quest.")) {

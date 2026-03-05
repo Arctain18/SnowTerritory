@@ -17,7 +17,7 @@
 3. 检查控制台是否显示 "SnowTerritory 插件已启用"
 4. 确认配置文件已生成：
    - `plugins/SnowTerritory/config.yml` - Reinforce 模块配置
-   - `plugins/SnowTerritory/ender-storage/` - EnderStorage 模块配置
+   - `plugins/SnowTerritory/enderstorage/` - EnderStorage 模块配置
 
 ## 功能测试清单
 

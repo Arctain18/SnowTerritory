@@ -39,7 +39,7 @@ public class EnderStorageModule {
         registerCommand();
         registerListeners();
 
-        MessageUtils.logSuccess("EnderStorage 模块已启用，配置目录: plugins/SnowTerritory/ender-storage/");
+        MessageUtils.logSuccess("EnderStorage 模块已启用，配置目录: plugins/SnowTerritory/enderstorage/");
     }
 
     public void disable() {

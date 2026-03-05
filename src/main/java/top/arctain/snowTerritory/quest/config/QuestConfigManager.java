@@ -3,11 +3,10 @@ package top.arctain.snowTerritory.quest.config;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import top.arctain.snowTerritory.Main;
+import top.arctain.snowTerritory.utils.ConfigUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,28 +47,15 @@ public class QuestConfigManager {
         if (!baseDir.exists() && !baseDir.mkdirs()) {
             MessageUtils.logWarning("创建 quest 目录失败: " + baseDir.getAbsolutePath());
         }
-        copyIfMissing(new File(baseDir, "config.yml"), DefaultFiles.DEFAULT_CONFIG);
-        copyIfMissing(new File(baseDir, "messages/zh_CN.yml"), DefaultFiles.DEFAULT_MESSAGES_ZH);
-        copyIfMissing(new File(baseDir, "rewards/default.yml"), DefaultFiles.DEFAULT_REWARDS_DEFAULT);
-        copyIfMissing(new File(baseDir, "rewards/level.yml"), DefaultFiles.DEFAULT_REWARDS_LEVEL);
-        copyIfMissing(new File(baseDir, "bonus/time-bonus.yml"), DefaultFiles.DEFAULT_BONUS_TIME_BONUS);
-        copyIfMissing(new File(baseDir, "materials/whitelist.yml"), DefaultFiles.DEFAULT_MATERIALS_WHITELIST);
-        copyIfMissing(new File(baseDir, "bounty/config.yml"), DefaultFiles.DEFAULT_BOUNTY_CONFIG);
-        copyIfMissing(new File(baseDir, "tasks/material.yml"), DefaultFiles.DEFAULT_TASKS_MATERIAL);
-        copyIfMissing(new File(baseDir, "tasks/kill.yml"), DefaultFiles.DEFAULT_TASKS_KILL);
-    }
-
-    private void copyIfMissing(File target, String content) {
-        try {
-            if (!target.exists()) {
-                if (target.getParentFile() != null) {
-                    target.getParentFile().mkdirs();
-                }
-                Files.writeString(target.toPath(), content);
-            }
-        } catch (IOException e) {
-            MessageUtils.logError("写入默认配置失败: " + target.getAbsolutePath() + " - " + e.getMessage());
-        }
+        ConfigUtils.copyIfMissing(new File(baseDir, "config.yml"), DefaultFiles.DEFAULT_CONFIG);
+        ConfigUtils.copyIfMissing(new File(baseDir, "messages/zh_CN.yml"), DefaultFiles.DEFAULT_MESSAGES_ZH);
+        ConfigUtils.copyIfMissing(new File(baseDir, "rewards/default.yml"), DefaultFiles.DEFAULT_REWARDS_DEFAULT);
+        ConfigUtils.copyIfMissing(new File(baseDir, "rewards/level.yml"), DefaultFiles.DEFAULT_REWARDS_LEVEL);
+        ConfigUtils.copyIfMissing(new File(baseDir, "bonus/time-bonus.yml"), DefaultFiles.DEFAULT_BONUS_TIME_BONUS);
+        ConfigUtils.copyIfMissing(new File(baseDir, "materials/whitelist.yml"), DefaultFiles.DEFAULT_MATERIALS_WHITELIST);
+        ConfigUtils.copyIfMissing(new File(baseDir, "bounty/config.yml"), DefaultFiles.DEFAULT_BOUNTY_CONFIG);
+        ConfigUtils.copyIfMissing(new File(baseDir, "tasks/material.yml"), DefaultFiles.DEFAULT_TASKS_MATERIAL);
+        ConfigUtils.copyIfMissing(new File(baseDir, "tasks/kill.yml"), DefaultFiles.DEFAULT_TASKS_KILL);
     }
 
     private void loadMainConfig() {

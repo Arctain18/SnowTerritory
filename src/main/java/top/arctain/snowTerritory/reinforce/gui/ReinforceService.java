@@ -230,10 +230,9 @@ public class ReinforceService {
                 reinforcingPlayers.remove(playerUUID);  // 移除标记，允许下次强化
             }, 2L);  // 延迟2 tick，确保GUI已更新
         } catch (Exception e) {
-            reinforcingPlayers.remove(playerUUID);  // 移除标记
+            reinforcingPlayers.remove(playerUUID);
             MessageUtils.sendError(player, "reinforce.error", "&c✗ &f强化过程中发生错误: &e{error}", "error", e.getMessage());
             MessageUtils.logError("强化过程中发生错误: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 }

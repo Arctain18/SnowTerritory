@@ -54,7 +54,6 @@ public class ItemIdCommand implements CommandExecutor {
         } catch (Exception e) {
             MessageUtils.sendError(player, "item.info-error", "&c✗ &f获取物品信息时发生错误: &e{error}", "error", e.getMessage());
             MessageUtils.logError("获取物品信息时发生错误: " + e.getMessage());
-            e.printStackTrace();
         }
 
         return true;

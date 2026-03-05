@@ -10,6 +10,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.util.List;
 import java.util.Random;
@@ -185,9 +186,7 @@ public class ReinforceUtils {
                 }
             }
         } catch (Exception e) {
-            // 如果出现异常，记录错误但不中断程序
-            System.err.println("修改MMOItems属性时发生错误: " + e.getMessage());
-            e.printStackTrace();
+            MessageUtils.logError("修改MMOItems属性时发生错误: " + e.getMessage());
         }
     }
 
@@ -204,8 +203,7 @@ public class ReinforceUtils {
             // 这是MMOItems API推荐的方式
             return mmoItem.newBuilder().build();
         } catch (Exception e) {
-            System.err.println("获取更新后的ItemStack时发生错误: " + e.getMessage());
-            e.printStackTrace();
+            MessageUtils.logError("获取更新后的ItemStack时发生错误: " + e.getMessage());
             return null;
         }
     }

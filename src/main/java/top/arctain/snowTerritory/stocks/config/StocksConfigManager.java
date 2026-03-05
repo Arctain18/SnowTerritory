@@ -4,6 +4,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.stocks.model.Symbol;
+import top.arctain.snowTerritory.utils.ConfigUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.io.File;
@@ -34,14 +35,11 @@ public class StocksConfigManager {
         if (!baseDir.exists() && !baseDir.mkdirs()) {
             MessageUtils.logWarning("创建 stocks 目录失败: " + baseDir.getAbsolutePath());
         }
+        ConfigUtils.copyIfMissing(new File(baseDir, "config.yml"), DefaultFiles.DEFAULT_CONFIG);
     }
-    
+
     private void loadMainConfig() {
-        File configFile = new File(baseDir, "config.yml");
-        if (!configFile.exists()) {
-            DefaultFiles.createDefaultConfig(configFile);
-        }
-        mainConfig = YamlConfiguration.loadConfiguration(configFile);
+        mainConfig = YamlConfiguration.loadConfiguration(new File(baseDir, "config.yml"));
     }
     
     private void loadSymbols() {

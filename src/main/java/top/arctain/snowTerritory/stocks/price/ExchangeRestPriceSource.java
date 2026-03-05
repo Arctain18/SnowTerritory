@@ -304,8 +304,7 @@ public class ExchangeRestPriceSource implements PriceService {
                 lastErrorTime.put("_dns", dnsNow);
             }
         } catch (javax.net.ssl.SSLException e) {
-            MessageUtils.logWarning("SSL/TLS 连接错误:");
-            e.printStackTrace();
+            MessageUtils.logWarning("SSL/TLS 连接错误: " + e.getMessage());
         } catch (Exception e) {
             // 其他错误，输出详细信息用于调试
             long exceptionNow = System.currentTimeMillis();

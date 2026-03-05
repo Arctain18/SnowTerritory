@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.enderstorage.config.EnderStorageConfigManager;
-import top.arctain.snowTerritory.enderstorage.config.MessageProvider;
+import top.arctain.snowTerritory.config.ModuleMessageProvider;
 import top.arctain.snowTerritory.enderstorage.service.LootStorageService;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
@@ -18,7 +18,7 @@ public class EnderStorageCommand implements CommandExecutor, TabCompleter {
 
     private final org.bukkit.plugin.Plugin plugin;
     private final LootStorageService service;
-    private final MessageProvider messages;
+    private final ModuleMessageProvider messages;
     private final top.arctain.snowTerritory.enderstorage.gui.LootStorageGUI gui;
 
     public EnderStorageCommand(org.bukkit.plugin.Plugin plugin, EnderStorageConfigManager configManager, LootStorageService service, top.arctain.snowTerritory.enderstorage.gui.LootStorageGUI gui) {
@@ -26,7 +26,7 @@ public class EnderStorageCommand implements CommandExecutor, TabCompleter {
         this.service = service;
         this.gui = gui;
         String lang = configManager.getMainConfig().getString("features.default-language", "zh_CN");
-        this.messages = new MessageProvider(configManager.getMessagePacks(), lang);
+        this.messages = new ModuleMessageProvider(configManager.getMessagePacks(), lang);
     }
 
     @Override

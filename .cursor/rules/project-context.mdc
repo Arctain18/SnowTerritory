@@ -1,0 +1,12 @@
+---
+description: SnowTerritory 项目上下文
+alwaysApply: true
+---
+
+# SnowTerritory 项目上下文
+
+- **类型**：Minecraft Paper 1.21 插件
+- **包名**：`top.arctain.snowTerritory`
+- **依赖**：MMOItems（必选）、Vault/PlayerPoints/MythicMobs（可选）
+- **模块**：reinforce（强化）、quest（任务）、enderstorage（末影存储）、stocks（股票）
+- **规范**：遵循 `RULE.md`，仅保留必要注释

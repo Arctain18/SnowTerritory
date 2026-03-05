@@ -41,7 +41,7 @@
 3. 启动服务器，插件会自动生成配置文件
 4. 根据需要修改配置文件：
    - `plugins/SnowTerritory/config.yml` - Reinforce 模块配置
-   - `plugins/SnowTerritory/ender-storage/` - EnderStorage 模块配置
+   - `plugins/SnowTerritory/enderstorage/` - EnderStorage 模块配置
 
 ## 使用方法
 
@@ -125,7 +125,7 @@ reinforce:
 
 ### EnderStorage 模块配置
 
-配置文件位于 `plugins/SnowTerritory/ender-storage/`
+配置文件位于 `plugins/SnowTerritory/enderstorage/`
 
 - `config.yml` - 数据库、基础开关、调试、默认消息语言
 - `messages/*.yml` - 多语言文本（提示、错误、GUI 文本）

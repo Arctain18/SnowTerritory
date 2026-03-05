@@ -3,6 +3,7 @@ package top.arctain.snowTerritory.config;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import top.arctain.snowTerritory.Main;
+import top.arctain.snowTerritory.utils.ConfigUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.io.File;
@@ -10,10 +11,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 插件主配置类
- * 注意：reinforce相关配置已移至 ReinforceConfigManager
- */
+/** 插件主配置，模块配置由各模块 ConfigManager 管理。 */
 public class PluginConfig {
 
     private final Main plugin;
@@ -21,7 +19,7 @@ public class PluginConfig {
     private FileConfiguration config;
     
     // 消息配置
-    private Map<String, String> messages;  // 消息映射表
+    private Map<String, String> messages;
 
     public PluginConfig(Main plugin) {
         this.plugin = plugin;
@@ -47,21 +45,7 @@ public class PluginConfig {
     private void loadMessages() {
         messages.clear();
         if (config.getConfigurationSection("messages") != null) {
-            loadMessagesRecursive("messages", config.getConfigurationSection("messages"));
-        }
-    }
-    
-    /**
-     * 递归加载消息配置
-     */
-    private void loadMessagesRecursive(String path, org.bukkit.configuration.ConfigurationSection section) {
-        for (String key : section.getKeys(false)) {
-            String fullPath = path + "." + key;
-            if (section.isConfigurationSection(key)) {
-                loadMessagesRecursive(fullPath, section.getConfigurationSection(key));
-            } else {
-                messages.put(fullPath, section.getString(key));
-            }
+            messages.putAll(ConfigUtils.loadMessagesRecursive("messages", config.getConfigurationSection("messages")));
         }
     }
     

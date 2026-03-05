@@ -1,84 +1,66 @@
 package top.arctain.snowTerritory.utils;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * 配置工具类
- * 提供配置文件的读取和保存功能
- */
-public class ConfigUtils {
+/** 配置工具：默认文件写入、消息递归加载。 */
+public final class ConfigUtils {
 
-    /**
-     * 加载配置文件
-     */
+    private ConfigUtils() {
+    }
+
+    public static void copyIfMissing(File target, String content) {
+        try {
+            if (!target.exists()) {
+                if (target.getParentFile() != null) {
+                    target.getParentFile().mkdirs();
+                }
+                java.nio.file.Files.writeString(target.toPath(), content);
+            }
+        } catch (IOException e) {
+            MessageUtils.logError("写入默认配置失败: " + target.getAbsolutePath() + " - " + e.getMessage());
+        }
+    }
+
+    public static Map<String, String> loadMessagesRecursive(String path, ConfigurationSection section) {
+        Map<String, String> result = new HashMap<>();
+        if (section == null) return result;
+        for (String key : section.getKeys(false)) {
+            String fullPath = path + "." + key;
+            if (section.isConfigurationSection(key)) {
+                result.putAll(loadMessagesRecursive(fullPath, section.getConfigurationSection(key)));
+            } else {
+                result.put(fullPath, section.getString(key));
+            }
+        }
+        return result;
+    }
+
     public static FileConfiguration loadConfig(File file) {
         if (!file.exists()) {
             try {
-                file.getParentFile().mkdirs();
+                if (file.getParentFile() != null) {
+                    file.getParentFile().mkdirs();
+                }
                 file.createNewFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                MessageUtils.logError("创建配置文件失败: " + file.getAbsolutePath() + " - " + e.getMessage());
             }
         }
         return YamlConfiguration.loadConfiguration(file);
     }
 
-    /**
-     * 保存配置文件
-     */
     public static void saveConfig(FileConfiguration config, File file) {
         try {
             config.save(file);
         } catch (IOException e) {
-            e.printStackTrace();
+            MessageUtils.logError("保存配置失败: " + file.getAbsolutePath() + " - " + e.getMessage());
         }
-    }
-
-    /**
-     * 获取配置值，如果不存在则返回默认值
-     */
-    public static String getString(FileConfiguration config, String path, String defaultValue) {
-        if (config.contains(path)) {
-            return config.getString(path);
-        }
-        config.set(path, defaultValue);
-        return defaultValue;
-    }
-
-    /**
-     * 获取配置值，如果不存在则返回默认值
-     */
-    public static int getInt(FileConfiguration config, String path, int defaultValue) {
-        if (config.contains(path)) {
-            return config.getInt(path);
-        }
-        config.set(path, defaultValue);
-        return defaultValue;
-    }
-
-    /**
-     * 获取配置值，如果不存在则返回默认值
-     */
-    public static double getDouble(FileConfiguration config, String path, double defaultValue) {
-        if (config.contains(path)) {
-            return config.getDouble(path);
-        }
-        config.set(path, defaultValue);
-        return defaultValue;
-    }
-
-    /**
-     * 获取配置值，如果不存在则返回默认值
-     */
-    public static boolean getBoolean(FileConfiguration config, String path, boolean defaultValue) {
-        if (config.contains(path)) {
-            return config.getBoolean(path);
-        }
-        config.set(path, defaultValue);
-        return defaultValue;
     }
 }

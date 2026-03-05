@@ -8,9 +8,10 @@ import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.reinforce.service.ExpressionService;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
+import top.arctain.snowTerritory.utils.ConfigUtils;
+
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -208,23 +209,7 @@ public class ReinforceConfigManager {
         if (!baseDir.exists() && !baseDir.mkdirs()) {
             MessageUtils.logWarning("创建 reinforce 目录失败: " + baseDir.getAbsolutePath());
         }
-        copyIfMissing(configFile, DefaultFiles.DEFAULT_CONFIG);
-    }
-    
-    /**
-     * 如果文件不存在，则创建默认配置文件
-     */
-    private void copyIfMissing(File target, String content) {
-        try {
-            if (!target.exists()) {
-                if (target.getParentFile() != null) {
-                    target.getParentFile().mkdirs();
-                }
-                Files.writeString(target.toPath(), content);
-            }
-        } catch (IOException e) {
-            MessageUtils.logError("写入默认配置失败: " + target.getAbsolutePath() + " - " + e.getMessage());
-        }
+        ConfigUtils.copyIfMissing(configFile, DefaultFiles.DEFAULT_CONFIG);
     }
     
     /**
@@ -277,21 +262,7 @@ public class ReinforceConfigManager {
     private void loadMessages() {
         messages.clear();
         if (config.getConfigurationSection("messages") != null) {
-            loadMessagesRecursive("messages", config.getConfigurationSection("messages"));
-        }
-    }
-    
-    /**
-     * 递归加载消息配置
-     */
-    private void loadMessagesRecursive(String path, org.bukkit.configuration.ConfigurationSection section) {
-        for (String key : section.getKeys(false)) {
-            String fullPath = path + "." + key;
-            if (section.isConfigurationSection(key)) {
-                loadMessagesRecursive(fullPath, section.getConfigurationSection(key));
-            } else {
-                messages.put(fullPath, section.getString(key));
-            }
+            messages.putAll(ConfigUtils.loadMessagesRecursive("messages", config.getConfigurationSection("messages")));
         }
     }
     
@@ -335,8 +306,6 @@ public class ReinforceConfigManager {
         }
     }
 
-    // 内部类：自定义物品配置
-    // 获取指定等级的成功概率（如果不存在，使用默认或最低）
     public double getSuccessRateForLevel(int level) {
         return reinforceSuccessRates.getOrDefault(level, 0.5);  // 默认0.5，如果未配置
     }

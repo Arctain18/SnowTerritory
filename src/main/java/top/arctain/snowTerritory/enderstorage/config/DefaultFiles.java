@@ -48,7 +48,7 @@ public final class DefaultFiles {
                 per_item_max: 512
             """;
 
-    // EnderStorage GUI 默认配置（plugins/SnowTerritory/ender-storage/gui.yml）
+    // plugins/SnowTerritory/enderstorage/gui.yml
     public static final String DEFAULT_GUI = """
             gui:
               # GUI标题 支持chatcolor解析
@@ -80,10 +80,9 @@ public final class DefaultFiles {
                     lore:
                       - ""
               
-              # 默认物品 lore 模板（所有物品共用，如需修改提示只改这里即可）
-              # 支持占位符: %amount% (当前数量), %max% (最大数量)
+              # 默认物品 lore 模板，占位符: {amount} {max}
               default-lore:
-                - "&7数量: &e%amount% / %max%"
+                - "&7数量: &e{amount} / {max}"
                 - "&8| &7左键 ▸ 存入 8"
                 - "&8| &7SHIFT+左键 ▸ 存入 64"
                 - "&8| &7右键 ▸ 取出 8"
@@ -110,11 +109,11 @@ public final class DefaultFiles {
             """;
 
     public static final String DEFAULT_MESSAGES_ZH = """
-            loot-gained: "&a+%amount%x %item% 已存入战利品仓库"
+            loot-gained: "&a+{amount}x {item} 已存入战利品仓库"
             no-permission: "&c✗ &f没有权限"
             not-whitelisted: "&c✗ &f该物品无法存入战利品仓库"
             exceed-limit: "&c✗ &f已达到上限"
-            gui-title: "战利品仓库 (%page%)"
+            gui-title: "战利品仓库 ({page})"
             reload-done: "&a✓ &f战利品仓库配置已重载"
             open: "&a✓ &f打开战利品仓库"
             """;

@@ -29,9 +29,8 @@ public class QuestListener implements Listener {
     // 当前事件处理的上下文（事件处理器在单线程中同步执行，因此可以安全使用）
     private MaterialSubmissionContext currentContext;
 
-    public QuestListener(Main plugin, QuestService questService, QuestConfigManager configManager, top.arctain.snowTerritory.quest.config.MessageProvider messages) {
+    public QuestListener(Main plugin, QuestService questService, QuestConfigManager configManager) {
         this.questService = questService;
-        // MessageProvider 参数保留以保持向后兼容，但不再使用
     }
 
     /**
