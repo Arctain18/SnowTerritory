@@ -291,3 +291,10 @@ messages:
   # 分隔线 (用于美化消息显示)
   separator: "&8&m                                        "
 
+  # 调试命令
+  debug:
+    usage: "&e用法: /sn debug resetconfig [模块] &7(不指定则重置全部)"
+    confirm-prompt: "&e⚠ &f确定要删除 {module} 的配置并重载吗？&c输入 yes 确认&f，30秒内有效"
+    invalid-module: "&c✗ &f未知模块: {module}，可选: reinforce, enderstorage, quest, stocks"
+    resetconfig-success: "&a✓ &f已删除 {module} 模块 {count} 个配置文件并重载（数据库已保留）"
+

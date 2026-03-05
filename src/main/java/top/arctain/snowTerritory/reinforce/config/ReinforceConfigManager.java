@@ -306,6 +306,10 @@ public class ReinforceConfigManager {
         }
     }
 
+    public File getBaseDir() {
+        return baseDir;
+    }
+
     public double getSuccessRateForLevel(int level) {
         return reinforceSuccessRates.getOrDefault(level, 0.5);  // 默认0.5，如果未配置
     }

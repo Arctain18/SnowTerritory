@@ -94,5 +94,9 @@ public class StocksConfigManager {
     public FileConfiguration getMainConfig() {
         return mainConfig;
     }
+
+    public File getBaseDir() {
+        return baseDir;
+    }
 }
 

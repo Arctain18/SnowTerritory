@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.config.PluginConfig;
 import top.arctain.snowTerritory.enderstorage.EnderStorageModule;
+import top.arctain.snowTerritory.utils.ConfigUtils;
 import top.arctain.snowTerritory.quest.QuestModule;
 import top.arctain.snowTerritory.reinforce.ReinforceModule;
 import top.arctain.snowTerritory.stocks.StocksModule;
@@ -20,15 +21,17 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
 
     private final Main plugin;
     private final PluginConfig config;
+    private final DebugResetConfirmHandler debugResetHandler;
     private final ItemIdCommand itemIdCommand;
     private final ReinforceModule reinforceModule;
     private final EnderStorageModule enderModule;
     private final QuestModule questModule;
     private final StocksModule stocksModule;
 
-    public SnowTerritoryCommand(Main plugin, PluginConfig config, ReinforceModule reinforceModule) {
+    public SnowTerritoryCommand(Main plugin, PluginConfig config, ReinforceModule reinforceModule, DebugResetConfirmHandler debugResetHandler) {
         this.plugin = plugin;
         this.config = config;
+        this.debugResetHandler = debugResetHandler;
         this.itemIdCommand = new ItemIdCommand();
         this.reinforceModule = reinforceModule;
         this.enderModule = plugin.getEnderStorageModule();
@@ -58,6 +61,8 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             return handleQuest(sender, args);
         } else if (subCommand.equals("stock") || subCommand.equals("stocks")) {
             return handleStock(sender, args);
+        } else if (subCommand.equals("debug")) {
+            return handleDebug(sender, args);
         } else {
             MessageUtils.sendError(sender, "command.unknown-command", "&c✗ &f未知的子命令！输入 /{label} 查看帮助。", "label", label);
             return true;
@@ -196,6 +201,105 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         return stocksModule.getStockCommand().onCommand(sender, null, "snowterritory stock", forward);
     }
 
+    private boolean handleDebug(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("mmoitemseditor.reload") && !(sender instanceof Player && ((Player) sender).isOp())) {
+            MessageUtils.sendError(sender, "command.no-permission", "&c✗ &f您没有权限使用此命令！");
+            return true;
+        }
+        if (!(sender instanceof Player player)) {
+            MessageUtils.sendError(sender, "command.player-only", "&c✗ &f此命令仅限玩家使用！");
+            return true;
+        }
+        if (args.length < 2 || !args[1].equalsIgnoreCase("resetconfig")) {
+            MessageUtils.sendConfigMessage(sender, "debug.usage", "&e用法: /sn debug resetconfig [模块] &7(不指定则重置全部)");
+            return true;
+        }
+        java.util.List<String> modules;
+        if (args.length >= 3) {
+            String m = args[2].toLowerCase();
+            if ("all".equals(m) || "全部".equals(m)) {
+                modules = new java.util.ArrayList<>();
+                if (reinforceModule != null) modules.add("reinforce");
+                if (enderModule != null) modules.add("enderstorage");
+                if (questModule != null) modules.add("quest");
+                if (stocksModule != null) modules.add("stocks");
+                if (modules.isEmpty()) {
+                    MessageUtils.sendError(sender, "command.feature-missing", "&c✗ &f没有已启用的模块");
+                    return true;
+                }
+            } else if (!java.util.Set.of("reinforce", "enderstorage", "es", "quest", "stocks").contains(m)) {
+                MessageUtils.sendConfigMessage(sender, "debug.invalid-module",
+                        "&c✗ &f未知模块: {module}，可选: reinforce, enderstorage, quest, stocks, all", "module", m);
+                return true;
+            } else {
+                modules = "es".equals(m) ? java.util.List.of("enderstorage") : java.util.List.of(m);
+            }
+        } else {
+            modules = new java.util.ArrayList<>();
+            if (reinforceModule != null) modules.add("reinforce");
+            if (enderModule != null) modules.add("enderstorage");
+            if (questModule != null) modules.add("quest");
+            if (stocksModule != null) modules.add("stocks");
+            if (modules.isEmpty()) {
+                MessageUtils.sendError(sender, "command.feature-missing", "&c✗ &f没有已启用的模块");
+                return true;
+            }
+        }
+        String scopeDesc = modules.size() == 1 ? modules.get(0) : "全部";
+        Runnable action = () -> {
+            int total = 0;
+            for (String mod : modules) {
+                total += executeReset(mod);
+            }
+            MessageUtils.sendConfigMessage(player, "debug.resetconfig-success",
+                    "&a✓ &f已删除 {module} 模块 {count} 个配置文件并重载（数据库已保留）",
+                    "module", scopeDesc, "count", String.valueOf(total));
+        };
+        debugResetHandler.request(player, action, scopeDesc);
+        MessageUtils.sendConfigMessage(sender, "debug.confirm-prompt",
+                "&e⚠ &f确定要删除 {module} 的配置并重载吗？&c输入 yes 确认&f，30秒内有效",
+                "module", scopeDesc);
+        return true;
+    }
+
+    private int executeReset(String module) {
+        return switch (module) {
+            case "reinforce" -> {
+                if (reinforceModule != null) {
+                    int n = ConfigUtils.deleteConfigFilesExcludingDatabase(reinforceModule.getConfigManager().getBaseDir());
+                    reinforceModule.reload();
+                    yield n;
+                }
+                yield 0;
+            }
+            case "enderstorage" -> {
+                if (enderModule != null) {
+                    int n = ConfigUtils.deleteConfigFilesExcludingDatabase(enderModule.getConfigManager().getBaseDir());
+                    enderModule.reload();
+                    yield n;
+                }
+                yield 0;
+            }
+            case "quest" -> {
+                if (questModule != null) {
+                    int n = ConfigUtils.deleteConfigFilesExcludingDatabase(questModule.getConfigManager().getBaseDir());
+                    questModule.reload();
+                    yield n;
+                }
+                yield 0;
+            }
+            case "stocks" -> {
+                if (stocksModule != null) {
+                    int n = ConfigUtils.deleteConfigFilesExcludingDatabase(stocksModule.getConfigManager().getBaseDir());
+                    stocksModule.reload();
+                    yield n;
+                }
+                yield 0;
+            }
+            default -> 0;
+        };
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
@@ -220,8 +324,26 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             if ("stock".startsWith(input) || "stocks".startsWith(input)) {
                 completions.add("stock");
             }
-            
+            if ("debug".startsWith(input)) {
+                completions.add("debug");
+            }
             return completions;
+        }
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("debug")) {
+            if ("resetconfig".startsWith(args[1].toLowerCase())) {
+                return List.of("resetconfig");
+            }
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("debug") && args[1].equalsIgnoreCase("resetconfig")) {
+            List<String> modules = new ArrayList<>();
+            String input = args[2].toLowerCase();
+            if ("reinforce".startsWith(input)) modules.add("reinforce");
+            if ("enderstorage".startsWith(input) || "es".startsWith(input)) modules.add("enderstorage");
+            if ("quest".startsWith(input)) modules.add("quest");
+            if ("stocks".startsWith(input)) modules.add("stocks");
+            if ("all".startsWith(input) || "全部".startsWith(input)) modules.add("all");
+            return modules;
         }
 
         // /sn es 子命令补全

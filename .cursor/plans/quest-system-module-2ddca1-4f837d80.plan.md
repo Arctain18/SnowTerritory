@@ -1,4 +1,13 @@
-<!-- 4f837d80-756d-4689-a854-4314e0049eb1 6e06a0f5-1a9d-4351-ae61-41b1e0ea4e33 -->
+---
+name: Quest System Implementation Plan
+overview: ""
+todos:
+  - id: 66cf5a65-eca0-4db0-b421-6757dcfb1595
+    content: Integrate QuestModule into Main.java and add quest subcommand to SnowTerritoryCommand.java
+    status: pending
+isProject: false
+---
+
 # Quest System Implementation Plan
 
 ## Overview
@@ -105,7 +114,7 @@ Create a new `/quest/` module following the structure of `Reinforce` and `enders
 
 ### Data Persistence
 
-- Store active quests in memory (Map<UUID, List<Quest>>)
+- Store active quests in memory (Map<UUID, List>)
 - Optionally persist to database (similar to EnderStorage pattern)
 - Track quest history for statistics
 
@@ -165,15 +174,3 @@ Create a new `/quest/` module following the structure of `Reinforce` and `enders
 - 64-base currency system prevents inventory overflow
 - Bounty tasks use scheduler for random interval publishing
 
-### To-dos
-
-- [ ] Create data model classes: Quest.java, QuestType.java, QuestReleaseMethod.java, QuestStatus.java
-- [ ] Create DefaultFiles.java with all default YAML configuration content (config.yml, messages, rewards, bonus, materials, bounty, tasks)
-- [ ] Create QuestConfigManager.java to load and manage all configuration files
-- [ ] Create MessageProvider.java for message retrieval with ChatColor support
-- [ ] Create QuestUtils.java with reward calculation, MMOItems helpers, and 64-base currency distribution
-- [ ] Create QuestService interface and QuestServiceImpl with quest management, bounty publishing, and reward distribution
-- [ ] Create QuestListener.java to handle material submission events and quest progress tracking
-- [ ] Create QuestCommand.java with subcommands for accepting, viewing, and completing quests
-- [ ] Create QuestModule.java as main entry point, integrating all components
-- [ ] Integrate QuestModule into Main.java and add quest subcommand to SnowTerritoryCommand.java

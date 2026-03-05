@@ -80,5 +80,9 @@ public class EnderStorageModule {
     public EnderStorageCommand getEnderCommand() {
         return enderCommand;
     }
+
+    public EnderStorageConfigManager getConfigManager() {
+        return configManager;
+    }
 }
 

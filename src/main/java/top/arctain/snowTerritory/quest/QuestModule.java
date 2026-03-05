@@ -77,5 +77,9 @@ public class QuestModule {
     public QuestCommand getQuestCommand() {
         return questCommand;
     }
+
+    public QuestConfigManager getConfigManager() {
+        return configManager;
+    }
 }
 

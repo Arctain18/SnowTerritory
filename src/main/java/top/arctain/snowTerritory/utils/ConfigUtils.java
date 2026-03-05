@@ -63,4 +63,23 @@ public final class ConfigUtils {
             MessageUtils.logError("保存配置失败: " + file.getAbsolutePath() + " - " + e.getMessage());
         }
     }
+
+    /** 删除目录下所有配置文件，保留 .db 数据库文件。返回删除的文件数。 */
+    public static int deleteConfigFilesExcludingDatabase(File dir) {
+        if (!dir.exists() || !dir.isDirectory()) return 0;
+        int count = 0;
+        File[] children = dir.listFiles();
+        if (children == null) return 0;
+        for (File f : children) {
+            if (f.isDirectory()) {
+                count += deleteConfigFilesExcludingDatabase(f);
+                if (f.list() == null || f.list().length == 0) {
+                    f.delete();
+                }
+            } else if (!f.getName().toLowerCase().endsWith(".db")) {
+                if (f.delete()) count++;
+            }
+        }
+        return count;
+    }
 }

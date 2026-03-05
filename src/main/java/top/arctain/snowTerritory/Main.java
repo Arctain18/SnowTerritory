@@ -1,7 +1,9 @@
 package top.arctain.snowTerritory;
 
+import top.arctain.snowTerritory.commands.DebugResetConfirmHandler;
 import top.arctain.snowTerritory.commands.SnowTerritoryCommand;
 import top.arctain.snowTerritory.config.PluginConfig;
+import top.arctain.snowTerritory.listeners.DebugResetConfirmListener;
 import top.arctain.snowTerritory.listeners.ItemEditListener;
 import top.arctain.snowTerritory.listeners.PlayerJoinListener;
 import top.arctain.snowTerritory.enderstorage.EnderStorageModule;
@@ -76,10 +78,12 @@ public class Main extends JavaPlugin {
             MessageUtils.logInfo("股票模块已禁用（配置文件中 modules.stocks = false）");
         }
 
-        // 注册主命令
+        DebugResetConfirmHandler debugResetHandler = new DebugResetConfirmHandler(this);
+        getServer().getPluginManager().registerEvents(new DebugResetConfirmListener(debugResetHandler), this);
+
         org.bukkit.command.PluginCommand mainCommand = getServer().getPluginCommand("snowterritory");
         if (mainCommand != null) {
-            SnowTerritoryCommand commandExecutor = new SnowTerritoryCommand(this, pluginConfig, reinforceModule);
+            SnowTerritoryCommand commandExecutor = new SnowTerritoryCommand(this, pluginConfig, reinforceModule, debugResetHandler);
             mainCommand.setExecutor(commandExecutor);
             mainCommand.setTabCompleter(commandExecutor);
             MessageUtils.logSuccess("命令 'snowterritory' 已注册");

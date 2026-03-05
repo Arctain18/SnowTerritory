@@ -121,7 +121,7 @@ public void updateAvailableBalance(BigDecimal isolatedMargin) { }
 
 ## 11. Commit 规范
 
-采用 Conventional Commits 风格，格式：
+采用 Conventional Commits 风格，语言使用中文，格式：
 
 ```
 <type>(<scope>): <subject>
