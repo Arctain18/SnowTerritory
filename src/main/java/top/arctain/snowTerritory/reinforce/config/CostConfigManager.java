@@ -6,12 +6,11 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.reinforce.data.CostConfig;
+import top.arctain.snowTerritory.utils.ConfigUtils;
 import top.arctain.snowTerritory.reinforce.service.ExpressionService;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -63,22 +62,8 @@ public class CostConfigManager {
         MessageUtils.logSuccess("已加载 " + itemCostConfigs.size() + " 个物品的消耗配置");
     }
 
-    /**
-     * 确保示例配置文件存在
-     */
     private void ensureExampleFile() {
-        File exampleFile = new File(baseDir, "example-cost.yml");
-        if (!exampleFile.exists()) {
-            try {
-                if (exampleFile.getParentFile() != null) {
-                    exampleFile.getParentFile().mkdirs();
-                }
-                Files.writeString(exampleFile.toPath(), DefaultFiles.DEFAULT_ITEM_COST_EXAMPLE);
-                MessageUtils.logInfo("已创建物品消耗配置示例文件: example-cost.yml");
-            } catch (IOException e) {
-                MessageUtils.logError("创建示例配置文件失败: " + e.getMessage());
-            }
-        }
+        ConfigUtils.copyResourceIfMissing(plugin, "reinforce/example-cost.yml", new File(baseDir, "example-cost.yml"));
     }
 
     /**

@@ -3,28 +3,38 @@ package top.arctain.snowTerritory.utils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-/** 配置工具：默认文件写入、消息递归加载。 */
+/** 配置工具：默认文件从资源复制、消息递归加载。资源路径相对于 default-configs/ */
 public final class ConfigUtils {
+
+    private static final String DEFAULT_CONFIGS_PREFIX = "default-configs/";
 
     private ConfigUtils() {
     }
 
-    public static void copyIfMissing(File target, String content) {
-        try {
-            if (!target.exists()) {
-                if (target.getParentFile() != null) {
-                    target.getParentFile().mkdirs();
-                }
-                java.nio.file.Files.writeString(target.toPath(), content);
+    /** 从 JAR 资源复制默认配置到目标文件，若目标已存在则跳过。resourcePath 相对于 default-configs/，如 reinforce/config.yml */
+    public static void copyResourceIfMissing(JavaPlugin plugin, String resourcePath, File target) {
+        if (target.exists()) return;
+        String fullPath = DEFAULT_CONFIGS_PREFIX + resourcePath;
+        try (InputStream in = plugin.getResource(fullPath)) {
+            if (in == null) {
+                MessageUtils.logError("默认配置资源不存在: " + fullPath);
+                return;
             }
+            if (target.getParentFile() != null) {
+                target.getParentFile().mkdirs();
+            }
+            Files.copy(in, target.toPath());
         } catch (IOException e) {
-            MessageUtils.logError("写入默认配置失败: " + target.getAbsolutePath() + " - " + e.getMessage());
+            MessageUtils.logError("复制默认配置失败: " + target.getAbsolutePath() + " - " + e.getMessage());
         }
     }
 

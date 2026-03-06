@@ -209,7 +209,7 @@ public class ReinforceConfigManager {
         if (!baseDir.exists() && !baseDir.mkdirs()) {
             MessageUtils.logWarning("创建 reinforce 目录失败: " + baseDir.getAbsolutePath());
         }
-        ConfigUtils.copyIfMissing(configFile, DefaultFiles.DEFAULT_CONFIG);
+        ConfigUtils.copyResourceIfMissing(plugin, "reinforce/config.yml", configFile);
     }
     
     /**

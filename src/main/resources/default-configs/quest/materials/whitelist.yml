@@ -1,0 +1,14 @@
+materials:
+  MM_DROPS:
+    优质狼皮:
+      min: 16
+      max: 256
+      material-level: 1
+    瓶装兽血:
+      min: 16
+      max: 256
+      material-level: 1
+    狼王獠牙:
+      min: 8
+      max: 128
+      material-level: 2

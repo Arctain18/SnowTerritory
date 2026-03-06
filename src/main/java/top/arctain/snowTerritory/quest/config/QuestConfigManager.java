@@ -17,6 +17,7 @@ import java.util.Map;
  */
 public class QuestConfigManager {
 
+    private final Main plugin;
     private final File baseDir;
     private FileConfiguration mainConfig;
     private Map<String, FileConfiguration> messagePacks = new HashMap<>();
@@ -29,6 +30,7 @@ public class QuestConfigManager {
     private FileConfiguration tasksKill;
 
     public QuestConfigManager(Main plugin) {
+        this.plugin = plugin;
         this.baseDir = new File(plugin.getDataFolder(), "quest");
     }
 
@@ -47,15 +49,15 @@ public class QuestConfigManager {
         if (!baseDir.exists() && !baseDir.mkdirs()) {
             MessageUtils.logWarning("创建 quest 目录失败: " + baseDir.getAbsolutePath());
         }
-        ConfigUtils.copyIfMissing(new File(baseDir, "config.yml"), DefaultFiles.DEFAULT_CONFIG);
-        ConfigUtils.copyIfMissing(new File(baseDir, "messages/zh_CN.yml"), DefaultFiles.DEFAULT_MESSAGES_ZH);
-        ConfigUtils.copyIfMissing(new File(baseDir, "rewards/default.yml"), DefaultFiles.DEFAULT_REWARDS_DEFAULT);
-        ConfigUtils.copyIfMissing(new File(baseDir, "rewards/level.yml"), DefaultFiles.DEFAULT_REWARDS_LEVEL);
-        ConfigUtils.copyIfMissing(new File(baseDir, "bonus/time-bonus.yml"), DefaultFiles.DEFAULT_BONUS_TIME_BONUS);
-        ConfigUtils.copyIfMissing(new File(baseDir, "materials/whitelist.yml"), DefaultFiles.DEFAULT_MATERIALS_WHITELIST);
-        ConfigUtils.copyIfMissing(new File(baseDir, "bounty/config.yml"), DefaultFiles.DEFAULT_BOUNTY_CONFIG);
-        ConfigUtils.copyIfMissing(new File(baseDir, "tasks/material.yml"), DefaultFiles.DEFAULT_TASKS_MATERIAL);
-        ConfigUtils.copyIfMissing(new File(baseDir, "tasks/kill.yml"), DefaultFiles.DEFAULT_TASKS_KILL);
+        ConfigUtils.copyResourceIfMissing(plugin, "quest/config.yml", new File(baseDir, "config.yml"));
+        ConfigUtils.copyResourceIfMissing(plugin, "quest/messages/zh_CN.yml", new File(baseDir, "messages/zh_CN.yml"));
+        ConfigUtils.copyResourceIfMissing(plugin, "quest/rewards/default.yml", new File(baseDir, "rewards/default.yml"));
+        ConfigUtils.copyResourceIfMissing(plugin, "quest/rewards/level.yml", new File(baseDir, "rewards/level.yml"));
+        ConfigUtils.copyResourceIfMissing(plugin, "quest/bonus/time-bonus.yml", new File(baseDir, "bonus/time-bonus.yml"));
+        ConfigUtils.copyResourceIfMissing(plugin, "quest/materials/whitelist.yml", new File(baseDir, "materials/whitelist.yml"));
+        ConfigUtils.copyResourceIfMissing(plugin, "quest/bounty/config.yml", new File(baseDir, "bounty/config.yml"));
+        ConfigUtils.copyResourceIfMissing(plugin, "quest/tasks/material.yml", new File(baseDir, "tasks/material.yml"));
+        ConfigUtils.copyResourceIfMissing(plugin, "quest/tasks/kill.yml", new File(baseDir, "tasks/kill.yml"));
     }
 
     private void loadMainConfig() {

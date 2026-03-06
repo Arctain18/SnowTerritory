@@ -1,0 +1,24 @@
+1:
+  display: "&c&lUltra&r {#E260FC>}Ext{#9560FC<>}reme+{#607AFC<}"
+  max-limit: 300000
+  time-bonus: 2.0
+2:
+  display: "{#E260FC>}Ext{#9560FC<>}reme{#607AFC<}"
+  max-limit: 600000
+  time-bonus: 1.8
+3:
+  display: "&{#607AFC}Master"
+  max-limit: 900000
+  time-bonus: 1.5
+4:
+  display: "&fNormal"
+  max-limit: 1200000
+  time-bonus: 1.2
+5:
+  display: "&{#FCE260}Adequate"
+  max-limit: 1800000
+  time-bonus: 1.0
+6:
+  display: "&4Poor"
+  max-limit: -1
+  time-bonus: 0.8

@@ -1,0 +1,12 @@
+bounty:
+  # 发布间隔区间（分钟），上一个悬赏结束到下一个悬赏发布的间隔
+  interval-min: 20
+  interval-max: 40
+  # 悬赏系数（奖励倍数）
+  bounty-bonus: 1.5
+  # 允许的任务类型: MATERIAL, KILL, BOTH
+  allowed-types: MATERIAL
+  # 消息配置
+  messages:
+    # 悬赏公告 (%material%=物品名, %amount%=数量)
+    announcement: "&6[悬赏任务] &e收集 %material% x%amount% &7- &f完成任务可获得丰厚奖励！"

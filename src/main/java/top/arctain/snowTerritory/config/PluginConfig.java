@@ -28,9 +28,7 @@ public class PluginConfig {
     }
 
     public void loadConfig() {
-        if (!configFile.exists()) {
-            plugin.saveResource("config.yml", false);
-        }
+        ConfigUtils.copyResourceIfMissing(plugin, "config.yml", configFile);
         config = YamlConfiguration.loadConfiguration(configFile);
 
         // 加载消息配置

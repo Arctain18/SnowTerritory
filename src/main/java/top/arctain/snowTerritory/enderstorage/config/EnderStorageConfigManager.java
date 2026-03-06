@@ -16,6 +16,7 @@ import java.util.Set;
 /** 管理 enderstorage 配置的加载与默认文件生成。配置路径: plugins/SnowTerritory/enderstorage/ */
 public class EnderStorageConfigManager {
 
+    private final Main plugin;
     private final File baseDir;
     private FileConfiguration mainConfig;
     private FileConfiguration guiConfig;
@@ -23,6 +24,7 @@ public class EnderStorageConfigManager {
     private ProgressionConfig progressionConfig;
 
     public EnderStorageConfigManager(Main plugin) {
+        this.plugin = plugin;
         this.baseDir = new File(plugin.getDataFolder(), "enderstorage");
     }
 
@@ -38,11 +40,11 @@ public class EnderStorageConfigManager {
         if (!baseDir.exists() && !baseDir.mkdirs()) {
             MessageUtils.logWarning("创建 enderstorage 目录失败: " + baseDir.getAbsolutePath());
         }
-        ConfigUtils.copyIfMissing(new File(baseDir, "config.yml"), DefaultFiles.DEFAULT_CONFIG);
-        ConfigUtils.copyIfMissing(new File(baseDir, "gui.yml"), DefaultFiles.DEFAULT_GUI);
-        ConfigUtils.copyIfMissing(new File(baseDir, "progression/size.yml"), DefaultFiles.DEFAULT_SIZE);
-        ConfigUtils.copyIfMissing(new File(baseDir, "progression/stack.yml"), DefaultFiles.DEFAULT_STACK);
-        ConfigUtils.copyIfMissing(new File(baseDir, "messages/zh_CN.yml"), DefaultFiles.DEFAULT_MESSAGES_ZH);
+        ConfigUtils.copyResourceIfMissing(plugin, "enderstorage/config.yml", new File(baseDir, "config.yml"));
+        ConfigUtils.copyResourceIfMissing(plugin, "enderstorage/gui.yml", new File(baseDir, "gui.yml"));
+        ConfigUtils.copyResourceIfMissing(plugin, "enderstorage/progression/size.yml", new File(baseDir, "progression/size.yml"));
+        ConfigUtils.copyResourceIfMissing(plugin, "enderstorage/progression/stack.yml", new File(baseDir, "progression/stack.yml"));
+        ConfigUtils.copyResourceIfMissing(plugin, "enderstorage/messages/zh_CN.yml", new File(baseDir, "messages/zh_CN.yml"));
     }
 
     private void loadMainConfig() {

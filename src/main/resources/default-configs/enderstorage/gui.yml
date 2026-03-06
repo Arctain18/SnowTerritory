@@ -1,0 +1,56 @@
+gui:
+  # GUI标题 支持chatcolor解析
+  title: "[&{#3ab835}&l末影&{#6dc97f}&l存储&8]"
+
+  # GUI大小 (必须是9的倍数，如9, 18, 27, 36, 45, 54)
+  size: 54
+
+  # 槽位配置 (0-53)
+  slots:
+    # 上一页
+    previous-page: 48
+    # 下一页
+    next-page: 50
+
+    # 物品槽位 (支持范围表达式)
+    material-slots: [ "28-34", "37-43" ]
+
+    # 装饰槽位
+    decoration-slots:
+      "0-17":
+        material: "GREEN_STAINED_GLASS_PANE"
+        name: "&{#d6fff6}&m-&{#fffad6}&m=&{#FFFFFF}&m-&8 [&{#3ab835}末影&{#6dc97f}存储&8] &{#FFFFFF}&m-&{#fffad6}&m=&{#d6fff6}&m-"
+        lore:
+          - ""
+      "18-53":
+        material: "BLACK_STAINED_GLASS_PANE"
+        name: "&{#d6fff6}&m-&{#fffad6}&m=&{#FFFFFF}&m-&8 [&{#3ab835}末影&{#6dc97f}存储&8] &{#FFFFFF}&m-&{#fffad6}&m=&{#d6fff6}&m-"
+        lore:
+          - ""
+
+  # 默认物品 lore 模板，占位符: {amount} {max}
+  default-lore:
+    - "&7数量: &e{amount} / {max}"
+    - "&8| &7左键 ▸ 存入 8"
+    - "&8| &7SHIFT+左键 ▸ 存入 64"
+    - "&8| &7右键 ▸ 取出 8"
+    - "&8| &7中键 ▸ 取出 64"
+
+  # 物品顺序与分组（只展示出现在这里并且在白名单中的物品）
+  materials:
+    MM_DROPS:
+      优质狼皮:
+        max: 256
+      瓶装兽血:
+        max: 256
+      狼王獠牙:
+        max: 128
+  # 注意:
+  # 1. 如果物品配置为数字（如 "优质狼皮: 256"），等价于 {max: 256}，同样会使用上面的 default-lore
+  # 2. 如果某个物品需要单独的提示，可以在该物品下增加 lore 节点覆盖默认值:
+  #    示例:
+  #      某物品:
+  #        max: 64
+  #        lore:
+  #          - "&7自定义第一行"
+  #          - "&7自定义第二行"

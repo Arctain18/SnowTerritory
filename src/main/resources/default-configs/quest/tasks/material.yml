@@ -1,0 +1,5 @@
+# 材料任务配置
+# 任务将从 materials/whitelist.yml 中随机选择材料
+material:
+  # 默认时间限制（毫秒），-1表示无限制
+  default-time-limit: -1

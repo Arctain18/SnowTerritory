@@ -16,12 +16,14 @@ import java.util.Map;
  * Stocks配置管理器
  */
 public class StocksConfigManager {
-    
+
+    private final Main plugin;
     private final File baseDir;
     private FileConfiguration mainConfig;
     private final Map<String, Symbol> symbols = new HashMap<>();
-    
+
     public StocksConfigManager(Main plugin) {
+        this.plugin = plugin;
         this.baseDir = new File(plugin.getDataFolder(), "stocks");
     }
     
@@ -35,7 +37,7 @@ public class StocksConfigManager {
         if (!baseDir.exists() && !baseDir.mkdirs()) {
             MessageUtils.logWarning("创建 stocks 目录失败: " + baseDir.getAbsolutePath());
         }
-        ConfigUtils.copyIfMissing(new File(baseDir, "config.yml"), DefaultFiles.DEFAULT_CONFIG);
+        ConfigUtils.copyResourceIfMissing(plugin, "stocks/config.yml", new File(baseDir, "config.yml"));
     }
 
     private void loadMainConfig() {

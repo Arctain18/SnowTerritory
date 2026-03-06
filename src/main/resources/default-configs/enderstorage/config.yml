@@ -1,0 +1,19 @@
+database:
+  type: sqlite
+  file: ender-storage.db
+  mysql:
+    host: localhost
+    port: 3306
+    database: enderstorage
+    username: root
+    password: root
+  pool:
+    maximum-pool-size: 4
+    minimum-idle: 1
+    connection-timeout: 30000
+
+features:
+  auto-pickup: true
+  cancel-entity-drop: true
+  debug: false
+  default-language: zh_CN

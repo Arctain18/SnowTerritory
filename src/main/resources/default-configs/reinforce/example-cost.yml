@@ -1,0 +1,72 @@
+# ============================================
+# 物品消耗配置示例文件
+# ============================================
+# 此文件为示例配置，首次运行时自动生成
+# 你可以复制此文件并修改物品ID来创建自己的配置
+#
+# 配置说明：
+# - 每个一级键是 MMOItems 的物品ID
+# - enabled: 是否启用该物品的自定义消耗配置
+# - gold-cost: 金币消耗配置（Vault）
+#   - enabled: 是否启用金币消耗
+#   - base-expression: 基础消耗公式，可用变量: playerLevel（玩家等级）
+#   - level-multiplier: 强化等级倍率公式，可用变量: level（强化等级）
+# - points-cost: 点券消耗配置（PlayerPoints）
+#   - enabled: 是否启用点券消耗
+#   - base-expression: 基础消耗公式，可用变量: playerLevel（玩家等级）
+#   - level-multiplier: 强化等级倍率公式，可用变量: level（强化等级）
+#
+# 计算公式：最终消耗 = base-expression 的计算结果 * level-multiplier 的计算结果
+#
+# 示例：
+# - base-expression: "100 + playerLevel * 10"
+#   表示基础消耗 = 100 + 玩家等级 * 10
+# - level-multiplier: "1 + level * 0.2"
+#   表示强化等级倍率 = 1 + 强化等级 * 0.2
+# - 如果玩家等级为50，强化等级为+5
+#   最终金币消耗 = (100 + 50 * 10) * (1 + 5 * 0.2) = 600 * 2 = 1200
+# ============================================
+
+# 示例物品1：武器
+MY_SWORD:
+  enabled: true
+
+  # 金币消耗配置
+  gold-cost:
+    enabled: true
+    base-expression: "100 + playerLevel * 10"
+    level-multiplier: "1 + level * 0.2"
+
+  # 点券消耗配置
+  points-cost:
+    enabled: true
+    base-expression: "10 + playerLevel * 2"
+    level-multiplier: "1 + level * 0.1"
+
+# 示例物品2：弓箭
+MY_BOW:
+  enabled: true
+
+  gold-cost:
+    enabled: true
+    base-expression: "50 + playerLevel * 5"
+    level-multiplier: "1 + level * 0.15"
+
+  points-cost:
+    enabled: false
+    base-expression: ""
+    level-multiplier: "1"
+
+# 示例物品3：只使用金币，不使用点券
+MY_AXE:
+  enabled: true
+
+  gold-cost:
+    enabled: true
+    base-expression: "200 + playerLevel * 15"
+    level-multiplier: "1 + level * 0.25"
+
+  points-cost:
+    enabled: false
+    base-expression: ""
+    level-multiplier: "1"

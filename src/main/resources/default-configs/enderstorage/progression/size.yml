@@ -1,0 +1,7 @@
+levels:
+  - perm: st.loot.size.1
+    slots: 9
+  - perm: st.loot.size.2
+    slots: 18
+  - perm: st.loot.size.3
+    slots: 27

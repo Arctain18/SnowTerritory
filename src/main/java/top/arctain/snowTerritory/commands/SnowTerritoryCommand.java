@@ -14,6 +14,7 @@ import top.arctain.snowTerritory.reinforce.ReinforceModule;
 import top.arctain.snowTerritory.stocks.StocksModule;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -211,22 +212,14 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         if (args.length < 2 || !args[1].equalsIgnoreCase("resetconfig")) {
-            MessageUtils.sendConfigMessage(sender, "debug.usage", "&e用法: /sn debug resetconfig [模块] &7(不指定则重置全部)");
+            MessageUtils.sendConfigMessage(sender, "debug.usage", "&e用法: /sn debug resetconfig [模块] &7(不指定则删除整个配置目录)");
             return true;
         }
         java.util.List<String> modules;
         if (args.length >= 3) {
             String m = args[2].toLowerCase();
             if ("all".equals(m) || "全部".equals(m)) {
-                modules = new java.util.ArrayList<>();
-                if (reinforceModule != null) modules.add("reinforce");
-                if (enderModule != null) modules.add("enderstorage");
-                if (questModule != null) modules.add("quest");
-                if (stocksModule != null) modules.add("stocks");
-                if (modules.isEmpty()) {
-                    MessageUtils.sendError(sender, "command.feature-missing", "&c✗ &f没有已启用的模块");
-                    return true;
-                }
+                modules = null; // null 表示删除整个目录
             } else if (!java.util.Set.of("reinforce", "enderstorage", "es", "quest", "stocks").contains(m)) {
                 MessageUtils.sendConfigMessage(sender, "debug.invalid-module",
                         "&c✗ &f未知模块: {module}，可选: reinforce, enderstorage, quest, stocks, all", "module", m);
@@ -235,25 +228,14 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
                 modules = "es".equals(m) ? java.util.List.of("enderstorage") : java.util.List.of(m);
             }
         } else {
-            modules = new java.util.ArrayList<>();
-            if (reinforceModule != null) modules.add("reinforce");
-            if (enderModule != null) modules.add("enderstorage");
-            if (questModule != null) modules.add("quest");
-            if (stocksModule != null) modules.add("stocks");
-            if (modules.isEmpty()) {
-                MessageUtils.sendError(sender, "command.feature-missing", "&c✗ &f没有已启用的模块");
-                return true;
-            }
+            modules = null; // 不指定则删除整个目录
         }
-        String scopeDesc = modules.size() == 1 ? modules.get(0) : "全部";
+        String scopeDesc = modules == null ? "SnowTerritory" : (modules.size() == 1 ? modules.get(0) : "全部");
         Runnable action = () -> {
-            int total = 0;
-            for (String mod : modules) {
-                total += executeReset(mod);
-            }
+            int count = modules == null ? executeResetAll() : executeResetModules(modules);
             MessageUtils.sendConfigMessage(player, "debug.resetconfig-success",
-                    "&a✓ &f已删除 {module} 模块 {count} 个配置文件并重载（数据库已保留）",
-                    "module", scopeDesc, "count", String.valueOf(total));
+                    "&a✓ &f已删除 {module} {count} 个配置文件并重载（数据库已保留）",
+                    "module", scopeDesc, "count", String.valueOf(count));
         };
         debugResetHandler.request(player, action, scopeDesc);
         MessageUtils.sendConfigMessage(sender, "debug.confirm-prompt",
@@ -262,42 +244,37 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    private int executeReset(String module) {
-        return switch (module) {
-            case "reinforce" -> {
-                if (reinforceModule != null) {
-                    int n = ConfigUtils.deleteConfigFilesExcludingDatabase(reinforceModule.getConfigManager().getBaseDir());
-                    reinforceModule.reload();
-                    yield n;
-                }
-                yield 0;
-            }
-            case "enderstorage" -> {
-                if (enderModule != null) {
-                    int n = ConfigUtils.deleteConfigFilesExcludingDatabase(enderModule.getConfigManager().getBaseDir());
-                    enderModule.reload();
-                    yield n;
-                }
-                yield 0;
-            }
-            case "quest" -> {
-                if (questModule != null) {
-                    int n = ConfigUtils.deleteConfigFilesExcludingDatabase(questModule.getConfigManager().getBaseDir());
-                    questModule.reload();
-                    yield n;
-                }
-                yield 0;
-            }
-            case "stocks" -> {
-                if (stocksModule != null) {
-                    int n = ConfigUtils.deleteConfigFilesExcludingDatabase(stocksModule.getConfigManager().getBaseDir());
-                    stocksModule.reload();
-                    yield n;
-                }
-                yield 0;
-            }
-            default -> 0;
-        };
+    /** 删除整个 SnowTerritory 配置目录（保留 .db 数据库文件），重载所有配置。返回删除的文件数。 */
+    private int executeResetAll() {
+        File dataFolder = plugin.getDataFolder();
+        int count = ConfigUtils.deleteConfigFilesExcludingDatabase(dataFolder);
+        config.reloadConfig();
+        if (reinforceModule != null) reinforceModule.reload();
+        if (enderModule != null) enderModule.reload();
+        if (questModule != null) questModule.reload();
+        if (stocksModule != null) stocksModule.reload();
+        return count;
+    }
+
+    /** 逐个删除指定模块的配置目录（保留 .db），重载对应模块。返回删除的文件数。 */
+    private int executeResetModules(java.util.List<String> modules) {
+        int total = 0;
+        for (String mod : modules) {
+            total += switch (mod) {
+                case "reinforce" -> reinforceModule != null ? doResetModule(reinforceModule.getConfigManager().getBaseDir(), () -> reinforceModule.reload()) : 0;
+                case "enderstorage" -> enderModule != null ? doResetModule(enderModule.getConfigManager().getBaseDir(), () -> enderModule.reload()) : 0;
+                case "quest" -> questModule != null ? doResetModule(questModule.getConfigManager().getBaseDir(), () -> questModule.reload()) : 0;
+                case "stocks" -> stocksModule != null ? doResetModule(stocksModule.getConfigManager().getBaseDir(), () -> stocksModule.reload()) : 0;
+                default -> 0;
+            };
+        }
+        return total;
+    }
+
+    private int doResetModule(File baseDir, Runnable reload) {
+        int n = ConfigUtils.deleteConfigFilesExcludingDatabase(baseDir);
+        reload.run();
+        return n;
     }
 
     @Override
