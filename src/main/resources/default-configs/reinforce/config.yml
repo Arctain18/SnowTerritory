@@ -72,24 +72,17 @@ reinforce:
 # GUI界面配置（强化模块）
 # ============================================
 gui:
-  # GUI标题 不能使用渐变
-  title: "&{#4a95ff}ST <#C9AE59>Reinforce"
+  # GUI标题 (支持16进制颜色，不能使用渐变)
+  title: "&{#5B9BD5}✦ &{#7BBAF7}SnowTerritory &{#C9AE59}强化工坊 &{#5B9BD5}✦"
 
   # GUI大小 (必须是9的倍数，如9, 18, 27, 36, 45, 54)
   size: 54
 
   # 槽位配置 (0-53)
   slots:
-    # 武器槽位 (放置要强化的物品)
     weapon: 10
-
-    # 保护符槽位 (防止失败降级)
     protect-charm: 12
-
-    # 强化符槽位 (提升成功率)
     enhance-charm: 14
-
-    # 材料槽位 (6个槽位)
     materials:
       1: 28
       2: 29
@@ -97,74 +90,48 @@ gui:
       4: 37
       5: 38
       6: 39
-
-    # 确认按钮槽位
     confirm: 22
-
-    # 取消按钮槽位
     cancel: 40
 
   # 按钮名称 (支持颜色代码 &)
-  confirm-button: "&a&l确认强化"
-  cancel-button: "&c&l取消"
+  confirm-button: "&a&l✦ 确认强化"
+  cancel-button: "&c&l✕ 取消"
 
   # 确认按钮Lore配置 (支持颜色代码和占位符)
   confirm-button-lore:
-    # 基础提示文本
-    click-hint: "&7点击确认强化"
-    # 分隔线
-    separator: "<#d6fff6>&m-<#fffad6>&m=<#FFFFFF>&m---------------<#fffad6>&m=<#d6fff6>&m-"
-    # 当前等级显示 (占位符: {currentLevel}, {nextLevel})
-    current-level: "&7当前等级: &e+{currentLevel} &7→ &a+{nextLevel}"
-    # 成功率显示 (占位符: {successRate}, {bonus} - 强化符加成，如果没有则为空)
-    # 示例: "&7成功率: &a{successRate}%{bonus}" 会显示为 "成功率: 30%(+20%)" 或 "成功率: 30%"
-    success-rate: "&7成功率: &a{successRate}%{bonus}"
-    # 失败降级概率显示 (占位符: {chance}, {protect} - 保护符保护，如果没有则为空)
-    # 示例: "&7失败降级概率: &c{chance}%{protect}" 会显示为 "失败降级概率: 30%" 或 "失败降级概率: 0%(-30%)"
-    fail-degrade-chance: "&7失败降级概率: &c{chance}%{protect}"
-    # 保护符失效消息 (占位符: {maxLevel})
-    protect-charm-expired: "&c&o保护符失效 (最高保护等级: +{maxLevel})"
-    # 保护符无效消息
-    protect-charm-invalid: "&c&o保护符无效 (类型不匹配)"
-    # 强化符失效消息 (占位符: {maxLevel})
-    enhance-charm-expired: "&c&o强化符失效 (最高强化等级: +{maxLevel})"
-    # 强化符无效消息
-    enhance-charm-invalid: "&c&o强化符无效 (类型不匹配或概率解析失败)"
-  # 消耗资源标题（本次升级）
-  cost-title: "&7消耗资源:"
-    # 金币显示 (占位符: {amount}, {color} - 绿色&a或红色&c)
-    cost-gold: "&7金币: {color}{amount}"
-    # 点券显示 (占位符: {amount}, {color} - 绿色&a或红色&c)
-    cost-points: "&7点券: {color}{amount}"
-    # 材料显示 (占位符: {current}, {required}, {color} - 绿色&a或红色&c)
-    cost-materials: "&7材料: {color}{current}&7/{required}"
-  # 下一级升级预估消耗标题（只显示金币和点券）
-  next-cost-title: "&7下一级升级预估消耗:"
+    click-hint: "&8▸ 点击此处确认强化"
+    separator: "&8&m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    current-level: "&f等级 &e+{currentLevel} &7→ &a+{nextLevel}"
+    success-rate: "&f成功率 &a{successRate}%{bonus}"
+    fail-degrade-chance: "&f失败降级 &c{chance}%{protect}"
+    protect-charm-expired: "&c&o保护符失效 &7(最高保护 +{maxLevel})"
+    protect-charm-invalid: "&c&o保护符无效 &7(类型不匹配)"
+    enhance-charm-expired: "&c&o强化符失效 &7(最高强化 +{maxLevel})"
+    enhance-charm-invalid: "&c&o强化符无效 &7(类型不匹配或概率解析失败)"
+    cost-title: "&6◆ 本次消耗"
+    cost-gold: "&7金币 &8| {color}{amount}"
+    cost-points: "&7点券 &8| {color}{amount}"
+    cost-materials: "&7材料 &8| {color}{current}&7/&f{required}"
+    next-cost-title: "&6◆ 下一级预估消耗"
 
   # 玩家信息显示配置
   player-info:
     enabled: true
-    slot: 49  # 54格GUI最下面一排中间
+    slot: 49
+    title: "&f&l◆ 玩家信息"
     format:
-      - "&7玩家: &e{playerName}"
-      - "&7等级: &a{playerLevel}"
-      - "&7职业: &b{className} &7(Lv.{classLevel})"
-      - "&7金币: &6{gold}"
-      - "&7点券: &d{points}"
+      - "&8━━━━━━━━━━━━━━━━━━"
+      - "&f{playerName} &7· &aLv.{playerLevel}"
+      - "&7职业 &b{className}"
+      - "&7金币 &6{gold} &8| &7点券 &d{points}"
+      - "&8━━━━━━━━━━━━━━━━━━"
 
-  # 自定义槽位 (装饰用，支持16进制颜色 &x&F&F&0&0&0&0)
-  # 格式: 槽位号: { material: 材料, name: 显示名称, lore: [描述行1, 描述行2, ...] }
-  # 支持范围表达式: 槽位范围: { material: 材料, name: 显示名称, lore: [描述行1, 描述行2, ...] }
-  # 例如: "0-5" 表示槽位 0 到 5 都使用相同的设置
-  # 优先级: 自定义槽位优先级最低，不会覆盖功能槽位
+  # 自定义槽位 (装饰用)
   custom-slots:
     0-53:
-      material: "BLACK_STAINED_GLASS_PANE"
-      name: "&r"
-      lore:
-        - "&r test"
-        - "&r test"
-        - "&r test"
+      material: "LIGHT_BLUE_STAINED_GLASS_PANE"
+      name: " "
+      lore: []
 
 # ============================================
 # 消息配置（强化模块相关）

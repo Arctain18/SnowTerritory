@@ -68,11 +68,11 @@ public class ReinforceGUI {
         top.arctain.snowTerritory.utils.GuiSlotUtils.applySlotItems(gui, config.getCustomSlots(), true);
 
         // 添加确认和取消按钮（可点击）
-        ItemStack confirmButton = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
+        ItemStack confirmButton = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
         ItemMeta confirmMeta = confirmButton.getItemMeta();
         if (confirmMeta != null) {
             confirmMeta.setDisplayName(MessageUtils.colorize(config.getGuiConfirmButtonName()));
-            confirmMeta.setLore(Collections.singletonList(MessageUtils.colorize("&7点击确认强化")));
+            confirmMeta.setLore(Collections.singletonList(MessageUtils.colorize(config.getConfirmButtonLoreClickHint())));
             confirmButton.setItemMeta(confirmMeta);
         }
         gui.setItem(config.getSlotConfirm(), confirmButton);
@@ -81,7 +81,7 @@ public class ReinforceGUI {
         ItemMeta cancelMeta = cancelButton.getItemMeta();
         if (cancelMeta != null) {
             cancelMeta.setDisplayName(MessageUtils.colorize(config.getGuiCancelButtonName()));
-            cancelMeta.setLore(Collections.singletonList(MessageUtils.colorize("&7点击取消操作")));
+            cancelMeta.setLore(Collections.singletonList(MessageUtils.colorize("&8▸ 点击此处取消操作")));
             cancelButton.setItemMeta(cancelMeta);
         }
         gui.setItem(config.getSlotCancel(), cancelButton);
@@ -117,7 +117,7 @@ public class ReinforceGUI {
         ItemStack infoItem = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta meta = infoItem.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(MessageUtils.colorize("&7玩家信息"));
+            meta.setDisplayName(MessageUtils.colorize(config.getPlayerInfoTitle()));
             
             // 构建lore
             List<String> lore = new ArrayList<>();

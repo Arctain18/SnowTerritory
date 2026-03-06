@@ -77,6 +77,7 @@ public class ReinforceConfigManager {
     // 玩家信息显示配置
     private boolean playerInfoEnabled;
     private int playerInfoSlot;
+    private String playerInfoTitle;
     private List<String> playerInfoFormat;
     
     // 消息配置
@@ -166,7 +167,8 @@ public class ReinforceConfigManager {
         ConfigurationSection playerInfoSection = config.getConfigurationSection("gui.player-info");
         if (playerInfoSection != null) {
             playerInfoEnabled = playerInfoSection.getBoolean("enabled", true);
-            playerInfoSlot = playerInfoSection.getInt("slot", 49); // 54格GUI最下面一排中间
+            playerInfoSlot = playerInfoSection.getInt("slot", 49);
+            playerInfoTitle = playerInfoSection.getString("title", "&7玩家信息");
             playerInfoFormat = playerInfoSection.getStringList("format");
             if (playerInfoFormat.isEmpty()) {
                 // 默认格式
@@ -181,6 +183,7 @@ public class ReinforceConfigManager {
         } else {
             playerInfoEnabled = false;
             playerInfoSlot = 49;
+            playerInfoTitle = "&7玩家信息";
             playerInfoFormat = List.of();
         }
 
