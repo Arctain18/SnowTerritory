@@ -46,7 +46,7 @@ public class PluginConfig {
             messages.putAll(ConfigUtils.loadMessagesRecursive("messages", config.getConfigurationSection("messages")));
         }
     }
-    
+
     /**
      * 获取消息（支持占位符替换）
      */

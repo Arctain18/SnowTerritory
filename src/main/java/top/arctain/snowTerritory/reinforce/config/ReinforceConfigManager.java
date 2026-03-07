@@ -313,6 +313,18 @@ public class ReinforceConfigManager {
         return baseDir;
     }
 
+    /** 获取模块消息用于合并到主配置（仅 reinforce 和 gui，供 MessageUtils 使用） */
+    public Map<String, String> getMessagesForMerge() {
+        Map<String, String> result = new HashMap<>();
+        for (Map.Entry<String, String> e : messages.entrySet()) {
+            String k = e.getKey();
+            if (k.startsWith("messages.reinforce.") || k.startsWith("messages.gui.")) {
+                result.put(k, e.getValue());
+            }
+        }
+        return result;
+    }
+
     public double getSuccessRateForLevel(int level) {
         return reinforceSuccessRates.getOrDefault(level, 0.5);  // 默认0.5，如果未配置
     }

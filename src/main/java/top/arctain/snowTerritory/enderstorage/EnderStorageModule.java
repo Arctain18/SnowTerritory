@@ -32,6 +32,7 @@ public class EnderStorageModule {
 
     public void enable() {
         configManager.loadAll();
+        MessageUtils.registerModuleMessages("enderstorage", configManager.getMessagesForMerge());
         lootStorageService.initialize();
         this.lootStorageGUI = new LootStorageGUI(plugin, configManager, lootStorageService);
         this.enderCommand = new EnderStorageCommand(plugin, configManager, lootStorageService, lootStorageGUI);
@@ -43,11 +44,13 @@ public class EnderStorageModule {
     }
 
     public void disable() {
+        MessageUtils.unregisterModuleMessages("enderstorage");
         lootStorageService.shutdown();
     }
 
     public void reload() {
         configManager.loadAll();
+        MessageUtils.registerModuleMessages("enderstorage", configManager.getMessagesForMerge());
         lootStorageService.reload();
         this.lootStorageGUI = new LootStorageGUI(plugin, configManager, lootStorageService);
         this.enderCommand = new EnderStorageCommand(plugin, configManager, lootStorageService, lootStorageGUI);

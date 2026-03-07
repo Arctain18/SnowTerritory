@@ -40,6 +40,7 @@ public class QuestModule {
 
     public void enable() {
         configManager.loadAll();
+        MessageUtils.registerModuleMessages("quest", configManager.getMessagesForMerge());
         questService.initialize();
         
         this.questCommand = new QuestCommand(plugin, configManager, questService, databaseDao);
@@ -51,6 +52,7 @@ public class QuestModule {
     }
 
     public void disable() {
+        MessageUtils.unregisterModuleMessages("quest");
         questService.shutdown();
         if (databaseDao != null) {
             databaseDao.close();
@@ -59,6 +61,7 @@ public class QuestModule {
 
     public void reload() {
         configManager.loadAll();
+        MessageUtils.registerModuleMessages("quest", configManager.getMessagesForMerge());
         questService.reload();
         
         this.questCommand = new QuestCommand(plugin, configManager, questService, databaseDao);

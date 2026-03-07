@@ -56,42 +56,9 @@ messages:
     # 重载成功提示
     reload-success: "&a✓ &f插件配置已重载！"
     
-  # 强化相关消息
-  reinforce:
-    # 无效物品提示
-    invalid-item: "&c✗ &f此物品不可强化！"
-    # 不可强化提示
-    not-reinforceable: "&c✗ &f此物品不可强化！"
-    # 金币不足提示
-    # 占位符: {cost} - 需要的金币数量 (已格式化，包含颜色代码)
-    insufficient-gold: "&c✗ &f金币不足！需要: &e{cost}"
-    # 点券不足提示
-    # 占位符: {cost} - 需要的点券数量 (已格式化，包含颜色代码)
-    insufficient-points: "&c✗ &f点券不足！需要: &e{cost}"
-    # 材料不足提示
-    # 占位符: {count} - 需要的材料数量 (已格式化，包含颜色代码)
-    insufficient-materials: "&c✗ &f强化材料不足！需要: &e{count} &f个"
-    # 强化成功标题
-    success-title: "&a&l✓ 强化成功！"
-    # 强化成功等级提示
-    # 占位符: {level} - 新的强化等级 (数字)
-    success-level: "&7等级提升至: &a&l+{level}"
-    # 强化失败标题
-    fail-title: "&c&l✗ 强化失败！"
-    # 强化失败等级提示
-    # 占位符: {level} - 新的强化等级 (数字)
-    fail-level: "&7等级下降至: &c&l+{level}"
-    # 强化维持标题
-    maintain-title: "&e&l⚠ 强化维持不变"
-    # 强化维持描述
-    maintain-desc: "&7物品等级未发生变化"
-    # 强化错误提示
-    # 占位符: {error} - 错误消息文本
-    error: "&c✗ &f强化过程中发生错误: &e{error}"
-    # 强化取消提示
-    cancelled: "&e⚠ &f强化已取消。"
+  # 强化/任务/GUI 消息由各模块配置提供（reinforce/config.yml、quest/messages/zh_CN.yml）
     
-  # 物品信息相关消息
+  # 物品信息相关消息（全局，checkid 等命令使用）
   item:
     # 未手持物品提示
     no-item: "&c✗ &f请手持一个物品！"
@@ -122,11 +89,6 @@ messages:
     # 战利品仓库命令帮助
     enderstorage: "&e/sn es &7- &f打开战利品仓库界面"
   
-  # GUI相关消息
-  gui:
-    # 背包满时警告消息
-    inventory-full: "&e⚠ &f背包已满！部分物品已掉落在地上。"
-    
   # 分隔线 (用于美化消息显示)
   separator: "&8&m                                        "
 

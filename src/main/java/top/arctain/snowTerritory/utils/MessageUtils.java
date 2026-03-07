@@ -1,10 +1,15 @@
 package top.arctain.snowTerritory.utils;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import top.arctain.snowTerritory.config.PluginConfig;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 /**
@@ -15,6 +20,7 @@ public class MessageUtils {
 
     private static JavaPlugin plugin;
     private static PluginConfig config;
+    private static final Map<String, Map<String, String>> moduleMessageMaps = new ConcurrentHashMap<>();
     private static final String CONSOLE_PREFIX = "[SnowTerritory] ";
     private static final String ANSI_BOLD = "\u001B[1m";
     private static final String ANSI_RESET = "\u001B[0m";
@@ -32,6 +38,22 @@ public class MessageUtils {
      */
     public static void setConfig(PluginConfig pluginConfig) {
         config = pluginConfig;
+    }
+
+    /**
+     * 注册模块消息（由各模块在 enable 时调用，无需合并进主配置）
+     */
+    public static void registerModuleMessages(String prefix, Map<String, String> messages) {
+        if (messages != null) {
+            moduleMessageMaps.put(prefix, messages);
+        }
+    }
+
+    /**
+     * 注销模块消息（由各模块在 disable 时调用）
+     */
+    public static void unregisterModuleMessages(String prefix) {
+        moduleMessageMaps.remove(prefix);
     }
     
     /**
@@ -76,13 +98,25 @@ public class MessageUtils {
     
     /**
      * 获取配置的消息，如果不存在则使用默认值
+     * 优先从模块消息源查找，再回退到主配置
      */
     private static String getMessage(String key, String defaultValue, String... placeholders) {
         String message = defaultValue;
-        if (config != null) {
+        String fullKey = "messages." + key;
+        int dot = key.indexOf('.');
+        if (dot > 0) {
+            String prefix = key.substring(0, dot);
+            Map<String, String> moduleMap = moduleMessageMaps.get(prefix);
+            if (moduleMap != null) {
+                String moduleMsg = moduleMap.get(fullKey);
+                if (moduleMsg != null && !moduleMsg.isEmpty()) {
+                    message = moduleMsg;
+                }
+            }
+        }
+        if (message.equals(defaultValue) && config != null) {
             String configMessage = config.getMessage(key);
-            // 如果配置中有消息且不是空字符串，且不等于key（说明找到了配置），则使用配置的消息
-            if (configMessage != null && !configMessage.isEmpty() && !configMessage.equals(key) && !configMessage.equals("messages." + key)) {
+            if (configMessage != null && !configMessage.isEmpty() && !configMessage.equals(key) && !configMessage.equals(fullKey)) {
                 message = configMessage;
             }
         }
@@ -164,6 +198,30 @@ public class MessageUtils {
         if (sender != null) {
             sender.sendMessage(colorize(message));
         }
+    }
+
+    /**
+     * 发送带悬停的悬赏任务公告（使用 Adventure Component）
+     * @param player 接收玩家
+     * @param questDesc 任务描述（已格式化）
+     * @param areaPlaceholder 任务区域占位文本（悬停时显示，暂用占位符如"待配置"）
+     */
+    public static void sendBountyAnnouncementWithHover(Player player, String questDesc, String areaPlaceholder) {
+        if (player == null) return;
+        String announcementKey = "quest.bounty-announcement";
+        String hoverKey = "quest.bounty-hover-area";
+        String announcement = getMessage(announcementKey,
+                "&6✦ &e[悬赏任务] &f{quest} &8| &7完成任务可获得丰厚奖励",
+                "quest", questDesc);
+        String hoverRaw = getMessage(hoverKey,
+                "&8━━━━━━━━━━━━━━━━━━\n&6◆ 任务区域\n&7{area}\n&8━━━━━━━━━━━━━━━━━━",
+                "area", areaPlaceholder);
+        String prefix = getPrefix(announcementKey);
+        String fullText = colorize(prefix + announcement);
+        String hoverText = colorize(hoverRaw);
+        Component display = LegacyComponentSerializer.legacySection().deserialize(fullText)
+                .hoverEvent(HoverEvent.showText(LegacyComponentSerializer.legacySection().deserialize(hoverText)));
+        player.sendMessage(display);
     }
 
     /**

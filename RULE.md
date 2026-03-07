@@ -98,9 +98,22 @@ public void updateAvailableBalance(BigDecimal isolatedMargin) { }
 
 ## 8. 配置与消息
 
-- 默认配置：`DefaultFiles` 用 Java 文本块定义，首次运行写入
-- 消息：统一通过 `MessageUtils.sendConfigMessage()`，键从 `config.yml` 读取
+- 默认配置：从 `default-configs/` 资源复制，首次运行写入 `plugins/SnowTerritory/`
+- 消息：统一通过 `MessageUtils.sendConfigMessage()` 发送
 - 占位符：`{key}` 格式，如 `{level}`、`{player}`
+
+### 8.1 主配置与模块配置不重复
+
+- **主配置**（`config.yml`）仅保留全局消息：`command`、`item`、`help`、`separator`、`debug` 等
+- **模块消息** 由各模块自身配置提供，不写入主配置
+
+### 8.2 模块消息注册（不合并）
+
+- 模块在 `enable()` 时调用 `MessageUtils.registerModuleMessages(prefix, messages)`
+- 模块在 `disable()` 时调用 `MessageUtils.unregisterModuleMessages(prefix)`
+- 模块在 `reload()` 时重新注册（覆盖旧消息）
+- ConfigManager 提供 `getMessagesForMerge()`，返回 `messages.{模块}.*` 格式的 Map
+- MessageUtils 查找消息时优先从模块注册表查找，再回退到主配置
 
 ---
 

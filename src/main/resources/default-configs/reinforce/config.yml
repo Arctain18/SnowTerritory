@@ -187,39 +187,6 @@ messages:
     # 强化取消提示
     cancelled: "&e⚠ &f强化已取消。"
 
-  # 物品信息相关消息
-  item:
-    # 未手持物品提示
-    no-item: "&c✗ &f请手持一个物品！"
-    # 非MMOItems物品提示
-    not-mmoitem: "&e⚠ &f这不是一个 MMOItems 物品！"
-    # 获取物品信息错误提示
-    # 占位符: {error} - 错误消息文本 (仅在异常时使用)
-    info-error: "&c✗ &f无法获取物品信息！"
-    # 物品信息标题
-    info-title: "物品信息"
-    # 物品类型显示
-    # 占位符: {type} - 物品类型 (如: "SWORD", "AXE", "BOW")
-    info-type: "&6类型: &f{type}"
-    # 物品ID显示
-    # 占位符: {id} - MMOItems物品的唯一标识符
-    info-id: "&6 ID: &e&l{id}"
-
-  # 帮助信息
-  help:
-    # 帮助标题
-    title: "SnowTerritory 命令帮助"
-    # 强化命令帮助
-    reinforce: "&e/sn reinforce &7- &f打开物品强化界面"
-    # 重载命令帮助
-    reload: "&e/sn reload &7- &f重载插件配置"
-    # 查看ID命令帮助
-    checkid: "&e/sn checkID &7- &f查看手中物品的MMOItems ID"
-
-  # GUI相关消息
+  # GUI相关消息（强化模块）
   gui:
-    # 背包满时警告消息
     inventory-full: "&e⚠ &f背包已满！部分物品已掉落在地上。"
-
-  # 分隔线 (用于美化消息显示)
-  separator: "&8&m                                        "

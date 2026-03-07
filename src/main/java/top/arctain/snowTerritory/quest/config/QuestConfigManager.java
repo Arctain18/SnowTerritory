@@ -139,5 +139,15 @@ public class QuestConfigManager {
     public File getBaseDir() {
         return baseDir;
     }
+
+    /** 获取任务模块消息用于合并到主配置（供 MessageUtils 使用） */
+    public Map<String, String> getMessagesForMerge() {
+        FileConfiguration pack = messagePacks.get("zh_CN");
+        if (pack == null && !messagePacks.isEmpty()) {
+            pack = messagePacks.values().iterator().next();
+        }
+        if (pack == null) return Map.of();
+        return ConfigUtils.loadMessagesRecursive("messages.quest", pack);
+    }
 }
 

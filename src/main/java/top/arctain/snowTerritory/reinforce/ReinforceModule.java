@@ -25,6 +25,9 @@ public class ReinforceModule {
 
     public void enable() {
         configManager.loadAll();
+        var messages = configManager.getMessagesForMerge();
+        MessageUtils.registerModuleMessages("reinforce", messages);
+        MessageUtils.registerModuleMessages("gui", messages);
         this.reinforceGUI = new ReinforceGUI(configManager, plugin);
         this.reinforceCommand = new ReinforceCommand(plugin, reinforceGUI);
 
@@ -34,11 +37,15 @@ public class ReinforceModule {
     }
 
     public void disable() {
-        // 可以在这里添加清理逻辑
+        MessageUtils.unregisterModuleMessages("reinforce");
+        MessageUtils.unregisterModuleMessages("gui");
     }
 
     public void reload() {
         configManager.reload();
+        var messages = configManager.getMessagesForMerge();
+        MessageUtils.registerModuleMessages("reinforce", messages);
+        MessageUtils.registerModuleMessages("gui", messages);
         this.reinforceGUI = new ReinforceGUI(configManager, plugin);
         this.reinforceCommand = new ReinforceCommand(plugin, reinforceGUI);
     }

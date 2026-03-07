@@ -94,6 +94,16 @@ public class EnderStorageConfigManager {
         return baseDir;
     }
 
+    /** 获取模块消息用于注册到 MessageUtils（供 enderstorage.* 键查找） */
+    public Map<String, String> getMessagesForMerge() {
+        FileConfiguration pack = messagePacks.get("zh_CN");
+        if (pack == null && !messagePacks.isEmpty()) {
+            pack = messagePacks.values().iterator().next();
+        }
+        if (pack == null) return Map.of();
+        return ConfigUtils.loadMessagesRecursive("messages.enderstorage", pack);
+    }
+
     // ===== GUI 辅助方法 =====
 
     /** 获取默认物品 lore 模板，占位符: {amount} {max} */

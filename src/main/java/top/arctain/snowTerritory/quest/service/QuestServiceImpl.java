@@ -375,15 +375,18 @@ public class QuestServiceImpl implements QuestService {
     }
     
     private void broadcastBountyQuest(Quest quest) {
-        
-        // 向所有在线玩家发送悬赏任务公告
+        String questDesc = quest.getDescription();
+        // 任务区域占位符（暂用，后续可接入实际区域配置）
+        String areaPlaceholder = getBountyAreaPlaceholder(quest);
         for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
-            MessageUtils.sendConfigMessage(player, "quest.bounty-announcement",
-                    "&6[悬赏任务] &e{quest} &7- &f完成任务可获得丰厚奖励！",
-                    "quest", quest.getDescription());
+            MessageUtils.sendBountyAnnouncementWithHover(player, questDesc, areaPlaceholder);
         }
-        
-        MessageUtils.logInfo("悬赏任务已发布: " + quest.getDescription());
+        MessageUtils.logInfo("悬赏任务已发布: " + questDesc);
+    }
+
+    /** 获取悬赏任务区域占位文本（暂用占位符，后续可接入实际区域配置） */
+    private String getBountyAreaPlaceholder(Quest quest) {
+        return "待配置";
     }
     
     // ==================== 任务生成 ====================
