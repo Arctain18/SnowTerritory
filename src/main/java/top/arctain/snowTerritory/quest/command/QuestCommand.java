@@ -14,9 +14,13 @@ import top.arctain.snowTerritory.quest.service.QuestService;
 import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.DisplayUtils;
 import top.arctain.snowTerritory.quest.utils.QuestUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * 任务命令处理器
@@ -215,7 +219,7 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * 处理设置等级上限
+     * 处理设置等级：/sn q setlevel <等级> [玩家]。无玩家参数则给发送者设置；给他人设置需 OP。
      */
     private boolean handleSetLevel(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
@@ -226,28 +230,60 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
 
         if (args.length < 2) {
             MessageUtils.sendConfigMessage(player, "quest.setlevel-usage",
-                    "&c✗ &f用法: /quest setlevel <等级>");
+                    "&c✗ &f用法: /sn q setlevel <等级> [玩家]");
             return true;
         }
 
+        int level;
         try {
-            int level = Integer.parseInt(args[1]);
-            if (level < 1) {
-                MessageUtils.sendConfigMessage(player, "quest.setlevel-invalid",
-                        "&c✗ &f等级必须大于等于1");
-                return true;
-            }
-
-            databaseDao.setMaxMaterialLevel(player.getUniqueId(), level);
-            MessageUtils.sendConfigMessage(player, "quest.setlevel-success",
-                    "&a✓ &f已设置材料任务等级上限为: &e{level}",
-                    "level", String.valueOf(level));
-            return true;
+            level = Integer.parseInt(args[1]);
         } catch (NumberFormatException e) {
             MessageUtils.sendConfigMessage(player, "quest.setlevel-invalid",
-                    "&c✗ &f无效的等级数字");
+                    "&c✗ &f等级必须是整数", "reason", "等级必须是整数");
             return true;
         }
+
+        Set<Integer> validLevels = configManager.getValidMaterialLevels();
+        if (!validLevels.contains(level)) {
+            MessageUtils.sendConfigMessage(player, "quest.setlevel-invalid",
+                    "&c✗ &f等级必须在 rewards/level.yml 的键范围内", "reason",
+                    "等级必须在 rewards/level.yml 的键范围内: " + validLevels);
+            return true;
+        }
+
+        UUID targetId;
+        String targetName;
+        if (args.length >= 3) {
+            if (!player.isOp()) {
+                MessageUtils.sendConfigMessage(player, "quest.no-permission",
+                        "&c✗ &f没有权限");
+                return true;
+            }
+            String name = args[2];
+            Player online = Bukkit.getPlayer(name);
+            if (online != null) {
+                targetId = online.getUniqueId();
+                targetName = online.getName();
+            } else {
+                OfflinePlayer offline = Bukkit.getOfflinePlayerIfCached(name);
+                if (offline == null || !offline.hasPlayedBefore()) {
+                    MessageUtils.sendConfigMessage(player, "quest.setlevel-player-not-found",
+                            "&c✗ &f未找到玩家: {name}", "name", name);
+                    return true;
+                }
+                targetId = offline.getUniqueId();
+                targetName = offline.getName() != null ? offline.getName() : name;
+            }
+        } else {
+            targetId = player.getUniqueId();
+            targetName = player.getName();
+        }
+
+        databaseDao.setMaxMaterialLevel(targetId, level);
+        MessageUtils.sendConfigMessage(player, "quest.setlevel-success",
+                "&a✓ &f已设置 {player} 的材料任务等级为 {level}",
+                "player", targetName, "level", String.valueOf(level));
+        return true;
     }
 
     /**
@@ -282,6 +318,16 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         } else if (args.length == 2 && args[0].equalsIgnoreCase("accept")) {
             list.add("material");
             list.add("kill");
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("setlevel")) {
+            String input = args[1].toLowerCase();
+            for (Integer l : configManager.getValidMaterialLevels()) {
+                if (String.valueOf(l).startsWith(input)) list.add(String.valueOf(l));
+            }
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("setlevel") && sender.isOp()) {
+            String input = args[2].toLowerCase();
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.getName().toLowerCase().startsWith(input)) list.add(p.getName());
+            }
         }
         return list;
     }

@@ -10,6 +10,8 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 管理 quest 配置的加载与默认文件生成。
@@ -114,6 +116,23 @@ public class QuestConfigManager {
 
     public FileConfiguration getRewardsLevel() {
         return rewardsLevel;
+    }
+
+    /** 有效材料任务等级集合，来自 rewards/level.yml 的 level 键 */
+    public Set<Integer> getValidMaterialLevels() {
+        if (rewardsLevel == null) return Set.of(1);
+        var section = rewardsLevel.getConfigurationSection("level");
+        if (section == null) return Set.of(1);
+        return section.getKeys(false).stream()
+                .map(k -> {
+                    try {
+                        return Integer.parseInt(k);
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                })
+                .filter(i -> i != null)
+                .collect(Collectors.toSet());
     }
 
     public FileConfiguration getBonusTimeBonus() {
