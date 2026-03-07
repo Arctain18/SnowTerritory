@@ -1,0 +1,29 @@
+crops:
+  WHEAT:
+    display-name: "小麦"
+    mmo-type: "MATERIAL"
+    mmo-id: "优质小麦"
+    min: 16
+    max: 64
+    crop-level: 1
+  CARROTS:
+    display-name: "胡萝卜"
+    mmo-type: "MATERIAL"
+    mmo-id: "优质胡萝卜"
+    min: 16
+    max: 64
+    crop-level: 1
+  POTATOES:
+    display-name: "马铃薯"
+    mmo-type: "MATERIAL"
+    mmo-id: "优质马铃薯"
+    min: 16
+    max: 64
+    crop-level: 1
+  BEETROOTS:
+    display-name: "甜菜根"
+    mmo-type: "MATERIAL"
+    mmo-id: "优质甜菜根"
+    min: 16
+    max: 64
+    crop-level: 1

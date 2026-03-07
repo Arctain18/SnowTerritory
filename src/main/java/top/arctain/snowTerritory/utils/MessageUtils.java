@@ -131,6 +131,13 @@ public class MessageUtils {
     }
     
     /**
+     * 获取配置消息（不发送），用于 Title 等需要原始字符串的场景
+     */
+    public static String getConfigMessage(String key, String defaultValue, String... placeholders) {
+        return getMessage(key, defaultValue, placeholders);
+    }
+
+    /**
      * 发送配置消息（从配置文件读取，根据配置键自动选择前缀）
      * @param sender 接收者
      * @param key 配置键（用于判断使用哪个前缀，如 reinforce.xxx 使用 Reinforce 前缀，enderstorage.xxx 使用 EnderStorage 前缀）

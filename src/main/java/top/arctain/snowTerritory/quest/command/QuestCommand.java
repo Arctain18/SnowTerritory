@@ -92,10 +92,12 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
             String typeStr = args[1].toUpperCase();
             if (typeStr.equals("KILL")) {
                 type = QuestType.KILL;
-                // TODO: 击杀任务尚未实现
                 MessageUtils.sendConfigMessage(player, "quest.kill-not-implemented",
                         "&c✗ &f击杀任务尚未实现");
                 return true;
+            }
+            if (typeStr.equals("COLLECT")) {
+                type = QuestType.COLLECT;
             }
         }
 

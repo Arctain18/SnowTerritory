@@ -27,8 +27,10 @@ public class QuestConfigManager {
     private FileConfiguration rewardsLevel;
     private FileConfiguration bonusTimeBonus;
     private FileConfiguration materialsWhitelist;
+    private FileConfiguration cropsWhitelist;
     private FileConfiguration bountyConfig;
     private FileConfiguration tasksMaterial;
+    private FileConfiguration tasksCollect;
     private FileConfiguration tasksKill;
 
     public QuestConfigManager(Main plugin) {
@@ -43,6 +45,7 @@ public class QuestConfigManager {
         loadRewards();
         loadBonus();
         loadMaterials();
+        loadCrops();
         loadBounty();
         loadTasks();
     }
@@ -57,8 +60,10 @@ public class QuestConfigManager {
         ConfigUtils.copyResourceIfMissing(plugin, "quest/rewards/level.yml", new File(baseDir, "rewards/level.yml"));
         ConfigUtils.copyResourceIfMissing(plugin, "quest/bonus/time-bonus.yml", new File(baseDir, "bonus/time-bonus.yml"));
         ConfigUtils.copyResourceIfMissing(plugin, "quest/materials/whitelist.yml", new File(baseDir, "materials/whitelist.yml"));
+        ConfigUtils.copyResourceIfMissing(plugin, "quest/crops/whitelist.yml", new File(baseDir, "crops/whitelist.yml"));
         ConfigUtils.copyResourceIfMissing(plugin, "quest/bounty/config.yml", new File(baseDir, "bounty/config.yml"));
         ConfigUtils.copyResourceIfMissing(plugin, "quest/tasks/material.yml", new File(baseDir, "tasks/material.yml"));
+        ConfigUtils.copyResourceIfMissing(plugin, "quest/tasks/collect.yml", new File(baseDir, "tasks/collect.yml"));
         ConfigUtils.copyResourceIfMissing(plugin, "quest/tasks/kill.yml", new File(baseDir, "tasks/kill.yml"));
     }
 
@@ -93,12 +98,17 @@ public class QuestConfigManager {
         this.materialsWhitelist = YamlConfiguration.loadConfiguration(new File(baseDir, "materials/whitelist.yml"));
     }
 
+    private void loadCrops() {
+        this.cropsWhitelist = YamlConfiguration.loadConfiguration(new File(baseDir, "crops/whitelist.yml"));
+    }
+
     private void loadBounty() {
         this.bountyConfig = YamlConfiguration.loadConfiguration(new File(baseDir, "bounty/config.yml"));
     }
 
     private void loadTasks() {
         this.tasksMaterial = YamlConfiguration.loadConfiguration(new File(baseDir, "tasks/material.yml"));
+        this.tasksCollect = YamlConfiguration.loadConfiguration(new File(baseDir, "tasks/collect.yml"));
         this.tasksKill = YamlConfiguration.loadConfiguration(new File(baseDir, "tasks/kill.yml"));
     }
 
@@ -143,12 +153,20 @@ public class QuestConfigManager {
         return materialsWhitelist;
     }
 
+    public FileConfiguration getCropsWhitelist() {
+        return cropsWhitelist;
+    }
+
     public FileConfiguration getBountyConfig() {
         return bountyConfig;
     }
 
     public FileConfiguration getTasksMaterial() {
         return tasksMaterial;
+    }
+
+    public FileConfiguration getTasksCollect() {
+        return tasksCollect;
     }
 
     public FileConfiguration getTasksKill() {

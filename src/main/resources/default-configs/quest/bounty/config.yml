@@ -4,8 +4,8 @@ bounty:
   interval-max: 40
   # 悬赏系数（奖励倍数）
   bounty-bonus: 1.5
-  # 允许的任务类型: MATERIAL, KILL, BOTH
-  allowed-types: MATERIAL
+  # 允许的任务类型: MATERIAL, KILL, COLLECT, BOTH
+  allowed-types: MATERIAL,COLLECT
   # 消息配置
   messages:
     # 悬赏公告 (%material%=物品名, %amount%=数量)

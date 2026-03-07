@@ -1,0 +1,5 @@
+# 采集任务配置
+# 任务将从 crops/whitelist.yml 中随机选择作物
+collect:
+  # 默认时间限制（毫秒），-1表示无限制
+  default-time-limit: -1

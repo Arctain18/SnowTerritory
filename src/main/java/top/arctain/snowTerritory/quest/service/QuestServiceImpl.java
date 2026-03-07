@@ -10,6 +10,7 @@ import top.arctain.snowTerritory.quest.data.QuestDatabaseDao;
 import top.arctain.snowTerritory.quest.data.QuestReleaseMethod;
 import top.arctain.snowTerritory.quest.data.QuestStatus;
 import top.arctain.snowTerritory.quest.data.QuestType;
+import top.arctain.snowTerritory.quest.service.generator.CollectQuestGenerator;
 import top.arctain.snowTerritory.quest.service.generator.MaterialQuestGenerator;
 import top.arctain.snowTerritory.quest.service.generator.QuestGenerator;
 import top.arctain.snowTerritory.quest.service.reward.DefaultRewardDistributor;
@@ -72,7 +73,7 @@ public class QuestServiceImpl implements QuestService {
     private Map<QuestType, QuestGenerator> initializeGenerators() {
         Map<QuestType, QuestGenerator> map = new EnumMap<>(QuestType.class);
         map.put(QuestType.MATERIAL, new MaterialQuestGenerator(configManager, databaseDao));
-        // TODO: 添加 KillQuestGenerator
+        map.put(QuestType.COLLECT, new CollectQuestGenerator(configManager, databaseDao));
         return map;
     }
     
@@ -173,7 +174,7 @@ public class QuestServiceImpl implements QuestService {
         
         for (int i = 0; i < quests.size(); i++) {
             Quest quest = quests.get(i);
-            if (!isMatchingMaterialQuest(quest, materialKey)) {
+            if (!isMatchingQuest(quest, materialKey)) {
                 continue;
             }
             
@@ -192,7 +193,7 @@ public class QuestServiceImpl implements QuestService {
         synchronized (bountyQuests) {
             for (int i = 0; i < bountyQuests.size(); i++) {
                 Quest quest = bountyQuests.get(i);
-                if (!isMatchingMaterialQuest(quest, materialKey)) {
+                if (!isMatchingQuest(quest, materialKey)) {
                     continue;
                 }
                 
@@ -203,10 +204,11 @@ public class QuestServiceImpl implements QuestService {
         return false;
     }
     
-    private boolean isMatchingMaterialQuest(Quest quest, String materialKey) {
-        return isActiveAndNotExpired(quest)
-                && quest.getType() == QuestType.MATERIAL
-                && quest.getMaterialKey().equals(materialKey);
+    private boolean isMatchingQuest(Quest quest, String materialKey) {
+        if (!isActiveAndNotExpired(quest) || !quest.getMaterialKey().equals(materialKey)) {
+            return false;
+        }
+        return quest.getType() == QuestType.MATERIAL || quest.getType() == QuestType.COLLECT;
     }
     
     private Quest applyProgress(Quest quest, int amount) {
@@ -351,19 +353,27 @@ public class QuestServiceImpl implements QuestService {
     
     private QuestType determineBountyQuestType(FileConfiguration config) {
         String allowedTypes = config.getString("bounty.allowed-types", "MATERIAL");
-        
-        switch (allowedTypes.toUpperCase()) {
-            case "MATERIAL":
-                return QuestType.MATERIAL;
-            case "KILL":
-                // TODO: 实现击杀任务后返回 QuestType.KILL
-                return null;
-            case "BOTH":
-                QuestType type = new Random().nextBoolean() ? QuestType.MATERIAL : QuestType.KILL;
-                return type == QuestType.KILL ? null : type; // TODO: 移除null判断
-            default:
-                return QuestType.MATERIAL;
+        String[] types = allowedTypes.toUpperCase().split("[, ]+");
+        List<QuestType> valid = new ArrayList<>();
+        for (String t : types) {
+            QuestType qt = parseQuestType(t.trim());
+            if (qt != null) {
+                valid.add(qt);
+            }
         }
+        if (valid.isEmpty()) {
+            return QuestType.MATERIAL;
+        }
+        return valid.get(new Random().nextInt(valid.size()));
+    }
+
+    private QuestType parseQuestType(String s) {
+        return switch (s) {
+            case "MATERIAL" -> QuestType.MATERIAL;
+            case "COLLECT" -> QuestType.COLLECT;
+            case "KILL" -> null;
+            default -> null;
+        };
     }
     
     private void addBountyQuest(Quest quest) {

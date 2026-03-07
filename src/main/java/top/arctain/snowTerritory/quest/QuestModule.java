@@ -6,6 +6,7 @@ import top.arctain.snowTerritory.quest.command.QuestCommand;
 import top.arctain.snowTerritory.quest.config.QuestConfigManager;
 import top.arctain.snowTerritory.quest.data.QuestDatabaseDao;
 import top.arctain.snowTerritory.quest.data.SqliteQuestDatabaseDao;
+import top.arctain.snowTerritory.quest.listener.CollectHarvestListener;
 import top.arctain.snowTerritory.quest.listener.QuestListener;
 import top.arctain.snowTerritory.quest.service.QuestService;
 import top.arctain.snowTerritory.quest.service.QuestServiceImpl;
@@ -24,6 +25,7 @@ public class QuestModule {
     private final QuestService questService;
     private QuestCommand questCommand;
     private QuestListener questListener;
+    private CollectHarvestListener collectHarvestListener;
 
     public QuestModule(Main plugin) {
         this.plugin = plugin;
@@ -45,6 +47,7 @@ public class QuestModule {
         
         this.questCommand = new QuestCommand(plugin, configManager, questService, databaseDao);
         this.questListener = new QuestListener(plugin, questService, configManager);
+        this.collectHarvestListener = new CollectHarvestListener(questService, configManager);
 
         registerListeners();
 
@@ -71,6 +74,7 @@ public class QuestModule {
     private void registerListeners() {
         PluginManager pm = plugin.getServer().getPluginManager();
         pm.registerEvents(questListener, plugin);
+        pm.registerEvents(collectHarvestListener, plugin);
     }
 
     public QuestService getQuestService() {
