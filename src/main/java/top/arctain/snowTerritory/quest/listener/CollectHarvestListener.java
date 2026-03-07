@@ -5,6 +5,7 @@ import net.Indyuce.mmoitems.api.item.mmoitem.MMOItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
+import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.block.Block;
@@ -20,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import top.arctain.snowTerritory.quest.config.QuestConfigManager;
+import top.arctain.snowTerritory.quest.utils.QuestUtils;
 import top.arctain.snowTerritory.quest.data.Quest;
 import top.arctain.snowTerritory.quest.data.QuestReleaseMethod;
 import top.arctain.snowTerritory.quest.data.QuestStatus;
@@ -71,17 +73,23 @@ public class CollectHarvestListener implements Listener {
         event.setCancelled(true);
 
         Player player = event.getPlayer();
-        String displayName = cropConfig.getString("display-name", cropType);
         String mmoType = cropConfig.getString("mmo-type");
         String mmoId = cropConfig.getString("mmo-id");
         if (mmoType == null || mmoId == null) {
             return;
         }
 
+        String cropDisplayName = QuestUtils.getMMOItemDisplayName(mmoType + ":" + mmoId);
+        if (cropDisplayName == null) {
+            cropDisplayName = cropType;
+        }
+
+        block.getWorld().playEffect(block.getLocation(), Effect.STEP_SOUND, block.getBlockData());
+
         ageable.setAge(0);
         block.setBlockData(ageable);
 
-        sendCollectTitle(player, displayName);
+        sendCollectTitle(player, cropDisplayName);
         player.incrementStatistic(Statistic.MINE_BLOCK, block.getType());
 
         ItemStack item = createMMOItem(mmoType, mmoId);
@@ -109,12 +117,17 @@ public class CollectHarvestListener implements Listener {
     }
 
     private void sendCollectTitle(Player player, String cropName) {
+        FileConfiguration tasksCollect = configManager.getTasksCollect();
+        long fadeIn = tasksCollect != null ? tasksCollect.getLong("collect.title-fade-in", 500) : 500;
+        long stay = tasksCollect != null ? tasksCollect.getLong("collect.title-stay", 2000) : 2000;
+        long fadeOut = tasksCollect != null ? tasksCollect.getLong("collect.title-fade-out", 500) : 500;
+
         String title = MessageUtils.getConfigMessage("quest.collect-success-title", "&a采集成功");
         String subtitle = MessageUtils.getConfigMessage("quest.collect-success-subtitle", "&7+1 {crop}", "crop", cropName);
         Component titleComp = LegacyComponentSerializer.legacySection().deserialize(ColorUtils.colorize(title));
         Component subtitleComp = LegacyComponentSerializer.legacySection().deserialize(ColorUtils.colorize(subtitle));
         player.showTitle(Title.title(titleComp, subtitleComp,
-                Title.Times.times(Duration.ofMillis(500), Duration.ofMillis(2000), Duration.ofMillis(500))));
+                Title.Times.times(Duration.ofMillis(fadeIn), Duration.ofMillis(stay), Duration.ofMillis(fadeOut))));
     }
 
     private ItemStack createMMOItem(String mmoType, String mmoId) {

@@ -3,3 +3,7 @@
 collect:
   # 默认时间限制（毫秒），-1表示无限制
   default-time-limit: -1
+  # 采集成功 Title 显示时长（毫秒）
+  title-fade-in: 250
+  title-stay: 1000
+  title-fade-out: 250

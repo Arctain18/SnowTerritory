@@ -88,7 +88,10 @@ public class CollectQuestGenerator implements QuestGenerator {
         int level = selected.cropLevel;
         long timeLimit = tasksCollect.getLong("collect.default-time-limit", DEFAULT_TIME_LIMIT);
         String materialKey = CROP_KEY_PREFIX + selected.cropType;
-        String materialName = selected.displayName;
+        String materialName = QuestUtils.getMMOItemDisplayName(selected.mmoType + ":" + selected.mmoId);
+        if (materialName == null) {
+            materialName = selected.cropType;
+        }
 
         return new Quest(
                 UUID.randomUUID(),
@@ -132,7 +135,6 @@ public class CollectQuestGenerator implements QuestGenerator {
         if (section == null) {
             return null;
         }
-        String displayName = section.getString("display-name", cropType);
         String mmoType = section.getString("mmo-type");
         String mmoId = section.getString("mmo-id");
         if (mmoType == null || mmoId == null) {
@@ -141,21 +143,19 @@ public class CollectQuestGenerator implements QuestGenerator {
         int min = section.getInt("min", DEFAULT_MIN_AMOUNT);
         int max = section.getInt("max", DEFAULT_MAX_AMOUNT);
         int cropLevel = section.getInt("crop-level", DEFAULT_CROP_LEVEL);
-        return new CropEntry(cropType, displayName, mmoType, mmoId, min, max, cropLevel);
+        return new CropEntry(cropType, mmoType, mmoId, min, max, cropLevel);
     }
 
     private static class CropEntry {
         final String cropType;
-        final String displayName;
         final String mmoType;
         final String mmoId;
         final int min;
         final int max;
         final int cropLevel;
 
-        CropEntry(String cropType, String displayName, String mmoType, String mmoId, int min, int max, int cropLevel) {
+        CropEntry(String cropType, String mmoType, String mmoId, int min, int max, int cropLevel) {
             this.cropType = cropType;
-            this.displayName = displayName;
             this.mmoType = mmoType;
             this.mmoId = mmoId;
             this.min = min;
