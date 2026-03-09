@@ -11,6 +11,7 @@ import top.arctain.snowTerritory.enderstorage.EnderStorageModule;
 import top.arctain.snowTerritory.utils.ConfigUtils;
 import top.arctain.snowTerritory.quest.QuestModule;
 import top.arctain.snowTerritory.reinforce.ReinforceModule;
+import top.arctain.snowTerritory.stfish.StfishModule;
 import top.arctain.snowTerritory.stocks.StocksModule;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
@@ -28,8 +29,9 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
     private final EnderStorageModule enderModule;
     private final QuestModule questModule;
     private final StocksModule stocksModule;
+    private final StfishModule stfishModule;
 
-    public SnowTerritoryCommand(Main plugin, PluginConfig config, ReinforceModule reinforceModule, DebugResetConfirmHandler debugResetHandler) {
+    public SnowTerritoryCommand(Main plugin, PluginConfig config, ReinforceModule reinforceModule, StfishModule stfishModule, DebugResetConfirmHandler debugResetHandler) {
         this.plugin = plugin;
         this.config = config;
         this.debugResetHandler = debugResetHandler;
@@ -38,6 +40,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         this.enderModule = plugin.getEnderStorageModule();
         this.questModule = plugin.getQuestModule();
         this.stocksModule = plugin.getStocksModule();
+        this.stfishModule = stfishModule;
     }
 
     @Override
@@ -62,6 +65,10 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             return handleQuest(sender, args);
         } else if (subCommand.equals("stock") || subCommand.equals("stocks")) {
             return handleStock(sender, args);
+        } else if (subCommand.equals("weather")) {
+            return handleWeather(sender, args);
+        } else if (subCommand.equals("fish")) {
+            return handleFish(sender, args);
         } else if (subCommand.equals("debug")) {
             return handleDebug(sender, args);
         } else {
@@ -115,6 +122,9 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         // 同步重载 Stocks 模块
         if (plugin.getStocksModule() != null) {
             plugin.getStocksModule().reload();
+        }
+        if (plugin.getStfishModule() != null) {
+            plugin.getStfishModule().reload();
         }
         MessageUtils.sendSuccess(sender, "command.reload-success", "&a✓ &f插件配置已重载！");
         return true;
@@ -187,6 +197,28 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
+     * 处理 Fish 子命令: /sn fish [atlas|give ...]
+     */
+    private boolean handleFish(CommandSender sender, String[] args) {
+        if (stfishModule == null || stfishModule.getStfishCommand() == null) {
+            MessageUtils.sendError(sender, "command.feature-missing", "&c✗ &fST Fish 功能未启用");
+            return true;
+        }
+        return stfishModule.getStfishCommand().onCommand(sender, null, "snowterritory fish", args);
+    }
+
+    /**
+     * 处理 Weather 子命令: /sn weather summon
+     */
+    private boolean handleWeather(CommandSender sender, String[] args) {
+        if (stfishModule == null || stfishModule.getStfishCommand() == null) {
+            MessageUtils.sendError(sender, "command.feature-missing", "&c✗ &fST Fish 功能未启用");
+            return true;
+        }
+        return stfishModule.getStfishCommand().onCommand(sender, null, "snowterritory weather", args);
+    }
+
+    /**
      * 处理 Stock 子命令: /sn stock ...
      */
     private boolean handleStock(CommandSender sender, String[] args) {
@@ -220,7 +252,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             String m = args[2].toLowerCase();
             if ("all".equals(m) || "全部".equals(m)) {
                 modules = null; // null 表示删除整个目录
-            } else if (!java.util.Set.of("reinforce", "enderstorage", "es", "quest", "stocks").contains(m)) {
+            } else if (!java.util.Set.of("reinforce", "enderstorage", "es", "quest", "stocks", "stfish").contains(m)) {
                 MessageUtils.sendConfigMessage(sender, "debug.invalid-module",
                         "&c✗ &f未知模块: {module}，可选: reinforce, enderstorage, quest, stocks, all", "module", m);
                 return true;
@@ -253,6 +285,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         if (enderModule != null) enderModule.reload();
         if (questModule != null) questModule.reload();
         if (stocksModule != null) stocksModule.reload();
+        if (stfishModule != null) stfishModule.reload();
         return count;
     }
 
@@ -265,6 +298,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
                 case "enderstorage" -> enderModule != null ? doResetModule(enderModule.getConfigManager().getBaseDir(), () -> enderModule.reload()) : 0;
                 case "quest" -> questModule != null ? doResetModule(questModule.getConfigManager().getBaseDir(), () -> questModule.reload()) : 0;
                 case "stocks" -> stocksModule != null ? doResetModule(stocksModule.getConfigManager().getBaseDir(), () -> stocksModule.reload()) : 0;
+                case "stfish" -> stfishModule != null ? doResetModule(stfishModule.getConfigManager().getBaseDir(), () -> stfishModule.reload()) : 0;
                 default -> 0;
             };
         }
@@ -301,12 +335,26 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             if ("stock".startsWith(input) || "stocks".startsWith(input)) {
                 completions.add("stock");
             }
+            if ("weather".startsWith(input)) {
+                completions.add("weather");
+            }
+            if ("fish".startsWith(input)) {
+                completions.add("fish");
+            }
             if ("debug".startsWith(input)) {
                 completions.add("debug");
             }
             return completions;
         }
 
+        if (args.length >= 2 && args[0].equalsIgnoreCase("fish")) {
+            if (stfishModule != null && stfishModule.getStfishCommand() != null) {
+                return stfishModule.getStfishCommand().onTabComplete(sender, command, "fish", args);
+            }
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("weather") && "summon".startsWith(args[1].toLowerCase())) {
+            return List.of("summon");
+        }
         if (args.length == 2 && args[0].equalsIgnoreCase("debug")) {
             if ("resetconfig".startsWith(args[1].toLowerCase())) {
                 return List.of("resetconfig");
@@ -319,6 +367,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             if ("enderstorage".startsWith(input) || "es".startsWith(input)) modules.add("enderstorage");
             if ("quest".startsWith(input)) modules.add("quest");
             if ("stocks".startsWith(input)) modules.add("stocks");
+            if ("stfish".startsWith(input)) modules.add("stfish");
             if ("all".startsWith(input) || "全部".startsWith(input)) modules.add("all");
             return modules;
         }

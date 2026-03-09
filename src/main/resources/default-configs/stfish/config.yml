@@ -1,0 +1,33 @@
+# ST Fish 钓鱼/天气模块配置
+
+weather:
+  summon-cost: 1000
+  storm-chance: 0.1
+
+quality-weights:
+  sun:
+    common: 50
+    rare: 30
+    epic: 12
+    legendary: 5
+    storm: 2
+    world: 1
+  rain:
+    common: 35
+    rare: 30
+    epic: 18
+    legendary: 10
+    storm: 5
+    world: 2
+  storm:
+    common: 20
+    rare: 25
+    epic: 25
+    legendary: 15
+    storm: 10
+    world: 5
+
+title:
+  fade-in: 300
+  stay: 1500
+  fade-out: 500

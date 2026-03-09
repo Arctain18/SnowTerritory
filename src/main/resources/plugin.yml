@@ -42,4 +42,13 @@ permissions:
   st.loot.admin:
     description: 管理战利品仓库
     default: op
+  st.fish.use:
+    description: 使用钓鱼功能
+    default: true
+  st.fish.weather:
+    description: 召唤天气
+    default: op
+  st.fish.give:
+    description: 给予玩家鱼类
+    default: op
 

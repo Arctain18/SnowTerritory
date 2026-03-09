@@ -76,6 +76,9 @@ public class MessageUtils {
             } else if (key.startsWith("quest.")) {
                 prefixKey = "prefix.quest";
                 defaultPrefix = "&{#4a95ff}ST &{#FFD700}Quest &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";
+            } else if (key.startsWith("stfish.")) {
+                prefixKey = "prefix.stfish";
+                defaultPrefix = "&{#4a95ff}ST &{#5dade2}Fish &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";
             } else {
                 prefixKey = "prefix.default";
                 defaultPrefix = "<g:#FFFFFF:#4A95FF>SnowTerritory</g> &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";

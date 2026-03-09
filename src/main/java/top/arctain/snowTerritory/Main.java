@@ -9,6 +9,7 @@ import top.arctain.snowTerritory.listeners.PlayerJoinListener;
 import top.arctain.snowTerritory.enderstorage.EnderStorageModule;
 import top.arctain.snowTerritory.quest.QuestModule;
 import top.arctain.snowTerritory.reinforce.ReinforceModule;
+import top.arctain.snowTerritory.stfish.StfishModule;
 import top.arctain.snowTerritory.stocks.StocksModule;
 import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.NBTUtils;
@@ -21,6 +22,7 @@ public class Main extends JavaPlugin {
     private ReinforceModule reinforceModule;
     private QuestModule questModule;
     private StocksModule stocksModule;
+    private StfishModule stfishModule;
 
     @Override
     public void onEnable() {
@@ -78,12 +80,20 @@ public class Main extends JavaPlugin {
             MessageUtils.logInfo("股票模块已禁用（配置文件中 modules.stocks = false）");
         }
 
+        if (pluginConfig.isModuleEnabled("stfish")) {
+            this.stfishModule = new StfishModule(this);
+            this.stfishModule.enable();
+            MessageUtils.logSuccess("ST Fish 模块已启用");
+        } else {
+            MessageUtils.logInfo("ST Fish 模块已禁用（配置文件中 modules.stfish = false）");
+        }
+
         DebugResetConfirmHandler debugResetHandler = new DebugResetConfirmHandler(this);
         getServer().getPluginManager().registerEvents(new DebugResetConfirmListener(debugResetHandler), this);
 
         org.bukkit.command.PluginCommand mainCommand = getServer().getPluginCommand("snowterritory");
         if (mainCommand != null) {
-            SnowTerritoryCommand commandExecutor = new SnowTerritoryCommand(this, pluginConfig, reinforceModule, debugResetHandler);
+            SnowTerritoryCommand commandExecutor = new SnowTerritoryCommand(this, pluginConfig, reinforceModule, stfishModule, debugResetHandler);
             mainCommand.setExecutor(commandExecutor);
             mainCommand.setTabCompleter(commandExecutor);
             MessageUtils.logSuccess("命令 'snowterritory' 已注册");
@@ -111,6 +121,9 @@ public class Main extends JavaPlugin {
         }
         if (stocksModule != null) {
             stocksModule.disable();
+        }
+        if (stfishModule != null) {
+            stfishModule.disable();
         }
         MessageUtils.sendShutdownBanner(this);
     }
@@ -164,5 +177,9 @@ public class Main extends JavaPlugin {
 
     public StocksModule getStocksModule() {
         return stocksModule;
+    }
+
+    public StfishModule getStfishModule() {
+        return stfishModule;
     }
 }
