@@ -50,9 +50,9 @@ public class FishAtlasGUI {
         for (int i = start; i < end; i++) {
             FishDefinition def = allFish.get(i);
             FishTier tier = getTierForFish(def);
-            String tierName = tier != null ? tier.getDisplayName() : "?";
+            if (tier == null) continue;
             double midLength = (def.lengthMin() + def.lengthMax()) / 2;
-            ItemStack display = itemFactory.create(def, midLength, tierName);
+            ItemStack display = itemFactory.create(def, midLength, tier);
             ItemMeta meta = display.getItemMeta();
             if (meta != null) {
                 meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ENCHANTS);

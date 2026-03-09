@@ -42,9 +42,15 @@ modules:
 #   {id}       - 物品ID (MMOItems物品的唯一标识符)
 # ============================================
 messages:
-  # 消息前缀 (所有带前缀的消息都会使用这个前缀)
-  prefix: "&{#4a95ff}ST <g:#C97759:#C9AE59>Reinforce</g> &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> "
-  
+  # 各模块消息前缀（相同样式，不同内容，支持 ColorUtils 格式）
+  prefix:
+    default: "<g:#FFFFFF:#4A95FF>SnowTerritory</g> &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> "
+    reinforce: "&{#4a95ff}ST &{#C9AE59}Reinforce &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> "
+    enderstorage: "&{#4a95ff}ST &{#3ab835}Ender&{#6dc97f}Storage &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> "
+    quest: "&{#4a95ff}ST &{#FFD700}Quest &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> "
+    stfish: "&{#4a95ff}ST &{#5dade2}Fish &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> "
+    stocks: "&{#4a95ff}ST &{#26A69A}Stocks &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> "
+
   # 命令相关消息
   command:
     # 无权限提示

@@ -67,10 +67,10 @@ public class PluginConfig {
     }
     
     /**
-     * 获取消息前缀
+     * 获取默认消息前缀
      */
     public String getMessagePrefix() {
-        return messages.getOrDefault("messages.prefix", "");
+        return messages.getOrDefault("messages.prefix.default", "");
     }
 
     /**

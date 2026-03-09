@@ -289,10 +289,16 @@ public class ReinforceConfigManager {
     }
     
     /**
-     * 获取消息前缀
+     * 获取消息前缀（从主配置读取）
      */
     public String getMessagePrefix() {
-        return messages.getOrDefault("messages.prefix", "");
+        if (plugin instanceof Main main) {
+            String p = main.getPluginConfig().getMessage("prefix.reinforce");
+            if (p != null && !p.isEmpty() && !p.equals("prefix.reinforce")) {
+                return p;
+            }
+        }
+        return "&{#4a95ff}ST &{#C9AE59}Reinforce &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";
     }
 
     public void reload() {

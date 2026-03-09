@@ -108,10 +108,13 @@ public class StfishCommand implements CommandExecutor, TabCompleter {
             }
         }
         FishTier tier = getTierForFish(def);
-        String tierName = tier != null ? tier.getDisplayName() : "?";
+        if (tier == null) {
+            MessageUtils.sendConfigMessage(sender, "stfish.give-tier-unknown", "&c✗ &f无法确定鱼种品质");
+            return true;
+        }
         double midLength = (def.lengthMin() + def.lengthMax()) / 2;
         for (int i = 0; i < amount; i++) {
-            ItemStack fish = itemFactory.create(def, midLength, tierName);
+            ItemStack fish = itemFactory.create(def, midLength, tier);
             Map<Integer, ItemStack> overflow = target.getInventory().addItem(fish);
             for (ItemStack drop : overflow.values()) {
                 if (drop != null && !drop.getType().isAir()) {
@@ -119,8 +122,9 @@ public class StfishCommand implements CommandExecutor, TabCompleter {
                 }
             }
         }
+        String fishDisplayName = FishItemFactory.getDisplayNameForBroadcast(def, tier);
         MessageUtils.sendConfigMessage(sender, "stfish.give-success", "&a✓ &f已给予 &e{player} &f{amount}x &e{fish}",
-                "player", target.getName(), "amount", String.valueOf(amount), "fish", def.name());
+                "player", target.getName(), "amount", String.valueOf(amount), "fish", fishDisplayName);
         return true;
     }
 

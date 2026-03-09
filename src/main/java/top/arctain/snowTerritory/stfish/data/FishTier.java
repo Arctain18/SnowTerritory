@@ -2,19 +2,21 @@ package top.arctain.snowTerritory.stfish.data;
 
 /** 鱼类品质枚举。 */
 public enum FishTier {
-    COMMON("普通", 34),
-    RARE("稀有", 21),
-    EPIC("史诗", 18),
-    LEGENDARY("传说", 15),
-    STORM("风暴", 23),
-    WORLD("世界", 14);
+    COMMON("普通", 34, "&7"),
+    RARE("稀有", 21, "&2"),
+    EPIC("史诗", 18, "&6"),
+    LEGENDARY("传说", 15, "&3"),
+    STORM("风暴", 23, "&1&l"),
+    WORLD("世界", 14, null);
 
     private final String displayName;
     private final int fishCount;
+    private final String nameColor;
 
-    FishTier(String displayName, int fishCount) {
+    FishTier(String displayName, int fishCount, String nameColor) {
         this.displayName = displayName;
         this.fishCount = fishCount;
+        this.nameColor = nameColor;
     }
 
     public String getDisplayName() {
@@ -23,5 +25,10 @@ public enum FishTier {
 
     public int getFishCount() {
         return fishCount;
+    }
+
+    /** 同品级统一名称颜色，世界级返回 null 表示使用配置中的渐变。 */
+    public String getNameColor() {
+        return nameColor;
     }
 }

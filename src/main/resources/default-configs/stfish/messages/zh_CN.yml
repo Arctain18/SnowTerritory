@@ -1,12 +1,15 @@
-# ST Fish 模块消息（唯一来源，主 config 不重复）
+# ST Fish 模块消息（支持 ColorUtils: &a &{#FF0000} <g:#FF:#00>Text</g>）
+# lore-quality/lore-length 占位符: {tier} {length}
 
-atlas-title: "&6鱼类图鉴 &8- &7第 {page}/{total} 页"
-fish-title: "&a钓到了！"
-fish-subtitle: "&7{fish} &8| &7{length}m"
-broadcast-storm: "&6✦ &e[风暴之鱼] &f{player} &7钓到了 &e{fish} &7({tier}) &8| &7长度: {length}m"
-broadcast-world: "&6✦ &e[世界之鱼] &f{player} &7钓到了 &e{fish} &7({tier}) &8| &7长度: {length}m"
-weather-rain-broadcast: "&6✦ &e[天气] &7主世界开始降雨，钓鱼品质概率提升！"
-weather-storm-broadcast: "&6✦ &e[天气] &7主世界迎来暴风雨，钓鱼品质概率大幅提升！"
+lore-quality: "&7品质: {tier}"
+lore-length: "&7长度: {length}cm"
+atlas-title: "&6<g:#FFD54F:#FF8F00>鱼类图鉴</g> &8- &7第 {page}/{total} 页"
+fish-title: "&a<g:#4CAF50:#81C784>钓到了！</g>"
+fish-subtitle: "&7{fish} &8| &7&{#64B5F6}{length}cm"
+broadcast-storm: "&{#4d99eb}◈ &{#cccccc}玩家 &{#FFFF00}{player} &{#cccccc}于 {#3c79cf>}&l{location}{#3341ff<} &{#cccccc}钓上了 &{#FFFF00}{length_cm}cm {tier_modifier}{fish_name} &{#cccccc}!"
+broadcast-world: "&{#4d99eb}◈ &{#cccccc}玩家 &{#FFFF00}{player} &{#cccccc}于 {#3c79cf>}&l{location}{#3341ff<} &{#cccccc}钓上了 &{#FFFF00}{length_cm}cm {tier_modifier}{fish_name} &{#cccccc}!"
+weather-rain-broadcast: "&6✦ &e[天气] &7<g:#4FC3F7:#29B6F6>主世界开始降雨，钓鱼品质概率提升！</g>"
+weather-storm-broadcast: "&6✦ &e[天气] &7<g:#42A5F5:#1E88E5>主世界迎来暴风雨，钓鱼品质概率大幅提升！</g>"
 weather-summon-broadcast: "&6✦ &e[天气] &f{player} &7消耗金币召唤了 &e{weather} &7天气！"
 summon-success: "&a✓ &f已消耗 &e{cost} &f金币召唤 &e{weather} &7天气"
 summon-no-permission: "&c✗ &f您没有权限召唤天气"
@@ -20,3 +23,4 @@ give-player-not-found: "&c✗ &f未找到玩家: {player}"
 give-fish-not-found: "&c✗ &f未找到鱼种: {id}"
 give-success: "&a✓ &f已给予 &e{player} &f{amount}x &e{fish}"
 give-no-permission: "&c✗ &f您没有权限给予鱼类"
+give-tier-unknown: "&c✗ &f无法确定鱼种品质"

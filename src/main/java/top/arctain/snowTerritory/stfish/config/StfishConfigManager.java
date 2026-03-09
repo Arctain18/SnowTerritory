@@ -70,7 +70,7 @@ public class StfishConfigManager {
         for (Map<?, ?> map : raw) {
             String id = (String) map.get("id");
             String name = (String) map.get("name");
-            String desc = (String) map.get("description");
+            String lore = (String) map.get("lore");
             Object lenMin = map.get("length-min");
             Object lenMax = map.get("length-max");
             String matStr = (String) map.get("material");
@@ -80,7 +80,7 @@ public class StfishConfigManager {
             if (lMin > lMax) lMax = lMin;
             Material mat = Material.matchMaterial(matStr);
             if (mat == null || !mat.isItem()) mat = Material.COD;
-            result.add(new FishDefinition(id, name, desc != null ? desc : "", lMin, lMax, mat));
+            result.add(new FishDefinition(id, name, lore != null ? lore : "", lMin, lMax, mat));
         }
         return result;
     }
