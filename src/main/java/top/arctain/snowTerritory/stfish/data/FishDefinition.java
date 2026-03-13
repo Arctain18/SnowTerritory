@@ -9,6 +9,8 @@ public record FishDefinition(
         String description,
         double lengthMin,
         double lengthMax,
-        Material material
+        Material material,
+        String type,
+        String broadcast
 ) {
 }

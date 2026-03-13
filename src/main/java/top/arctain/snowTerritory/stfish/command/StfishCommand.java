@@ -122,7 +122,7 @@ public class StfishCommand implements CommandExecutor, TabCompleter {
                 }
             }
         }
-        String fishDisplayName = FishItemFactory.getDisplayNameForBroadcast(def, tier);
+        String fishDisplayName = itemFactory.getDisplayNameForBroadcast(def, tier);
         MessageUtils.sendConfigMessage(sender, "stfish.give-success", "&a✓ &f已给予 &e{player} &f{amount}x &e{fish}",
                 "player", target.getName(), "amount", String.valueOf(amount), "fish", fishDisplayName);
         return true;

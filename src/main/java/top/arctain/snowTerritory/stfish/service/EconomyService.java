@@ -32,4 +32,10 @@ public class EconomyService {
         if (economy == null) return;
         economy.withdrawPlayer(player, amount);
     }
+
+    public boolean deposit(Player player, double amount) {
+        if (economy == null || amount <= 0) return false;
+        var resp = economy.depositPlayer(player, amount);
+        return resp.transactionSuccess();
+    }
 }

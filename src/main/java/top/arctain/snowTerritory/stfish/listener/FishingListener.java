@@ -56,12 +56,13 @@ public class FishingListener implements Listener {
 
         double length = FishItemFactory.getStFishLength(fishItem);
         String lengthStr = String.format("%.1f", length * 100);
-        String fishDisplayName = FishItemFactory.getDisplayNameForBroadcast(def, tier);
+        String fishDisplayName = itemFactory.getDisplayNameForBroadcast(def, tier);
 
         sendFishTitle(player, fishDisplayName, lengthStr);
         if (tier == FishTier.STORM || tier == FishTier.WORLD) {
             Biome biome = event.getHook().getLocation().getBlock().getBiome();
-            broadcastFish(player, fishDisplayName, tier, length, biome);
+            String poem = tier == FishTier.WORLD && def.broadcast() != null ? def.broadcast() : null;
+            broadcastFish(player, fishDisplayName, tier, length, biome, poem);
         }
     }
 
@@ -70,7 +71,7 @@ public class FishingListener implements Listener {
         long stay = configManager.getTitleStay();
         long fadeOut = configManager.getTitleFadeOut();
 
-        String title = MessageUtils.getConfigMessage("stfish.fish-title", "&a钓到了！");
+        String title = MessageUtils.getConfigMessage("stfish.fish-title", "&a鱼上钩了！");
         String subtitle = MessageUtils.getConfigMessage("stfish.fish-subtitle", "&7{fish} &8| &7{length}cm",
                 "fish", fishDisplayName, "length", lengthStr);
 
@@ -80,15 +81,16 @@ public class FishingListener implements Listener {
                 Title.Times.times(Duration.ofMillis(fadeIn), Duration.ofMillis(stay), Duration.ofMillis(fadeOut))));
     }
 
-    private void broadcastFish(Player player, String fishDisplayName, FishTier tier, double lengthM, Biome biome) {
+    private void broadcastFish(Player player, String fishDisplayName, FishTier tier, double lengthM, Biome biome, String poem) {
         String location = BiomeNameHelper.getDisplayName(biome);
         String lengthCm = String.format("%.1f", lengthM * 100);
         String tierModifier = tier == FishTier.STORM ? "&{#42a5f5}&l风暴般的 " : "&{#8c00ff}&l世界般的 ";
 
         String key = tier == FishTier.STORM ? "stfish.broadcast-storm" : "stfish.broadcast-world";
+        String poemPlaceholder = poem != null ? poem : "";
         String msg = MessageUtils.getConfigMessage(key,
-                "{#4d99eb}◈ {#cccccc}玩家 {#yellow} {player} {#cccccc}于 {#3c79cf>}&l{location}{#3341ff<} {#cccccc}钓上了 {#yellow} {length_cm}cm {tier_modifier}{fish_name} {#cccccc}!",
-                "player", player.getName(), "location", location, "length_cm", lengthCm, "tier_modifier", tierModifier, "fish_name", fishDisplayName);
+                "{#4d99eb}◈ {#cccccc}玩家 {#FFFF00}{player} {#cccccc}于 {#3c79cf>}&l{location}{#3341ff<} {#cccccc}钓上了 {#FFFF00}{length_cm}cm {tier_modifier}{fish_name} {#cccccc}!\n{poem}",
+                "player", player.getName(), "location", location, "length_cm", lengthCm, "tier_modifier", tierModifier, "fish_name", fishDisplayName, "poem", poemPlaceholder);
 
         String colored = ColorUtils.colorize(msg);
         for (Player p : Bukkit.getOnlinePlayers()) {

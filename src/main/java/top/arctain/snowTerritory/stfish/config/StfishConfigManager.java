@@ -26,6 +26,11 @@ public class StfishConfigManager {
     private FileConfiguration fishConfig;
     private Map<String, FileConfiguration> messagePacks = new HashMap<>();
     private Map<FishTier, List<FishDefinition>> fishByTier = new HashMap<>();
+    private Map<String, Double> marketBasePrices = new HashMap<>();
+    private Map<String, Double> tierMultipliers = new HashMap<>();
+    private int decayWindowMinutes = 10;
+    private int decayThreshold = 5;
+    private double decayFactor = 0.8;
 
     public StfishConfigManager(Main plugin) {
         this.plugin = plugin;
@@ -52,14 +57,81 @@ public class StfishConfigManager {
 
     private void loadMainConfig() {
         this.mainConfig = YamlConfiguration.loadConfiguration(new File(baseDir, "config.yml"));
+        loadMarketConfig();
+    }
+
+    private void loadMarketConfig() {
+        ConfigurationSection market = mainConfig.getConfigurationSection("market");
+        if (market == null) {
+            marketBasePrices.clear();
+            tierMultipliers.put("common", 1.0);
+            tierMultipliers.put("rare", 1.5);
+            tierMultipliers.put("epic", 2.5);
+            tierMultipliers.put("legendary", 4.0);
+            decayWindowMinutes = 10;
+            decayThreshold = 5;
+            decayFactor = 0.8;
+            return;
+        }
+        ConfigurationSection basePrices = market.getConfigurationSection("base-prices");
+        marketBasePrices.clear();
+        if (basePrices != null) {
+            for (String key : basePrices.getKeys(false)) {
+                marketBasePrices.put(key, basePrices.getDouble(key, 10));
+            }
+        }
+        ConfigurationSection multipliers = market.getConfigurationSection("tier-multipliers");
+        tierMultipliers.clear();
+        if (multipliers != null && !multipliers.getKeys(false).isEmpty()) {
+            for (String key : multipliers.getKeys(false)) {
+                tierMultipliers.put(key, multipliers.getDouble(key, 1.0));
+            }
+        } else {
+            tierMultipliers.put("common", 1.0);
+            tierMultipliers.put("rare", 1.5);
+            tierMultipliers.put("epic", 2.5);
+            tierMultipliers.put("legendary", 4.0);
+        }
+        decayWindowMinutes = market.getInt("decay-window-minutes", 10);
+        decayThreshold = market.getInt("decay-threshold", 5);
+        decayFactor = market.getDouble("decay-factor", 0.8);
     }
 
     private void loadFishConfig() {
         this.fishConfig = YamlConfiguration.loadConfiguration(new File(baseDir, "fish.yml"));
         fishByTier.clear();
-        for (FishTier tier : FishTier.values()) {
+        loadFishTypesIntoTiers();
+        for (FishTier tier : new FishTier[]{FishTier.STORM, FishTier.WORLD}) {
             List<FishDefinition> list = loadFishForTier(tier.name().toLowerCase());
             fishByTier.put(tier, list);
+        }
+    }
+
+    private void loadFishTypesIntoTiers() {
+        List<Map<?, ?>> types = fishConfig.getMapList("fish-types");
+        if (types == null || types.isEmpty()) return;
+        FishTier[] tiers = {FishTier.COMMON, FishTier.RARE, FishTier.EPIC, FishTier.LEGENDARY};
+        String[] suffixes = {"01", "02", "03", "04"};
+        for (int t = 0; t < tiers.length; t++) {
+            List<FishDefinition> list = new ArrayList<>();
+            for (Map<?, ?> map : types) {
+                String type = (String) map.get("type");
+                String name = (String) map.get("name");
+                String lore = (String) map.get("lore");
+                Object lenMin = map.get("length-min");
+                Object lenMax = map.get("length-max");
+                String matStr = (String) map.get("material");
+                if (type == null || name == null || matStr == null) continue;
+                String baseId = type.replace("_01", "");
+                String id = baseId + "_" + suffixes[t];
+                double lMin = toDouble(lenMin, 0.5);
+                double lMax = toDouble(lenMax, 1.0);
+                if (lMin > lMax) lMax = lMin;
+                Material mat = Material.matchMaterial(matStr);
+                if (mat == null || !mat.isItem()) mat = Material.COD;
+                list.add(new FishDefinition(id, name, lore != null ? lore : "", lMin, lMax, mat, type, null));
+            }
+            fishByTier.put(tiers[t], list);
         }
     }
 
@@ -74,13 +146,15 @@ public class StfishConfigManager {
             Object lenMin = map.get("length-min");
             Object lenMax = map.get("length-max");
             String matStr = (String) map.get("material");
+            String type = (String) map.get("type");
+            String broadcast = (String) map.get("broadcast");
             if (id == null || name == null || matStr == null) continue;
             double lMin = toDouble(lenMin, 0.5);
             double lMax = toDouble(lenMax, 1.0);
             if (lMin > lMax) lMax = lMin;
             Material mat = Material.matchMaterial(matStr);
             if (mat == null || !mat.isItem()) mat = Material.COD;
-            result.add(new FishDefinition(id, name, lore != null ? lore : "", lMin, lMax, mat));
+            result.add(new FishDefinition(id, name, lore != null ? lore : "", lMin, lMax, mat, type, broadcast));
         }
         return result;
     }
@@ -180,6 +254,26 @@ public class StfishConfigManager {
 
     public File getBaseDir() {
         return baseDir;
+    }
+
+    public double getMarketBasePrice(String speciesId) {
+        return marketBasePrices.getOrDefault(speciesId, 10.0);
+    }
+
+    public double getTierMultiplier(FishTier tier) {
+        return tierMultipliers.getOrDefault(tier.name().toLowerCase(), 1.0);
+    }
+
+    public int getDecayWindowMinutes() {
+        return decayWindowMinutes;
+    }
+
+    public int getDecayThreshold() {
+        return decayThreshold;
+    }
+
+    public double getDecayFactor() {
+        return decayFactor;
     }
 
     public Map<String, String> getMessagesForMerge() {

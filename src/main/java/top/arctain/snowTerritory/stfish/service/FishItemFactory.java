@@ -21,9 +21,10 @@ public class FishItemFactory {
     private static final NamespacedKey KEY_ID = new NamespacedKey(NAMESPACE, "stfish_id");
     private static final NamespacedKey KEY_LENGTH = new NamespacedKey(NAMESPACE, "stfish_length");
     private static final NamespacedKey KEY_TIER = new NamespacedKey(NAMESPACE, "stfish_tier");
+    private static final NamespacedKey KEY_SPECIES = new NamespacedKey(NAMESPACE, "stfish_species");
     private final Plugin plugin;
 
-    public FishItemFactory(Plugin plugin) {
+    public FishItemFactory(Plugin plugin, top.arctain.snowTerritory.stfish.config.StfishConfigManager configManager) {
         this.plugin = plugin;
     }
 
@@ -55,6 +56,9 @@ public class FishItemFactory {
         if (def.description() != null && !def.description().isEmpty()) {
             lore.add(ColorUtils.colorize(def.description()));
         }
+        if (def.broadcast() != null && !def.broadcast().isEmpty() && tier == FishTier.WORLD) {
+            lore.add(ColorUtils.colorize(def.broadcast()));
+        }
         String qualityLore = MessageUtils.getConfigMessage("stfish.lore-quality", "&7品质: {tier}", "tier", tierDisplayName);
         String lengthLore = MessageUtils.getConfigMessage("stfish.lore-length", "&7长度: {length}cm", "length", formatLengthCm(length));
         lore.add(ColorUtils.colorize(qualityLore));
@@ -64,6 +68,10 @@ public class FishItemFactory {
         meta.getPersistentDataContainer().set(KEY_ID, PersistentDataType.STRING, def.id());
         meta.getPersistentDataContainer().set(KEY_LENGTH, PersistentDataType.DOUBLE, length);
         meta.getPersistentDataContainer().set(KEY_TIER, PersistentDataType.STRING, tierDisplayName);
+        String type = def.type() != null ? def.type() : (tier == FishTier.COMMON ? def.id() : null);
+        if (type != null) {
+            meta.getPersistentDataContainer().set(KEY_SPECIES, PersistentDataType.STRING, type);
+        }
 
         item.setItemMeta(meta);
         return item;
@@ -90,10 +98,15 @@ public class FishItemFactory {
     }
 
     /** 获取用于广播/标题的鱼名称（含颜色，世界鱼保留渐变）。 */
-    public static String getDisplayNameForBroadcast(FishDefinition def, FishTier tier) {
+    public String getDisplayNameForBroadcast(FishDefinition def, FishTier tier) {
         if (tier.getNameColor() != null) {
             return tier.getNameColor() + ColorUtils.stripColor(def.name());
         }
         return def.name();
+    }
+
+    public static String getStFishSpeciesId(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return null;
+        return item.getItemMeta().getPersistentDataContainer().get(KEY_SPECIES, PersistentDataType.STRING);
     }
 }

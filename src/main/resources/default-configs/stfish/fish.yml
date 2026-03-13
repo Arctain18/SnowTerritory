@@ -1,141 +1,62 @@
 # ST Fish 鱼种配置
-# 品质: common(34) rare(21) epic(18) legendary(15) storm(23) world(14)
-# name 支持 ColorUtils 格式，世界鱼可用渐变；lore 使用 &7 灰色
+# fish-types: 15 种鱼，每类一份配置，自动展开为 common(01)/rare(02)/epic(03)/legendary(04)
+# lore 为现实中外貌与特性描述，四品质共用
+# storm/world 单独配置
 
-common:
-  - { id: cod_01, name: "鳕鱼", lore: "&7北大西洋常见的冷水鱼", length-min: 0.5, length-max: 1.2, material: COD }
-  - { id: salmon_01, name: "鲑鱼", lore: "&7洄游性鱼类，肉质鲜美", length-min: 0.6, length-max: 1.5, material: SALMON }
-  - { id: tropical_01, name: "热带鱼", lore: "&7色彩斑斓的珊瑚礁居民", length-min: 0.1, length-max: 0.3, material: TROPICAL_FISH }
-  - { id: puffer_01, name: "河豚", lore: "&7遇险时会膨胀的防御者", length-min: 0.2, length-max: 0.5, material: PUFFERFISH }
-  - { id: carp_01, name: "鲤鱼", lore: "&7淡水中的常见鱼种", length-min: 0.4, length-max: 1.0, material: COD }
-  - { id: perch_01, name: "鲈鱼", lore: "&7溪流与湖泊中的掠食者", length-min: 0.3, length-max: 0.8, material: SALMON }
-  - { id: trout_01, name: "鳟鱼", lore: "&7冷水溪流中的敏捷猎手", length-min: 0.4, length-max: 1.0, material: SALMON }
-  - { id: bass_01, name: "鲈鲉", lore: "&7近海礁石区的潜伏者", length-min: 0.3, length-max: 0.7, material: COD }
-  - { id: bream_01, name: "鲷鱼", lore: "&7浅海沙底的银鳞鱼", length-min: 0.2, length-max: 0.6, material: COD }
-  - { id: flounder_01, name: "比目鱼", lore: "&7扁平身躯的底栖鱼", length-min: 0.3, length-max: 0.8, material: COD }
-  - { id: mackerel_01, name: "鲭鱼", lore: "&7快速游动的群居鱼", length-min: 0.3, length-max: 0.6, material: COD }
-  - { id: herring_01, name: "鲱鱼", lore: "&7北大西洋的银色鱼群", length-min: 0.2, length-max: 0.5, material: COD }
-  - { id: sardine_01, name: "沙丁鱼", lore: "&7成群结队的小型鱼", length-min: 0.15, length-max: 0.25, material: COD }
-  - { id: anchovy_01, name: "凤尾鱼", lore: "&7地中海风味的银色小鱼", length-min: 0.1, length-max: 0.2, material: COD }
-  - { id: tilapia_01, name: "罗非鱼", lore: "&7适应性强的淡水鱼", length-min: 0.3, length-max: 0.6, material: COD }
-  - { id: catfish_01, name: "鲶鱼", lore: "&7长须底栖的夜行猎手", length-min: 0.4, length-max: 1.2, material: COD }
-  - { id: pike_01, name: "狗鱼", lore: "&7淡水中的顶级掠食者", length-min: 0.5, length-max: 1.5, material: COD }
-  - { id: walleye_01, name: "鼓眼鱼", lore: "&7夜行性淡水掠食者", length-min: 0.4, length-max: 1.0, material: COD }
-  - { id: bluegill_01, name: "蓝鳃鱼", lore: "&7池塘常见的小型太阳鱼", length-min: 0.15, length-max: 0.3, material: TROPICAL_FISH }
-  - { id: crappie_01, name: "刺盖鱼", lore: "&7北美淡水的小型鱼", length-min: 0.2, length-max: 0.4, material: COD }
-  - { id: minnow_01, name: "米诺鱼", lore: "&7溪流中的饵料鱼", length-min: 0.05, length-max: 0.15, material: TROPICAL_FISH }
-  - { id: dace_01, name: "雅罗鱼", lore: "&7欧洲河流的银鳞鱼", length-min: 0.2, length-max: 0.4, material: COD }
-  - { id: roach_01, name: "拟鲤", lore: "&7静水中的群居鱼", length-min: 0.2, length-max: 0.5, material: COD }
-  - { id: chub_01, name: "圆鳍雅罗", lore: "&7溪流中的健壮鱼种", length-min: 0.3, length-max: 0.6, material: COD }
-  - { id: barbel_01, name: "鲃鱼", lore: "&7河底觅食的须鱼", length-min: 0.4, length-max: 1.0, material: COD }
-  - { id: tench_01, name: "丁鳜", lore: "&7泥底水域的耐污鱼", length-min: 0.3, length-max: 0.7, material: COD }
-  - { id: rudd_01, name: "红眼鱼", lore: "&7浅水区的金色鱼", length-min: 0.2, length-max: 0.5, material: COD }
-  - { id: bleak_01, name: "欧白鱼", lore: "&7水面游动的小银鱼", length-min: 0.1, length-max: 0.2, material: COD }
-  - { id: gudgeon_01, name: "鮈鱼", lore: "&7河床沙砾间的小鱼", length-min: 0.1, length-max: 0.2, material: TROPICAL_FISH }
-  - { id: stickleback_01, name: "刺鱼", lore: "&7背鳍带刺的小型鱼", length-min: 0.05, length-max: 0.1, material: TROPICAL_FISH }
-  - { id: loach_01, name: "泥鳅", lore: "&7淤泥中的滑溜鱼", length-min: 0.1, length-max: 0.25, material: COD }
-  - { id: eel_01, name: "鳗鱼", lore: "&7蛇形身躯的夜行鱼", length-min: 0.5, length-max: 1.2, material: COD }
-  - { id: gar_01, name: "雀鳝", lore: "&7古老的长吻掠食者", length-min: 0.6, length-max: 1.5, material: COD }
-  - { id: bowfin_01, name: "弓鳍鱼", lore: "&7活化石般的淡水鱼", length-min: 0.4, length-max: 1.0, material: COD }
-  - { id: sturgeon_01, name: "鲟鱼", lore: "&7古老而珍贵的巨鱼", length-min: 0.8, length-max: 2.0, material: COD }
-
-rare:
-  - { id: rare_silver_01, name: "银鳞鲑", lore: "&7鳞片如银的稀有鲑鱼", length-min: 0.6, length-max: 1.4, material: SALMON }
-  - { id: rare_crimson_01, name: "赤纹鳟", lore: "&7身侧赤纹的冷水鳟", length-min: 0.4, length-max: 1.0, material: SALMON }
-  - { id: rare_ghost_01, name: "幽灵鲤", lore: "&7半透明的神秘鲤鱼", length-min: 0.5, length-max: 1.2, material: COD }
-  - { id: rare_iron_01, name: "铁鳞鲶", lore: "&7鳞甲坚硬的底栖鲶", length-min: 0.5, length-max: 1.3, material: COD }
-  - { id: rare_frost_01, name: "霜吻鲈", lore: "&7吻部泛霜的冷水鲈", length-min: 0.3, length-max: 0.8, material: SALMON }
-  - { id: rare_shadow_01, name: "影鳍鳕", lore: "&7鳍如暗影的深海鳕", length-min: 0.5, length-max: 1.2, material: COD }
-  - { id: rare_gold_01, name: "金瞳鲷", lore: "&7眼瞳金色的礁石鲷", length-min: 0.3, length-max: 0.7, material: TROPICAL_FISH }
-  - { id: rare_ember_01, name: "烬尾鲭", lore: "&7尾鳍如烬的迅捷鲭", length-min: 0.3, length-max: 0.6, material: COD }
-  - { id: rare_moon_01, name: "月斑鲱", lore: "&7身带月斑的银鲱", length-min: 0.2, length-max: 0.5, material: COD }
-  - { id: rare_storm_01, name: "雷纹狗", lore: "&7体侧雷纹的狗鱼", length-min: 0.5, length-max: 1.4, material: COD }
-  - { id: rare_crystal_01, name: "晶鳞鲤", lore: "&7鳞片如晶的溪鲤", length-min: 0.3, length-max: 0.8, material: COD }
-  - { id: rare_void_01, name: "虚空鲶", lore: "&7色泽深沉的夜行鲶", length-min: 0.4, length-max: 1.1, material: COD }
-  - { id: rare_sun_01, name: "日鳞鲈", lore: "&7鳞泛日光的浅水鲈", length-min: 0.3, length-max: 0.7, material: SALMON }
-  - { id: rare_star_01, name: "星点鳟", lore: "&7身缀星点的山鳟", length-min: 0.4, length-max: 1.0, material: SALMON }
-  - { id: rare_ice_01, name: "冰吻鲑", lore: "&7吻部冰蓝的洄游鲑", length-min: 0.6, length-max: 1.5, material: SALMON }
-  - { id: rare_flame_01, name: "焰鳍鲷", lore: "&7鳍如焰火的礁鲷", length-min: 0.25, length-max: 0.6, material: TROPICAL_FISH }
-  - { id: rare_phantom_01, name: "幻影鳕", lore: "&7若隐若现的深海鳕", length-min: 0.5, length-max: 1.2, material: COD }
-  - { id: rare_steel_01, name: "钢脊鲟", lore: "&7脊背如钢的古老鲟", length-min: 0.7, length-max: 1.8, material: COD }
-  - { id: rare_pearl_01, name: "珠光鲃", lore: "&7泛珠光的河底鲃", length-min: 0.35, length-max: 0.8, material: COD }
-  - { id: rare_ash_01, name: "灰烬鲶", lore: "&7体色灰烬的泥底鲶", length-min: 0.4, length-max: 1.0, material: COD }
-  - { id: rare_dawn_01, name: "晨光鲱", lore: "&7如晨光般的银鲱", length-min: 0.2, length-max: 0.5, material: COD }
-
-epic:
-  - { id: epic_azure_01, name: "碧鳞龙鱼", lore: "&7鳞如碧玉的传说之鱼", length-min: 0.6, length-max: 1.5, material: TROPICAL_FISH }
-  - { id: epic_crimson_01, name: "赤焰帝王鲑", lore: "&7帝王之姿的赤色鲑", length-min: 0.8, length-max: 1.8, material: SALMON }
-  - { id: epic_void_01, name: "虚空深渊鳕", lore: "&7来自深渊的暗影鳕", length-min: 0.6, length-max: 1.4, material: COD }
-  - { id: epic_frost_01, name: "霜魂冰鲈", lore: "&7魂含霜寒的冰水鲈", length-min: 0.4, length-max: 1.0, material: SALMON }
-  - { id: epic_storm_01, name: "雷怒风暴鲭", lore: "&7蕴含雷怒的迅捷鲭", length-min: 0.4, length-max: 0.9, material: COD }
-  - { id: epic_sun_01, name: "日冕金鲷", lore: "&7如日冕般的金鳞鲷", length-min: 0.35, length-max: 0.8, material: TROPICAL_FISH }
-  - { id: epic_moon_01, name: "月华银鳟", lore: "&7沐浴月华的银鳞鳟", length-min: 0.5, length-max: 1.2, material: SALMON }
-  - { id: epic_star_01, name: "星尘幻鲱", lore: "&7身披星尘的幻影鲱", length-min: 0.25, length-max: 0.55, material: COD }
-  - { id: epic_ember_01, name: "烬心焰鲶", lore: "&7心含余烬的古老鲶", length-min: 0.5, length-max: 1.3, material: COD }
-  - { id: epic_crystal_01, name: "晶核冰鳕", lore: "&7核如水晶的冰海鳕", length-min: 0.5, length-max: 1.3, material: COD }
-  - { id: epic_phantom_01, name: "幻翼幽灵鲤", lore: "&7翼若幻影的幽灵鲤", length-min: 0.5, length-max: 1.2, material: COD }
-  - { id: epic_iron_01, name: "铁心钢脊鲟", lore: "&7心如钢铁的古老鲟", length-min: 0.8, length-max: 2.0, material: COD }
-  - { id: epic_shadow_01, name: "暗影深渊狗", lore: "&7来自深渊的影狗鱼", length-min: 0.6, length-max: 1.5, material: COD }
-  - { id: epic_pearl_01, name: "珠魂龙鲤", lore: "&7魂含珠光的传说鲤", length-min: 0.5, length-max: 1.2, material: COD }
-  - { id: epic_flame_01, name: "焰魂赤鲷", lore: "&7魂含焰火的礁石鲷", length-min: 0.3, length-max: 0.7, material: TROPICAL_FISH }
-  - { id: epic_ice_01, name: "冰魄霜鲑", lore: "&7魄含冰霜的洄游鲑", length-min: 0.7, length-max: 1.6, material: SALMON }
-  - { id: epic_void_02, name: "虚空裂隙鲶", lore: "&7来自裂隙的虚空鲶", length-min: 0.5, length-max: 1.2, material: COD }
-  - { id: epic_dawn_01, name: "晨辉圣鲈", lore: "&7沐浴晨辉的圣洁鲈", length-min: 0.4, length-max: 1.0, material: SALMON }
-
-legendary:
-  - { id: leg_azure_01, name: "碧海龙皇", lore: "&7统御碧海的传说之皇", length-min: 0.8, length-max: 2.0, material: TROPICAL_FISH }
-  - { id: leg_crimson_01, name: "赤焰鲑帝", lore: "&7火焰加冕的鲑鱼帝王", length-min: 0.9, length-max: 2.0, material: SALMON }
-  - { id: leg_void_01, name: "虚空鳕尊", lore: "&7深渊归来的鳕鱼尊者", length-min: 0.7, length-max: 1.6, material: COD }
-  - { id: leg_frost_01, name: "霜魂冰皇", lore: "&7冰封王座的鲈鱼之皇", length-min: 0.5, length-max: 1.3, material: SALMON }
-  - { id: leg_storm_01, name: "雷怒鲭王", lore: "&7执掌雷怒的鲭鱼之王", length-min: 0.5, length-max: 1.1, material: COD }
-  - { id: leg_sun_01, name: "日冕鲷圣", lore: "&7日冕加身的圣洁鲷鱼", length-min: 0.4, length-max: 0.9, material: TROPICAL_FISH }
-  - { id: leg_moon_01, name: "月华鳟仙", lore: "&7月华凝身的鳟鱼仙灵", length-min: 0.6, length-max: 1.4, material: SALMON }
-  - { id: leg_star_01, name: "星尘鲱神", lore: "&7星尘织就的鲱鱼之神", length-min: 0.3, length-max: 0.6, material: COD }
-  - { id: leg_ember_01, name: "烬心鲶祖", lore: "&7余烬不灭的鲶鱼先祖", length-min: 0.6, length-max: 1.5, material: COD }
-  - { id: leg_crystal_01, name: "晶核鳕圣", lore: "&7晶核为心的鳕鱼圣者", length-min: 0.6, length-max: 1.5, material: COD }
-  - { id: leg_phantom_01, name: "幻翼鲤尊", lore: "&7幻翼加身的鲤鱼尊者", length-min: 0.6, length-max: 1.4, material: COD }
-  - { id: leg_iron_01, name: "铁心鲟帝", lore: "&7铁心不摧的鲟鱼帝王", length-min: 0.9, length-max: 2.2, material: COD }
-  - { id: leg_shadow_01, name: "暗影狗神", lore: "&7暗影为名的狗鱼之神", length-min: 0.7, length-max: 1.6, material: COD }
-  - { id: leg_pearl_01, name: "珠魂龙皇", lore: "&7珠魂凝身的龙鲤之皇", length-min: 0.6, length-max: 1.4, material: COD }
-  - { id: leg_flame_01, name: "焰魂鲷尊", lore: "&7焰魂不熄的鲷鱼尊者", length-min: 0.35, length-max: 0.8, material: TROPICAL_FISH }
+fish-types:
+  - { type: cod_01, name: "鳕鱼", lore: "&7北大西洋冷水鱼，体长可达1.2米，背部灰褐色，腹部银白，肉质细嫩。", length-min: 0.5, length-max: 1.2, material: COD }
+  - { type: salmon_01, name: "鲑鱼", lore: "&7洄游性鱼类，体侧有黑色斑点，成年后体色变红，肉质鲜美富含油脂。", length-min: 0.6, length-max: 1.5, material: SALMON }
+  - { type: tropical_01, name: "热带鱼", lore: "&7珊瑚礁小型鱼，体色斑斓多变，常见蓝黄红等鲜艳条纹。", length-min: 0.1, length-max: 0.3, material: TROPICAL_FISH }
+  - { type: puffer_01, name: "河豚", lore: "&7遇险时吸水膨胀成球状，体表有细刺，部分种类含河豚毒素。", length-min: 0.2, length-max: 0.5, material: PUFFERFISH }
+  - { type: carp_01, name: "鲤鱼", lore: "&7淡水常见鱼，体侧扁，口部有两对须，鳞片大而圆，适应性强。", length-min: 0.4, length-max: 1.0, material: COD }
+  - { type: perch_01, name: "鲈鱼", lore: "&7溪流湖泊掠食者，背鳍分两片，体侧有深色竖纹，吻部尖。", length-min: 0.3, length-max: 0.8, material: SALMON }
+  - { type: trout_01, name: "鳟鱼", lore: "&7冷水溪流鱼，体侧有红点与黑色斑点，尾鳍分叉，游速敏捷。", length-min: 0.4, length-max: 1.0, material: SALMON }
+  - { type: bass_01, name: "鲈鲉", lore: "&7近海礁石区底栖鱼，头大嘴阔，体色斑驳与礁石相近，善伪装。", length-min: 0.3, length-max: 0.7, material: COD }
+  - { type: bream_01, name: "鲷鱼", lore: "&7浅海沙底银鳞鱼，体侧扁高，呈银白色带淡红光泽，肉质紧实。", length-min: 0.2, length-max: 0.6, material: COD }
+  - { type: flounder_01, name: "比目鱼", lore: "&7扁平底栖鱼，两眼同侧，体色可随沙底变化，常侧卧沙中。", length-min: 0.3, length-max: 0.8, material: COD }
+  - { type: mackerel_01, name: "鲭鱼", lore: "&7流线型群游鱼，背蓝腹银，体侧有波浪状深色条纹，游速极快。", length-min: 0.3, length-max: 0.6, material: COD }
+  - { type: herring_01, name: "鲱鱼", lore: "&7北大西洋银色小鱼，成群洄游，鳞片细小闪亮，是重要经济鱼种。", length-min: 0.2, length-max: 0.5, material: COD }
+  - { type: sardine_01, name: "沙丁鱼", lore: "&7小型群居鱼，体细长银白，常密集游动形成银色鱼群。", length-min: 0.15, length-max: 0.25, material: COD }
+  - { type: anchovy_01, name: "凤尾鱼", lore: "&7地中海小型银鱼，体细长，吻尖突出，常制成鱼露或罐头。", length-min: 0.1, length-max: 0.2, material: COD }
+  - { type: tilapia_01, name: "罗非鱼", lore: "&7淡水养殖鱼，体侧扁，鳞片大，耐低氧，原产非洲现广泛引种。", length-min: 0.3, length-max: 0.6, material: COD }
 
 storm:
-  - { id: storm_north_01, name: "北境冰鳞", lore: "&7北境冰海中的银鳞鱼", length-min: 0.5, length-max: 1.2, material: COD }
-  - { id: storm_south_01, name: "南渊暗鳍", lore: "&7南方深渊的暗色鱼", length-min: 0.4, length-max: 1.0, material: COD }
-  - { id: storm_east_01, name: "东溟雷纹", lore: "&7东海雷纹的迅捷鱼", length-min: 0.5, length-max: 1.1, material: SALMON }
-  - { id: storm_west_01, name: "西漠金鳞", lore: "&7西域沙漠绿洲的金鳞", length-min: 0.3, length-max: 0.8, material: TROPICAL_FISH }
-  - { id: storm_highland_01, name: "高地霜吻", lore: "&7高地冰湖的霜吻鱼", length-min: 0.4, length-max: 1.0, material: SALMON }
-  - { id: storm_coast_01, name: "海岸浪纹", lore: "&7海岸浪花中的纹鱼", length-min: 0.3, length-max: 0.7, material: COD }
-  - { id: storm_abyss_01, name: "深渊裂隙", lore: "&7深渊裂隙中的影鱼", length-min: 0.5, length-max: 1.3, material: COD }
-  - { id: storm_fjord_01, name: "峡湾银影", lore: "&7北欧峡湾的银影鱼", length-min: 0.5, length-max: 1.2, material: SALMON }
-  - { id: storm_coral_01, name: "珊瑚幻影", lore: "&7珊瑚礁中的幻影鱼", length-min: 0.2, length-max: 0.5, material: TROPICAL_FISH }
-  - { id: storm_tundra_01, name: "冻原冰心", lore: "&7冻原冰层下的冰心鱼", length-min: 0.4, length-max: 1.0, material: COD }
-  - { id: storm_marsh_01, name: "沼泽雾鳞", lore: "&7沼泽迷雾中的雾鳞鱼", length-min: 0.3, length-max: 0.7, material: COD }
-  - { id: storm_reef_01, name: "礁石暗流", lore: "&7礁石暗流中的迅鱼", length-min: 0.35, length-max: 0.8, material: TROPICAL_FISH }
-  - { id: storm_glacier_01, name: "冰川银魂", lore: "&7冰川融水中的银魂鱼", length-min: 0.5, length-max: 1.2, material: SALMON }
-  - { id: storm_bay_01, name: "海湾星点", lore: "&7宁静海湾的星点鱼", length-min: 0.25, length-max: 0.6, material: COD }
-  - { id: storm_canyon_01, name: "峡谷雷心", lore: "&7峡谷急流中的雷心鱼", length-min: 0.4, length-max: 1.0, material: COD }
-  - { id: storm_lagoon_01, name: "泻湖碧波", lore: "&7热带泻湖的碧波鱼", length-min: 0.3, length-max: 0.7, material: TROPICAL_FISH }
-  - { id: storm_delta_01, name: "河口泥金", lore: "&7河口三角洲的泥金鱼", length-min: 0.35, length-max: 0.8, material: COD }
-  - { id: storm_plateau_01, name: "高原雪鳞", lore: "&7高原雪水中的雪鳞鱼", length-min: 0.4, length-max: 1.0, material: SALMON }
-  - { id: storm_grotto_01, name: "洞窟幽光", lore: "&7地下洞窟的幽光鱼", length-min: 0.2, length-max: 0.5, material: TROPICAL_FISH }
-  - { id: storm_savanna_01, name: "草原雨季", lore: "&7草原雨季水塘的鱼", length-min: 0.25, length-max: 0.6, material: COD }
-  - { id: storm_volcano_01, name: "火山温泉", lore: "&7火山温泉中的耐热鱼", length-min: 0.3, length-max: 0.7, material: COD }
-  - { id: storm_archipelago_01, name: "群岛浪花", lore: "&7群岛海域的浪花鱼", length-min: 0.4, length-max: 0.9, material: SALMON }
-  - { id: storm_mangrove_01, name: "红树林影", lore: "&7红树林根间的影鱼", length-min: 0.25, length-max: 0.6, material: COD }
+  - { id: storm_north_01, name: "雷暴冰鳞", lore: "&7雷暴中诞生的北境银鳞", length-min: 0.5, length-max: 1.2, material: COD }
+  - { id: storm_south_01, name: "风暴暗鳍", lore: "&7风暴席卷的深渊暗色鱼", length-min: 0.4, length-max: 1.0, material: COD }
+  - { id: storm_east_01, name: "东溟雷纹", lore: "&7东海雷暴中游走的迅捷鱼", length-min: 0.5, length-max: 1.1, material: SALMON }
+  - { id: storm_west_01, name: "暴雨金鳞", lore: "&7暴雨洗礼的西域金鳞", length-min: 0.3, length-max: 0.8, material: TROPICAL_FISH }
+  - { id: storm_highland_01, name: "风暴霜吻", lore: "&7风暴过境高地冰湖的霜吻鱼", length-min: 0.4, length-max: 1.0, material: SALMON }
+  - { id: storm_coast_01, name: "浪涛纹鱼", lore: "&7暴风浪涛中的海岸纹鱼", length-min: 0.3, length-max: 0.7, material: COD }
+  - { id: storm_abyss_01, name: "雷渊裂隙", lore: "&7雷暴照亮的深渊裂隙影鱼", length-min: 0.5, length-max: 1.3, material: COD }
+  - { id: storm_fjord_01, name: "风暴银影", lore: "&7风暴峡湾中的银影鱼", length-min: 0.5, length-max: 1.2, material: SALMON }
+  - { id: storm_coral_01, name: "暴雨幻影", lore: "&7暴雨中珊瑚礁的幻影鱼", length-min: 0.2, length-max: 0.5, material: TROPICAL_FISH }
+  - { id: storm_tundra_01, name: "冰风暴心", lore: "&7冰风暴下的冻原冰心鱼", length-min: 0.4, length-max: 1.0, material: COD }
+  - { id: storm_marsh_01, name: "雷雨雾鳞", lore: "&7雷雨笼罩沼泽的雾鳞鱼", length-min: 0.3, length-max: 0.7, material: COD }
+  - { id: storm_reef_01, name: "风暴暗流", lore: "&7风暴掀起的礁石暗流迅鱼", length-min: 0.35, length-max: 0.8, material: TROPICAL_FISH }
+  - { id: storm_glacier_01, name: "暴雪银魂", lore: "&7暴雪冰川融水中的银魂鱼", length-min: 0.5, length-max: 1.2, material: SALMON }
+  - { id: storm_bay_01, name: "雷暴星点", lore: "&7雷暴下海湾的星点鱼", length-min: 0.25, length-max: 0.6, material: COD }
+  - { id: storm_canyon_01, name: "峡谷雷心", lore: "&7峡谷急流雷暴中的雷心鱼", length-min: 0.4, length-max: 1.0, material: COD }
+  - { id: storm_lagoon_01, name: "风暴碧波", lore: "&7风暴泻湖的碧波鱼", length-min: 0.3, length-max: 0.7, material: TROPICAL_FISH }
+  - { id: storm_delta_01, name: "暴雨泥金", lore: "&7暴雨河口三角洲的泥金鱼", length-min: 0.35, length-max: 0.8, material: COD }
+  - { id: storm_plateau_01, name: "暴雪雪鳞", lore: "&7高原暴雪中的雪鳞鱼", length-min: 0.4, length-max: 1.0, material: SALMON }
+  - { id: storm_grotto_01, name: "雷光幽影", lore: "&7雷光映照洞窟的幽光鱼", length-min: 0.2, length-max: 0.5, material: TROPICAL_FISH }
+  - { id: storm_savanna_01, name: "雨季风暴", lore: "&7草原雨季风暴水塘的鱼", length-min: 0.25, length-max: 0.6, material: COD }
+  - { id: storm_volcano_01, name: "风暴温泉", lore: "&7风暴与火山温泉交汇的耐热鱼", length-min: 0.3, length-max: 0.7, material: COD }
+  - { id: storm_archipelago_01, name: "风暴浪花", lore: "&7风暴群岛海域的浪花鱼", length-min: 0.4, length-max: 0.9, material: SALMON }
+  - { id: storm_mangrove_01, name: "暴雨林影", lore: "&7暴雨红树林根间的影鱼", length-min: 0.25, length-max: 0.6, material: COD }
 
 world:
-  - { id: world_tide_singer, name: "{#00bcd4>}潮汐歌者{#0097a7<}", lore: "&7传说在潮起潮落时歌唱，其声能抚平海浪。来自东海之滨的古老存在。", length-min: 0.8, length-max: 2.0, material: TROPICAL_FISH }
-  - { id: world_abyss_whisper, name: "{#0d47a1>}深渊低语者{#263238<}", lore: "&7栖息于世界最深的裂隙，据说能听见深渊的私语。", length-min: 0.7, length-max: 1.8, material: COD }
-  - { id: world_northern_guardian, name: "{#4fc3f7>}北境守望者{#0288d1<}", lore: "&7冰封之海的守护之灵，鳞片如千年寒冰。", length-min: 0.9, length-max: 2.2, material: SALMON }
-  - { id: world_southern_dream, name: "{#f48fb1>}南溟梦游者{#ec407a<}", lore: "&7南方温暖海域的梦之化身，游走于现实与幻梦之间。", length-min: 0.6, length-max: 1.5, material: TROPICAL_FISH }
-  - { id: world_starfall_child, name: "{#969dff>}星落之子{#f0ff91<}", lore: "&7传说为坠星所化，鳞间闪烁星辰余晖。诞生于西陆高原的圣湖。", length-min: 0.5, length-max: 1.3, material: COD }
-  - { id: world_moon_reflection, name: "{#e1bee7>}月影倒映{#ce93d8<}", lore: "&7只在满月之夜浮现的幻鱼，如水中倒映的月影。东方的传说之鱼。", length-min: 0.6, length-max: 1.4, material: SALMON }
-  - { id: world_sunrise_herald, name: "{#ffd54f>}破晓使者{#ffc107<}", lore: "&7伴随第一缕曙光出现的鱼，被东方渔民视为吉兆。", length-min: 0.5, length-max: 1.2, material: TROPICAL_FISH }
-  - { id: world_twilight_wanderer, name: "{#ce93d8>}暮色漫游者{#ba68c8<}", lore: "&7游走于昼夜交界的存在，鳞色随光影变幻。西海岸的传说。", length-min: 0.6, length-max: 1.5, material: COD }
-  - { id: world_eternal_flow, name: "{#26a69a>}永恒之流{#00897b<}", lore: "&7象征时间之河的存在，据说见证过大陆的变迁。", length-min: 0.7, length-max: 1.8, material: SALMON }
-  - { id: world_silent_depth, name: "{#37474f>}静默深渊{#263238<}", lore: "&7从不发出声响的鱼，栖息于世界最寂静的深海。", length-min: 0.6, length-max: 1.6, material: COD }
-  - { id: world_coral_memory, name: "{#f8bbd9>}珊瑚记忆{#f48fb1<}", lore: "&7承载古老珊瑚礁记忆的灵鱼，鳞片如千年珊瑚。", length-min: 0.4, length-max: 1.0, material: TROPICAL_FISH }
-  - { id: world_glacier_heart, name: "{#b3e5fc>}冰川之心{#4fc3f7<}", lore: "&7北地冰川深处的冰心之灵，触碰如触寒冰之魂。", length-min: 0.7, length-max: 1.7, material: SALMON }
-  - { id: world_delta_soul, name: "{#ffb74d>}河口之魂{#ffa726<}", lore: "&7汇聚百川的河口孕育之灵，身负万千支流的记忆。", length-min: 0.5, length-max: 1.3, material: COD }
-  - { id: world_archipelago_echo, name: "{#90caf9>}群岛回响{#64b5f6<}", lore: "&7在群岛间回荡的传说之鱼，其存在如海风中的低语。", length-min: 0.6, length-max: 1.5, material: TROPICAL_FISH }
+  - { id: world_tide_singer, name: "{#00bcd4>}潮汐歌者{#0097a7<}", lore: "&7传说在潮起潮落时歌唱，其声能抚平海浪。来自东海之滨的古老存在。", broadcast: "&7「春江潮水连海平，海上明月共潮生。」", length-min: 0.8, length-max: 2.0, material: TROPICAL_FISH }
+  - { id: world_abyss_whisper, name: "{#0d47a1>}深渊低语者{#263238<}", lore: "&7栖息于世界最深的裂隙，据说能听见深渊的私语。", broadcast: "&7「海纳百川，有容乃大。」", length-min: 0.7, length-max: 1.8, material: COD }
+  - { id: world_northern_guardian, name: "{#4fc3f7>}北境守望者{#0288d1<}", lore: "&7冰封之海的守护之灵，鳞片如千年寒冰。", broadcast: "&7「北风卷地白草折，胡天八月即飞雪。」", length-min: 0.9, length-max: 2.2, material: SALMON }
+  - { id: world_southern_dream, name: "{#f48fb1>}南溟梦游者{#ec407a<}", lore: "&7南方温暖海域的梦之化身，游走于现实与幻梦之间。", broadcast: "&7「南有乔木，不可休思。」", length-min: 0.6, length-max: 1.5, material: TROPICAL_FISH }
+  - { id: world_starfall_child, name: "{#969dff>}星落之子{#f0ff91<}", lore: "&7传说为坠星所化，鳞间闪烁星辰余晖。诞生于西陆高原的圣湖。", broadcast: "&7「星垂平野阔，月涌大江流。」", length-min: 0.5, length-max: 1.3, material: COD }
+  - { id: world_moon_reflection, name: "{#e1bee7>}月影倒映{#ce93d8<}", lore: "&7只在满月之夜浮现的幻鱼，如水中倒映的月影。东方的传说之鱼。", broadcast: "&7「海上生明月，天涯共此时。」", length-min: 0.6, length-max: 1.4, material: SALMON }
+  - { id: world_sunrise_herald, name: "{#ffd54f>}破晓使者{#ffc107<}", lore: "&7伴随第一缕曙光出现的鱼，被东方渔民视为吉兆。", broadcast: "&7「日出江花红胜火，春来江水绿如蓝。」", length-min: 0.5, length-max: 1.2, material: TROPICAL_FISH }
+  - { id: world_twilight_wanderer, name: "{#ce93d8>}暮色漫游者{#ba68c8<}", lore: "&7游走于昼夜交界的存在，鳞色随光影变幻。西海岸的传说。", broadcast: "&7「夕阳无限好，只是近黄昏。」", length-min: 0.6, length-max: 1.5, material: COD }
+  - { id: world_eternal_flow, name: "{#26a69a>}永恒之流{#00897b<}", lore: "&7象征时间之河的存在，据说见证过大陆的变迁。", broadcast: "&7「逝者如斯夫，不舍昼夜。」", length-min: 0.7, length-max: 1.8, material: SALMON }
+  - { id: world_silent_depth, name: "{#37474f>}静默深渊{#263238<}", lore: "&7从不发出声响的鱼，栖息于世界最寂静的深海。", broadcast: "&7「大音希声，大象无形。」", length-min: 0.6, length-max: 1.6, material: COD }
+  - { id: world_coral_memory, name: "{#f8bbd9>}珊瑚记忆{#f48fb1<}", lore: "&7承载古老珊瑚礁记忆的灵鱼，鳞片如千年珊瑚。", broadcast: "&7「沧海月明珠有泪，蓝田日暖玉生烟。」", length-min: 0.4, length-max: 1.0, material: TROPICAL_FISH }
+  - { id: world_glacier_heart, name: "{#b3e5fc>}冰川之心{#4fc3f7<}", lore: "&7北地冰川深处的冰心之灵，触碰如触寒冰之魂。", broadcast: "&7「千山鸟飞绝，万径人踪灭。」", length-min: 0.7, length-max: 1.7, material: SALMON }
+  - { id: world_delta_soul, name: "{#ffb74d>}河口之魂{#ffa726<}", lore: "&7汇聚百川的河口孕育之灵，身负万千支流的记忆。", broadcast: "&7「百川东到海，何时复西归。」", length-min: 0.5, length-max: 1.3, material: COD }
+  - { id: world_archipelago_echo, name: "{#90caf9>}群岛回响{#64b5f6<}", lore: "&7在群岛间回荡的传说之鱼，其存在如海风中的低语。", broadcast: "&7「长风破浪会有时，直挂云帆济沧海。」", length-min: 0.6, length-max: 1.5, material: TROPICAL_FISH }

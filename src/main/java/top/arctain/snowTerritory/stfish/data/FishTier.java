@@ -31,4 +31,12 @@ public enum FishTier {
     public String getNameColor() {
         return nameColor;
     }
+
+    public static FishTier fromDisplayName(String displayName) {
+        if (displayName == null) return null;
+        for (FishTier t : values()) {
+            if (t.displayName.equals(displayName)) return t;
+        }
+        return null;
+    }
 }

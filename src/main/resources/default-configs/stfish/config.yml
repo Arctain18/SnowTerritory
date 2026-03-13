@@ -31,3 +31,29 @@ title:
   fade-in: 300
   stay: 1500
   fade-out: 500
+
+market:
+  decay-window-minutes: 10
+  decay-threshold: 5
+  decay-factor: 0.8
+  base-prices:
+    cod_01: 10
+    salmon_01: 12
+    tropical_01: 15
+    puffer_01: 8
+    carp_01: 9
+    perch_01: 11
+    trout_01: 12
+    bass_01: 10
+    bream_01: 11
+    flounder_01: 9
+    mackerel_01: 10
+    herring_01: 8
+    sardine_01: 6
+    anchovy_01: 7
+    tilapia_01: 9
+  tier-multipliers:
+    common: 1.0
+    rare: 1.5
+    epic: 2.5
+    legendary: 4.0
