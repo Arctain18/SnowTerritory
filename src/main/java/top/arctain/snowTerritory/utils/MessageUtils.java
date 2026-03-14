@@ -143,6 +143,18 @@ public class MessageUtils {
         return getMessage(key, defaultValue, placeholders);
     }
 
+    private static String parsePapi(CommandSender sender, String text) {
+        if (sender instanceof Player) {
+            return PlaceholderAPIUtils.parse((Player) sender, text);
+        }
+        return text;
+    }
+
+    /** 解析 PAPI 占位符，供 Title、Lore 等需玩家上下文的场景使用。 */
+    public static String parsePlaceholders(Player player, String text) {
+        return player != null ? PlaceholderAPIUtils.parse(player, text) : text;
+    }
+
     /**
      * 发送配置消息（从配置文件读取，根据配置键自动选择前缀）
      * @param sender 接收者
@@ -154,7 +166,8 @@ public class MessageUtils {
         String message = getMessage(key, defaultValue, placeholders);
         String prefix = getPrefix(key);
         if (sender != null) {
-            sender.sendMessage(colorize(prefix + message));
+            String text = parsePapi(sender, prefix + message);
+            sender.sendMessage(colorize(text));
         }
     }
     
@@ -200,7 +213,8 @@ public class MessageUtils {
     public static void sendMessage(CommandSender sender, String message) {
         if (sender != null) {
             String prefix = getPrefix(null);
-            sender.sendMessage(colorize(prefix + message));
+            String text = parsePapi(sender, prefix + message);
+            sender.sendMessage(colorize(text));
         }
     }
 
@@ -209,7 +223,8 @@ public class MessageUtils {
      */
     public static void sendRaw(CommandSender sender, String message) {
         if (sender != null) {
-            sender.sendMessage(colorize(message));
+            String text = parsePapi(sender, message);
+            sender.sendMessage(colorize(text));
         }
     }
 
@@ -230,8 +245,8 @@ public class MessageUtils {
                 "&8━━━━━━━━━━━━━━━━━━\n&6◆ 任务区域\n&7{area}\n&8━━━━━━━━━━━━━━━━━━",
                 "area", areaPlaceholder);
         String prefix = getPrefix(announcementKey);
-        String fullText = colorize(prefix + announcement);
-        String hoverText = colorize(hoverRaw);
+        String fullText = colorize(parsePapi(player, prefix + announcement));
+        String hoverText = colorize(parsePapi(player, hoverRaw));
         Component display = LegacyComponentSerializer.legacySection().deserialize(fullText)
                 .hoverEvent(HoverEvent.showText(LegacyComponentSerializer.legacySection().deserialize(hoverText)));
         player.sendMessage(display);

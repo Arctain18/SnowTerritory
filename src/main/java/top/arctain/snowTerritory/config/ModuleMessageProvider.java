@@ -4,11 +4,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.utils.ColorUtils;
+import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.util.Map;
 import java.util.Optional;
 
-/** 模块消息提供者，支持占位符 {key} 与颜色解析。 */
+/** 模块消息提供者，支持占位符 {key}、PAPI 与颜色解析。 */
 public class ModuleMessageProvider {
 
     private final Map<String, FileConfiguration> packs;
@@ -20,7 +21,8 @@ public class ModuleMessageProvider {
     }
 
     public String get(CommandSender sender, String path, String def) {
-        return ColorUtils.colorize(getRaw(sender, path, def));
+        String raw = getRaw(sender, path, def);
+        return ColorUtils.colorize(parsePapi(sender, raw));
     }
 
     public String getRaw(CommandSender sender, String path, String def) {
@@ -42,6 +44,10 @@ public class ModuleMessageProvider {
                 message = message.replace("{" + k + "}", v).replace("%" + k + "%", v);
             }
         }
-        return ColorUtils.colorize(message);
+        return ColorUtils.colorize(parsePapi(sender, message));
+    }
+
+    private String parsePapi(CommandSender sender, String text) {
+        return sender instanceof Player ? MessageUtils.parsePlaceholders((Player) sender, text) : text;
     }
 }

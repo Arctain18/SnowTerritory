@@ -5,7 +5,7 @@ api-version: '1.21'
 authors: [ Arctain ]
 website: www.arctain.top
 depend: [ MMOItems ]
-softdepend: [ Vault, PlayerPoints ]
+softdepend: [ Vault, PlayerPoints, PlaceholderAPI ]
 commands:
   snowterritory:
     description: SnowTerritory 主命令

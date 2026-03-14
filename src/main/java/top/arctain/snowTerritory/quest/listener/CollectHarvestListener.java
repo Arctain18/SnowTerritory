@@ -122,8 +122,8 @@ public class CollectHarvestListener implements Listener {
         long stay = tasksCollect != null ? tasksCollect.getLong("collect.title-stay", 2000) : 2000;
         long fadeOut = tasksCollect != null ? tasksCollect.getLong("collect.title-fade-out", 500) : 500;
 
-        String title = MessageUtils.getConfigMessage("quest.collect-success-title", "&a采集成功");
-        String subtitle = MessageUtils.getConfigMessage("quest.collect-success-subtitle", "&7+1 {crop}", "crop", cropName);
+        String title = MessageUtils.parsePlaceholders(player, MessageUtils.getConfigMessage("quest.collect-success-title", "&a采集成功"));
+        String subtitle = MessageUtils.parsePlaceholders(player, MessageUtils.getConfigMessage("quest.collect-success-subtitle", "&7+1 {crop}", "crop", cropName));
         Component titleComp = LegacyComponentSerializer.legacySection().deserialize(ColorUtils.colorize(title));
         Component subtitleComp = LegacyComponentSerializer.legacySection().deserialize(ColorUtils.colorize(subtitle));
         player.showTitle(Title.title(titleComp, subtitleComp,

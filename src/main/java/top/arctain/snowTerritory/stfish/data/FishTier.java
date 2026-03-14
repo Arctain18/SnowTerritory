@@ -2,10 +2,10 @@ package top.arctain.snowTerritory.stfish.data;
 
 /** 鱼类品质枚举。 */
 public enum FishTier {
-    COMMON("普通", 34, "&7"),
-    RARE("稀有", 21, "&2"),
-    EPIC("史诗", 18, "&6"),
-    LEGENDARY("传说", 15, "&3"),
+    COMMON("普通", 34, "&f"),
+    RARE("稀有", 21, "&a"),
+    EPIC("史诗", 18, "&d"),
+    LEGENDARY("传说", 15, "&b"),
     STORM("风暴", 23, "&1&l"),
     WORLD("世界", 14, null);
 

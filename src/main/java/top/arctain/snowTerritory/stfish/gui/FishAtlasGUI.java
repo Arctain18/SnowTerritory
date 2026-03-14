@@ -43,8 +43,8 @@ public class FishAtlasGUI {
         int start = (currentPage - 1) * CONTENT_SLOTS;
         int end = Math.min(allFish.size(), start + CONTENT_SLOTS);
 
-        String title = MessageUtils.getConfigMessage("stfish.atlas-title", "&6鱼类图鉴 &8- &7第 {page}/{total} 页",
-                "page", String.valueOf(currentPage), "total", String.valueOf(totalPages));
+        String title = MessageUtils.parsePlaceholders(player, MessageUtils.getConfigMessage("stfish.atlas-title", "&6鱼类图鉴 &8- &7第 {page}/{total} 页",
+                "page", String.valueOf(currentPage), "total", String.valueOf(totalPages)));
         Inventory inv = Bukkit.createInventory(new FishAtlasHolder(currentPage), 54, ColorUtils.colorize(title));
 
         for (int i = start; i < end; i++) {

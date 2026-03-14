@@ -57,7 +57,7 @@ public class FishSellService {
         item.setAmount(item.getAmount() - 1);
 
         String fishDisplayName = itemFactory.getDisplayNameForBroadcast(def, tier);
-        MessageUtils.sendConfigMessage(player, "stfish.sell-success", "&a✓ &f出售成功，获得 &e{price} &f金币",
+        MessageUtils.sendConfigMessage(player, "stfish.sell-success", "&a✓ &7出售 {fish} &7成功，获得 &e{price} &7金币",
                 "price", String.format("%.2f", quote.price()), "fish", fishDisplayName);
         if (quote.priceDecayed()) {
             MessageUtils.sendConfigMessage(player, "stfish.sell-price-decay",

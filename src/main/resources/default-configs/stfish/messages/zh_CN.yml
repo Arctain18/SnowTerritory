@@ -1,13 +1,13 @@
 # ST Fish 模块消息（支持 ColorUtils: &a &{#FF0000} <g:#FF:#00>Text</g>）
-# lore-quality/lore-length 占位符: {tier} {length}
+# lore-quality 占位符: {color} {tier}（键深灰 &8）；lore-length 占位符: {length} {unit}（键深灰 &8，unit 灰色 cm）
 
-lore-quality: "&7品质: {tier}"
-lore-length: "&7长度: {length}cm"
+lore-quality: "&8品质: {color}{tier}"
+lore-length: "&8长度: {length}{unit}"
 atlas-title: "&6<g:#FFD54F:#FF8F00>鱼类图鉴</g> &8- &7第 {page}/{total} 页"
 fish-title: "&a<g:#4CAF50:#81C784>鱼上钩了！</g>"
-fish-subtitle: "&7{fish} &8| &7&{#64B5F6}{length}cm"
-broadcast-storm: "&{#4d99eb}◈ &{#cccccc}玩家 &{#FFFF00}{player} &{#cccccc}于 {#3c79cf>}&l{location}{#3341ff<} &{#cccccc}钓上了 &{#FFFF00}{length_cm}cm {tier_modifier}{fish_name} &{#cccccc}!"
-broadcast-world: "&{#4d99eb}✦ &{#8c00ff}&l世界之鱼降临 &{#4d99eb}✦\n&{#cccccc}玩家 &{#FFFF00}{player} &{#cccccc}于 {#3c79cf>}&l{location}{#3341ff<} &{#cccccc}钓上了 &{#FFFF00}{length_cm}cm {tier_modifier}{fish_name} &{#cccccc}!\n&{#e1bee7}&o{poem}"
+fish-subtitle: "&7{fish} &8| {length}&7cm"
+broadcast-storm: "&{#4d99eb}◈ &{#cccccc}玩家 &{#FFFF00}{player} &{#cccccc}于 {#3c79cf>}&l{location}{#3341ff<} &{#cccccc}钓上了 {length_cm}&7cm {tier_modifier}{fish_name} &{#cccccc}!"
+broadcast-world: "&{#4d99eb}✦ &{#8c00ff}&l世界之鱼降临 &{#4d99eb}✦\n&{#cccccc}玩家 &{#FFFF00}{player} &{#cccccc}于 {#3c79cf>}&l{location}{#3341ff<} &{#cccccc}钓上了 {length_cm}&7cm {tier_modifier}{fish_name} &{#cccccc}!\n&{#e1bee7}&o{poem}"
 weather-rain-broadcast: "&6✦ &e[天气] &7<g:#4FC3F7:#29B6F6>主世界开始降雨，钓鱼品质概率提升！</g>"
 weather-storm-broadcast: "&6✦ &e[天气] &7<g:#42A5F5:#1E88E5>主世界迎来暴风雨，钓鱼品质概率大幅提升！</g>"
 weather-summon-broadcast: "&6✦ &e[天气] &f{player} &7消耗金币召唤了 &e{weather} &7天气！"
@@ -24,7 +24,7 @@ give-fish-not-found: "&c✗ &f未找到鱼种: {id}"
 give-success: "&a✓ &f已给予 &e{player} &f{amount}x &e{fish}"
 give-no-permission: "&c✗ &f您没有权限给予鱼类"
 give-tier-unknown: "&c✗ &f无法确定鱼种品质"
-sell-success: "&a✓ &f出售 {fish} 成功，获得 &e{price} &f金币"
+sell-success: "&a✓ &7出售 {fish} &7成功，获得 &e{price} &7金币"
 sell-price-decay: "&e&l! &7该品种出售过多，收购价已下降，请稍后再售"
 sell-no-economy: "&c✗ &f经济系统未启用，无法出售"
 sell-storm-forbidden: "&c✗ &f风暴级及以上鱼类不可出售"
