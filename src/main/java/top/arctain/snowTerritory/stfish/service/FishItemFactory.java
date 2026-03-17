@@ -116,7 +116,7 @@ public class FishItemFactory {
         return String.format("%.1f", lengthM * 100);
     }
 
-    /** 品质 lore 颜色：普通白、稀有浅绿、史诗粉、传说浅蓝、风暴/世界保持原样。 */
+    /** 品质 lore 颜色：普通白、稀有浅绿、史诗粉、传说浅蓝、风暴深蓝、潮汐紫色。 */
     private String getTierColorForLore(FishTier tier) {
         return switch (tier) {
             case COMMON -> "&f";
@@ -124,7 +124,7 @@ public class FishItemFactory {
             case EPIC -> "&d";
             case LEGENDARY -> "&b";
             case STORM -> "&1&l";
-            case WORLD -> "&3";
+            case WORLD -> "&5";
         };
     }
 

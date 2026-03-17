@@ -23,8 +23,6 @@ import top.arctain.snowTerritory.utils.ColorUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.time.Duration;
-import java.util.Map;
-
 /** 监听钓鱼事件，替换掉落为 ST 鱼类，发送 Title 与广播。 */
 public class FishingListener implements Listener {
 
@@ -85,7 +83,7 @@ public class FishingListener implements Listener {
             double lengthMin, double lengthMax, Biome biome, String poem) {
         String location = BiomeNameHelper.getDisplayName(biome);
         String lengthCm = FishItemFactory.formatLengthColored(lengthM, lengthMin, lengthMax);
-        String tierModifier = tier == FishTier.STORM ? "&{#42a5f5}&l风暴般的 " : "&{#8c00ff}&l世界般的 ";
+        String tierModifier = tier == FishTier.STORM ? "&{#42a5f5}&l风暴般的 " : "&{#8c00ff}&l潮汐般的 ";
 
         String key = tier == FishTier.STORM ? "stfish.broadcast-storm" : "stfish.broadcast-world";
         String poemPlaceholder = poem != null ? poem : "";

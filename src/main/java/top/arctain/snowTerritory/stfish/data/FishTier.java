@@ -7,7 +7,8 @@ public enum FishTier {
     EPIC("史诗", 18, "&d"),
     LEGENDARY("传说", 15, "&b"),
     STORM("风暴", 23, "&1&l"),
-    WORLD("世界", 14, null);
+    // 世界（潮汐）品质：品质行用统一紫色，鱼名保留各自渐变，因此 nameColor 设为 null
+    WORLD("潮汐", 5, null);
 
     private final String displayName;
     private final int fishCount;

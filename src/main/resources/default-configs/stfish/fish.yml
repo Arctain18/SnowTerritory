@@ -46,17 +46,8 @@ storm:
   - { id: storm_mangrove_01, name: "暴雨林影", lore: "&7暴雨红树林根间的影鱼", length-min: 0.25, length-max: 0.6, material: COD }
 
 world:
-  - { id: world_tide_singer, name: "{#00bcd4>}潮汐歌者{#0097a7<}", lore: "&7传说在潮起潮落时歌唱，其声能抚平海浪。来自东海之滨的古老存在。", broadcast: "&7「春江潮水连海平，海上明月共潮生。」", length-min: 0.8, length-max: 2.0, material: TROPICAL_FISH }
-  - { id: world_abyss_whisper, name: "{#0d47a1>}深渊低语者{#263238<}", lore: "&7栖息于世界最深的裂隙，据说能听见深渊的私语。", broadcast: "&7「海纳百川，有容乃大。」", length-min: 0.7, length-max: 1.8, material: COD }
-  - { id: world_northern_guardian, name: "{#4fc3f7>}北境守望者{#0288d1<}", lore: "&7冰封之海的守护之灵，鳞片如千年寒冰。", broadcast: "&7「北风卷地白草折，胡天八月即飞雪。」", length-min: 0.9, length-max: 2.2, material: SALMON }
-  - { id: world_southern_dream, name: "{#f48fb1>}南溟梦游者{#ec407a<}", lore: "&7南方温暖海域的梦之化身，游走于现实与幻梦之间。", broadcast: "&7「南有乔木，不可休思。」", length-min: 0.6, length-max: 1.5, material: TROPICAL_FISH }
-  - { id: world_starfall_child, name: "{#969dff>}星落之子{#f0ff91<}", lore: "&7传说为坠星所化，鳞间闪烁星辰余晖。诞生于西陆高原的圣湖。", broadcast: "&7「星垂平野阔，月涌大江流。」", length-min: 0.5, length-max: 1.3, material: COD }
-  - { id: world_moon_reflection, name: "{#e1bee7>}月影倒映{#ce93d8<}", lore: "&7只在满月之夜浮现的幻鱼，如水中倒映的月影。东方的传说之鱼。", broadcast: "&7「海上生明月，天涯共此时。」", length-min: 0.6, length-max: 1.4, material: SALMON }
-  - { id: world_sunrise_herald, name: "{#ffd54f>}破晓使者{#ffc107<}", lore: "&7伴随第一缕曙光出现的鱼，被东方渔民视为吉兆。", broadcast: "&7「日出江花红胜火，春来江水绿如蓝。」", length-min: 0.5, length-max: 1.2, material: TROPICAL_FISH }
-  - { id: world_twilight_wanderer, name: "{#ce93d8>}暮色漫游者{#ba68c8<}", lore: "&7游走于昼夜交界的存在，鳞色随光影变幻。西海岸的传说。", broadcast: "&7「夕阳无限好，只是近黄昏。」", length-min: 0.6, length-max: 1.5, material: COD }
-  - { id: world_eternal_flow, name: "{#26a69a>}永恒之流{#00897b<}", lore: "&7象征时间之河的存在，据说见证过大陆的变迁。", broadcast: "&7「逝者如斯夫，不舍昼夜。」", length-min: 0.7, length-max: 1.8, material: SALMON }
-  - { id: world_silent_depth, name: "{#37474f>}静默深渊{#263238<}", lore: "&7从不发出声响的鱼，栖息于世界最寂静的深海。", broadcast: "&7「大音希声，大象无形。」", length-min: 0.6, length-max: 1.6, material: COD }
-  - { id: world_coral_memory, name: "{#f8bbd9>}珊瑚记忆{#f48fb1<}", lore: "&7承载古老珊瑚礁记忆的灵鱼，鳞片如千年珊瑚。", broadcast: "&7「沧海月明珠有泪，蓝田日暖玉生烟。」", length-min: 0.4, length-max: 1.0, material: TROPICAL_FISH }
-  - { id: world_glacier_heart, name: "{#b3e5fc>}冰川之心{#4fc3f7<}", lore: "&7北地冰川深处的冰心之灵，触碰如触寒冰之魂。", broadcast: "&7「千山鸟飞绝，万径人踪灭。」", length-min: 0.7, length-max: 1.7, material: SALMON }
-  - { id: world_delta_soul, name: "{#ffb74d>}河口之魂{#ffa726<}", lore: "&7汇聚百川的河口孕育之灵，身负万千支流的记忆。", broadcast: "&7「百川东到海，何时复西归。」", length-min: 0.5, length-max: 1.3, material: COD }
-  - { id: world_archipelago_echo, name: "{#90caf9>}群岛回响{#64b5f6<}", lore: "&7在群岛间回荡的传说之鱼，其存在如海风中的低语。", broadcast: "&7「长风破浪会有时，直挂云帆济沧海。」", length-min: 0.6, length-max: 1.5, material: TROPICAL_FISH }
+  - { id: tide_forget_river_carp, name: "{#1a237e>}忘川鲤{#4a148c<}", lore: "&7逆流而上的暗紫鲤鱼，鳞片在潮汐与星光间折射出幽蓝光辉，似在追逐被遗忘的记忆。", broadcast: "&7日月起落，星光绽于你我之间", length-min: 0.6, length-max: 1.4, material: SALMON }
+  - { id: tide_starfall_drum, name: "{#283593>}落星鮸{#6a1b9a<}", lore: "&7夜空坠落的星屑化作牠的鳞片，银紫光点随潮汐起伏，如同沉睡在海面的流星雨。", broadcast: "&7夜色低垂，银色的雨在天幕上沉睡", length-min: 0.5, length-max: 1.1, material: COD }
+  - { id: tide_frostsong_salmon, name: "{#3949ab>}霜歌鲑{#7e57c2<}", lore: "&7游弋于寒潮边界，呼吸间溢出薄霜，尾鳍划过水面时，会留下一段仿若歌声的冰痕。", broadcast: "&7何处吹来的清风，带走覆雪的只言片语", length-min: 0.7, length-max: 1.6, material: SALMON }
+  - { id: tide_nightchase_bass, name: "{#1a237e>}逐夜鲈{#8e24aa<}", lore: "&7专爱追逐退潮后的幽暗浪头，双眸如冷紫灯火，在无尽长夜中猎逐一切逼近黎明的光。", broadcast: "&7冰冷的血在心脏中流动，我们学会了拒绝黎明。", length-min: 0.6, length-max: 1.5, material: COD }
+  - { id: tide_drifting_whale, name: "{#283593>}浮生鲸{#9c27b0<}", lore: "&7潮水是牠的被褥，星空是牠的眼眸。巨大的身影随潮起潮落缓缓浮沉，似在梦中回望逝去的万千浮生。", broadcast: "&7浮生若梦，为欢几何？", length-min: 1.8, length-max: 4.0, material: TROPICAL_FISH }
