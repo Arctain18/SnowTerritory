@@ -2,7 +2,7 @@
 
 sets:
   frost_guard:
-    display-name: "冰霜守卫"
+    display-name: "&{#70F4FF}冰霜守卫"
     # 基础属性（用于整套的理论总值）
     base-stats:
       defense: 100

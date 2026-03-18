@@ -231,5 +231,9 @@ public class ArmorConfigManager {
     public Map<String, ArmorSetDefinition> getAllSets() {
         return Collections.unmodifiableMap(sets);
     }
+
+    public File getBaseDir() {
+        return baseDir;
+    }
 }
 

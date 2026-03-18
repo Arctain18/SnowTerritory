@@ -268,9 +268,9 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             String m = args[2].toLowerCase();
             if ("all".equals(m) || "全部".equals(m)) {
                 modules = null; // null 表示删除整个目录
-            } else if (!java.util.Set.of("reinforce", "enderstorage", "es", "quest", "stocks", "stfish").contains(m)) {
+            } else if (!java.util.Set.of("reinforce", "enderstorage", "es", "quest", "stocks", "stfish", "armor").contains(m)) {
                 MessageUtils.sendConfigMessage(sender, "debug.invalid-module",
-                        "&c✗ &f未知模块: {module}，可选: reinforce, enderstorage, quest, stocks, all", "module", m);
+                        "&c✗ &f未知模块: {module}，可选: reinforce, enderstorage, quest, stocks, stfish, armor, all", "module", m);
                 return true;
             } else {
                 modules = "es".equals(m) ? java.util.List.of("enderstorage") : java.util.List.of(m);
@@ -302,6 +302,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         if (questModule != null) questModule.reload();
         if (stocksModule != null) stocksModule.reload();
         if (stfishModule != null) stfishModule.reload();
+        if (armorModule != null) armorModule.reload();
         return count;
     }
 
@@ -315,6 +316,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
                 case "quest" -> questModule != null ? doResetModule(questModule.getConfigManager().getBaseDir(), () -> questModule.reload()) : 0;
                 case "stocks" -> stocksModule != null ? doResetModule(stocksModule.getConfigManager().getBaseDir(), () -> stocksModule.reload()) : 0;
                 case "stfish" -> stfishModule != null ? doResetModule(stfishModule.getConfigManager().getBaseDir(), () -> stfishModule.reload()) : 0;
+                case "armor" -> armorModule != null ? doResetModule(armorModule.getConfigManager().getBaseDir(), () -> armorModule.reload()) : 0;
                 default -> 0;
             };
         }
@@ -392,6 +394,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             if ("quest".startsWith(input)) modules.add("quest");
             if ("stocks".startsWith(input)) modules.add("stocks");
             if ("stfish".startsWith(input)) modules.add("stfish");
+            if ("armor".startsWith(input)) modules.add("armor");
             if ("all".startsWith(input) || "全部".startsWith(input)) modules.add("all");
             return modules;
         }

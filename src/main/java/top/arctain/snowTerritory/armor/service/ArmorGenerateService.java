@@ -73,14 +73,13 @@ public class ArmorGenerateService {
         if (withStats != null) {
             built = withStats;
         }
-        if (quality != null) {
-            var meta = built.getItemMeta();
-            if (meta != null) {
-                String display = meta.hasDisplayName() ? meta.getDisplayName() : built.getType().name();
-                String name = display + quality.getSuffix();
-                meta.setDisplayName(MessageUtils.colorize(name));
-                built.setItemMeta(meta);
-            }
+        var meta = built.getItemMeta();
+        if (meta != null) {
+            String slotDisplay = MessageUtils.getConfigMessage("armor.slot-display." + slotId, slotId);
+            String suffix = quality != null ? quality.getSuffix() : "";
+            String name = set.getDisplayName() + slotDisplay + suffix;
+            meta.setDisplayName(MessageUtils.colorize(name));
+            built.setItemMeta(meta);
         }
         return built;
     }

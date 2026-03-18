@@ -28,12 +28,12 @@ armor:
       value-multiplier: 1.0
     rare:
       display-name: "精品"
-      suffix: " 精品"
+      suffix: " &{#FF8000}Ex"
       weight: 25
       value-multiplier: 1.1
     epic:
       display-name: "极品"
-      suffix: " 极品"
+      suffix: " &{#FF0000}Ex+"
       weight: 5
       value-multiplier: 1.25
 
