@@ -12,6 +12,7 @@ import top.arctain.snowTerritory.utils.ConfigUtils;
 import top.arctain.snowTerritory.quest.QuestModule;
 import top.arctain.snowTerritory.reinforce.ReinforceModule;
 import top.arctain.snowTerritory.stfish.StfishModule;
+import top.arctain.snowTerritory.armor.ArmorModule;
 import top.arctain.snowTerritory.stocks.StocksModule;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
@@ -30,6 +31,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
     private final QuestModule questModule;
     private final StocksModule stocksModule;
     private final StfishModule stfishModule;
+    private final ArmorModule armorModule;
 
     public SnowTerritoryCommand(Main plugin, PluginConfig config, ReinforceModule reinforceModule, StfishModule stfishModule, DebugResetConfirmHandler debugResetHandler) {
         this.plugin = plugin;
@@ -41,6 +43,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         this.questModule = plugin.getQuestModule();
         this.stocksModule = plugin.getStocksModule();
         this.stfishModule = stfishModule;
+        this.armorModule = plugin instanceof Main ? ((Main) plugin).getArmorModule() : null;
     }
 
     @Override
@@ -69,6 +72,8 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             return handleWeather(sender, args);
         } else if (subCommand.equals("fish")) {
             return handleFish(sender, args);
+        } else if (subCommand.equals("armor")) {
+            return handleArmor(sender, args);
         } else if (subCommand.equals("debug")) {
             return handleDebug(sender, args);
         } else {
@@ -208,6 +213,17 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
+     * 处理 Armor 子命令: /sn armor generate all <套装ID>
+     */
+    private boolean handleArmor(CommandSender sender, String[] args) {
+        if (armorModule == null || armorModule.getArmorCommand() == null) {
+            MessageUtils.sendError(sender, "command.feature-missing", "&c✗ &fArmor 功能未启用");
+            return true;
+        }
+        return armorModule.getArmorCommand().onCommand(sender, null, "snowterritory armor", args);
+    }
+
+    /**
      * 处理 Weather 子命令: /sn weather summon
      */
     private boolean handleWeather(CommandSender sender, String[] args) {
@@ -341,12 +357,20 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             if ("fish".startsWith(input)) {
                 completions.add("fish");
             }
+            if ("armor".startsWith(input)) {
+                completions.add("armor");
+            }
             if ("debug".startsWith(input)) {
                 completions.add("debug");
             }
             return completions;
         }
 
+        if (args.length >= 2 && args[0].equalsIgnoreCase("armor")) {
+            if (armorModule != null && armorModule.getArmorCommand() != null) {
+                return armorModule.getArmorCommand().onTabComplete(sender, command, "armor", args);
+            }
+        }
         if (args.length >= 2 && args[0].equalsIgnoreCase("fish")) {
             if (stfishModule != null && stfishModule.getStfishCommand() != null) {
                 return stfishModule.getStfishCommand().onTabComplete(sender, command, "fish", args);

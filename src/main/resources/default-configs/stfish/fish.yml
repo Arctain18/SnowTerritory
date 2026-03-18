@@ -46,8 +46,38 @@ storm:
   - { id: storm_mangrove_01, name: "暴雨林影", lore: "&7暴雨红树林根间的影鱼", length-min: 0.25, length-max: 0.6, material: COD }
 
 world:
-  - { id: tide_forget_river_carp, name: "{#1a237e>}忘川鲤{#4a148c<}", lore: "&7逆流而上的暗紫鲤鱼，鳞片在潮汐与星光间折射出幽蓝光辉，似在追逐被遗忘的记忆。", broadcast: "&7日月起落，星光绽于你我之间", length-min: 0.6, length-max: 1.4, material: SALMON }
-  - { id: tide_starfall_drum, name: "{#283593>}落星鮸{#6a1b9a<}", lore: "&7夜空坠落的星屑化作牠的鳞片，银紫光点随潮汐起伏，如同沉睡在海面的流星雨。", broadcast: "&7夜色低垂，银色的雨在天幕上沉睡", length-min: 0.5, length-max: 1.1, material: COD }
-  - { id: tide_frostsong_salmon, name: "{#3949ab>}霜歌鲑{#7e57c2<}", lore: "&7游弋于寒潮边界，呼吸间溢出薄霜，尾鳍划过水面时，会留下一段仿若歌声的冰痕。", broadcast: "&7何处吹来的清风，带走覆雪的只言片语", length-min: 0.7, length-max: 1.6, material: SALMON }
-  - { id: tide_nightchase_bass, name: "{#1a237e>}逐夜鲈{#8e24aa<}", lore: "&7专爱追逐退潮后的幽暗浪头，双眸如冷紫灯火，在无尽长夜中猎逐一切逼近黎明的光。", broadcast: "&7冰冷的血在心脏中流动，我们学会了拒绝黎明。", length-min: 0.6, length-max: 1.5, material: COD }
-  - { id: tide_drifting_whale, name: "{#283593>}浮生鲸{#9c27b0<}", lore: "&7潮水是牠的被褥，星空是牠的眼眸。巨大的身影随潮起潮落缓缓浮沉，似在梦中回望逝去的万千浮生。", broadcast: "&7浮生若梦，为欢几何？", length-min: 1.8, length-max: 4.0, material: TROPICAL_FISH }
+  - id: tide_forget_river_carp
+    name: "{#1a237e>}忘川鲤{#4a148c<}"
+    lore: "&7逆流而上的暗紫鲤鱼，鳞片在潮汐与星光间折射出幽蓝光辉，似在追逐被遗忘的记忆。"
+    broadcast: "&{#ffd54f}&o日月起落，&{#fff9c4}&o星光绽于你我之间"
+    length-min: 0.6
+    length-max: 1.4
+    material: SALMON
+  - id: tide_starfall_drum
+    name: "{#283593>}落星鮸{#ffca28<}"
+    lore: "&7夜空坠落的星屑化作牠的鳞片，银紫光点随潮汐起伏，如同沉睡在海面的流星雨。"
+    broadcast: "&{#90caf9}&o夜色低垂，&{#e1f5fe}&o银色的雨在天幕上沉睡"
+    length-min: 0.5
+    length-max: 1.1
+    material: COD
+  - id: tide_frostsong_salmon
+    name: "{#80deea>}霜歌鲑{#ce93d8<}"
+    lore: "&7游弋于寒潮边界，呼吸间溢出薄霜，尾鳍划过水面时，会留下一段仿若歌声的冰痕。"
+    broadcast: "&{#b3e5fc}&o何处吹来的清风，&{#e1bee7}&o带走覆雪的只言片语"
+    length-min: 0.7
+    length-max: 1.6
+    material: SALMON
+  - id: tide_nightchase_bass
+    name: "{#212121>}逐夜鲈{#8e24aa<}"
+    lore: "&7专爱追逐退潮后的幽暗浪头，双眸如冷紫灯火，在无尽长夜中猎逐一切逼近黎明的光。"
+    broadcast: "&{#b0bec5}&o冰冷的血在心脏中流动，&{#c5cae9}&o我们学会了拒绝黎明。"
+    length-min: 0.6
+    length-max: 1.5
+    material: COD
+  - id: tide_drifting_whale
+    name: "{#26c6da>}浮生鲸{#ab47bc<}"
+    lore: "&7潮水是牠的被褥，星空是牠的眼眸。巨大的身影随潮起潮落缓缓浮沉，似在梦中回望逝去的万千浮生。"
+    broadcast: "&{#ffe082}&o浮生若梦，&{#ffcc80}&o为欢几何？"
+    length-min: 1.8
+    length-max: 4.0
+    material: TROPICAL_FISH

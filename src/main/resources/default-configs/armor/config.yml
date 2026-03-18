@@ -1,0 +1,55 @@
+## 制式防具模块配置
+
+armor:
+  # MMOItems 类型与子类型（示例，需与服务器实际 MMOItems 配置对应）
+  # 可以按需改成 template-id 列表
+  mmoitems-type: ST_ARMOR
+  # 护具槽位与 MMOItems 模板键映射
+  slots:
+    helmet:
+      slot-key: HELMET
+      template-id: ARMOR_HELMET_TEMPLATE
+    chestplate:
+      slot-key: CHESTPLATE
+      template-id: ARMOR_CHESTPLATE_TEMPLATE
+    leggings:
+      slot-key: LEGGINGS
+      template-id: ARMOR_LEGGINGS_TEMPLATE
+    boots:
+      slot-key: BOOTS
+      template-id: ARMOR_BOOTS_TEMPLATE
+
+  # 品质配置：权重=概率权重，multiplier=数值倍率，suffix=名称后缀
+  qualities:
+    common:
+      display-name: "普通"
+      suffix: ""          # 无后缀
+      weight: 70
+      value-multiplier: 1.0
+    rare:
+      display-name: "精品"
+      suffix: " 精品"
+      weight: 25
+      value-multiplier: 1.1
+    epic:
+      display-name: "极品"
+      suffix: " 极品"
+      weight: 5
+      value-multiplier: 1.25
+
+  # 正态分布随机参数（所有属性的默认扰动范围）
+  random:
+    normal-enabled: true
+    # 标准差相当于基础值的百分比，例如 0.1 = 10%
+    sigma-factor: 0.1
+    # 钳制最终结果范围：基础值 * [min-multiplier, max-multiplier]
+    min-multiplier: 0.8
+    max-multiplier: 1.2
+
+  # 属性键名映射到 MMOItems stat（示例，需配合 ArmorStats 与生成逻辑）
+  stat-mapping:
+    defense: ARMOR
+    max-health: MAX_HEALTH
+    toughness: TOUGHNESS
+    dodge: DODGE_RATE
+

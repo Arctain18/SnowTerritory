@@ -8,6 +8,7 @@ import top.arctain.snowTerritory.listeners.ItemEditListener;
 import top.arctain.snowTerritory.listeners.PlayerJoinListener;
 import top.arctain.snowTerritory.enderstorage.EnderStorageModule;
 import top.arctain.snowTerritory.quest.QuestModule;
+import top.arctain.snowTerritory.armor.ArmorModule;
 import top.arctain.snowTerritory.reinforce.ReinforceModule;
 import top.arctain.snowTerritory.stfish.StfishModule;
 import top.arctain.snowTerritory.stocks.StocksModule;
@@ -23,6 +24,7 @@ public class Main extends JavaPlugin {
     private QuestModule questModule;
     private StocksModule stocksModule;
     private StfishModule stfishModule;
+    private ArmorModule armorModule;
 
     @Override
     public void onEnable() {
@@ -88,6 +90,14 @@ public class Main extends JavaPlugin {
             MessageUtils.logInfo("ST Fish 模块已禁用（配置文件中 modules.stfish = false）");
         }
 
+        if (pluginConfig.isModuleEnabled("armor")) {
+            this.armorModule = new ArmorModule(this);
+            this.armorModule.enable();
+            MessageUtils.logSuccess("Armor 模块已启用");
+        } else {
+            MessageUtils.logInfo("Armor 模块已禁用（配置文件中 modules.armor = false）");
+        }
+
         DebugResetConfirmHandler debugResetHandler = new DebugResetConfirmHandler(this);
         getServer().getPluginManager().registerEvents(new DebugResetConfirmListener(debugResetHandler), this);
 
@@ -124,6 +134,9 @@ public class Main extends JavaPlugin {
         }
         if (stfishModule != null) {
             stfishModule.disable();
+        }
+        if (armorModule != null) {
+            armorModule.disable();
         }
         MessageUtils.sendShutdownBanner(this);
     }
@@ -181,5 +194,9 @@ public class Main extends JavaPlugin {
 
     public StfishModule getStfishModule() {
         return stfishModule;
+    }
+
+    public ArmorModule getArmorModule() {
+        return armorModule;
     }
 }

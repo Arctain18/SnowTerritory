@@ -51,4 +51,7 @@ permissions:
   st.fish.give:
     description: 给予玩家鱼类
     default: op
+  st.armor.generate:
+    description: 生成制式防具套装
+    default: op
 

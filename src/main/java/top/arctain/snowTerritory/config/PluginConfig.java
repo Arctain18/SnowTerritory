@@ -85,6 +85,7 @@ public class PluginConfig {
         }
         // 如果配置不存在，默认启用
         config.set(path, true);
+        saveConfig();
         return true;
     }
 

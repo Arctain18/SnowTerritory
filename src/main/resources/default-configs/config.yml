@@ -11,6 +11,7 @@ modules:
   quest: true
   stocks: true
   stfish: true
+  armor: true
 
 # ============================================
 # 消息配置（全局，供 MessageUtils 使用）

@@ -1,0 +1,21 @@
+## 制式防具模块消息
+
+command-usage: "&e用法: &f/sn armor generate all <套装ID>"
+command-no-permission: "&c✗ &f您没有权限使用该命令"
+command-player-only: "&c✗ &f此命令仅限玩家使用"
+command-unknown-set: "&c✗ &f未找到套装: &e{set}"
+command-missing-mmoitems: "&c✗ &f未找到 MMOItems 或相关模板，无法生成防具"
+
+generate-set-success: "&a✓ &f已为 &e{player} &f生成 &e{set-display} &f套装"
+generate-piece-summary: "&7- &f{slot} &8| &f{quality} &7({stats})"
+
+quality-common: "&7普通"
+quality-rare: "&a精品"
+quality-epic: "&d极品"
+
+slot-display:
+  helmet: "头盔"
+  chestplate: "胸甲"
+  leggings: "护腿"
+  boots: "战靴"
+
