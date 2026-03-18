@@ -50,7 +50,7 @@ public class StfishModule {
 
         PluginManager pm = plugin.getServer().getPluginManager();
         pm.registerEvents(new FishingListener(configManager, lootService, itemFactory), plugin);
-        pm.registerEvents(new WeatherListener(), plugin);
+        pm.registerEvents(new WeatherListener(configManager), plugin);
         pm.registerEvents(new FishAtlasListener(plugin, atlasGUI), plugin);
         pm.registerEvents(fishSellListener, plugin);
 

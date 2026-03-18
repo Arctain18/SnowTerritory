@@ -1,6 +1,9 @@
 # ST Fish 钓鱼/天气模块配置
 
 weather:
+  # Multiverse 适配：用于检测/召唤天气的世界名（对应 /mv list 的世界名）。
+  # 留空则自动选择第一个 NORMAL 环境世界（不推荐在多世界服使用）。
+  world: "w-main"
   summon-cost: 1000
   storm-chance: 0.1
 

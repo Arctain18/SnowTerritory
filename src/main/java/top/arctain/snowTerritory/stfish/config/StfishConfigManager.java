@@ -219,6 +219,13 @@ public class StfishConfigManager {
         return section != null ? section.getDouble("storm-chance", 0.1) : 0.1;
     }
 
+    public String getWeatherWorldName() {
+        ConfigurationSection section = mainConfig.getConfigurationSection("weather");
+        if (section == null) return "world";
+        String name = section.getString("world", "world");
+        return name != null ? name.trim() : "world";
+    }
+
     public Map<String, Integer> getQualityWeights(String weatherKey) {
         ConfigurationSection section = mainConfig.getConfigurationSection("quality-weights." + weatherKey);
         if (section == null) return defaultWeights(weatherKey);

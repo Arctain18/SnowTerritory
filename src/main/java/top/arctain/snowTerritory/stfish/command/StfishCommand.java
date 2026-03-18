@@ -169,6 +169,10 @@ public class StfishCommand implements CommandExecutor, TabCompleter {
             MessageUtils.sendConfigMessage(sender, "stfish.summon-success",
                     "&a✓ &f已消耗 &e{cost} &f金币召唤 &e{weather} &7天气",
                     "cost", String.valueOf((int) cost), "weather", weatherName);
+        } else {
+            String worldName = configManager.getWeatherWorldName();
+            MessageUtils.sendConfigMessage(sender, "stfish.summon-world-not-found",
+                    "&c✗ &f天气世界未找到或未加载: &e{world}", "world", worldName.isBlank() ? "(auto)" : worldName);
         }
         return true;
     }

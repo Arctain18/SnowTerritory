@@ -24,6 +24,11 @@ public class WeatherService {
     public String summon(Player player) {
         if (!economyService.isEnabled()) return null;
 
+        World targetWorld = resolveTargetWorld();
+        if (targetWorld == null) {
+            return null;
+        }
+
         double cost = configManager.getSummonCost();
         if (economyService.getBalance(player) < cost) return null;
 
@@ -32,15 +37,8 @@ public class WeatherService {
 
         economyService.withdraw(player, cost);
 
-        World overworld = Bukkit.getWorlds().stream()
-                .filter(w -> w.getEnvironment() == World.Environment.NORMAL)
-                .findFirst()
-                .orElse(null);
-
-        if (overworld != null) {
-            overworld.setStorm(true);
-            overworld.setThundering(toStorm);
-        }
+        targetWorld.setStorm(true);
+        targetWorld.setThundering(toStorm);
 
         String weatherName = toStorm ? "暴风雨" : "雨天";
         String msg = MessageUtils.getConfigMessage("stfish.weather-summon-broadcast",
@@ -52,5 +50,21 @@ public class WeatherService {
         }
 
         return weatherName;
+    }
+
+    private World resolveTargetWorld() {
+        String configured = configManager.getWeatherWorldName();
+        if (configured.isBlank()) {
+            return Bukkit.getWorlds().stream()
+                    .filter(w -> w.getEnvironment() == World.Environment.NORMAL)
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        World world = Bukkit.getWorld(configured);
+        if (world != null) return world;
+
+        MessageUtils.logWarning("天气世界未找到或未加载: " + configured);
+        return null;
     }
 }
