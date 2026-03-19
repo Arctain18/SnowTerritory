@@ -8,12 +8,14 @@ import top.arctain.snowTerritory.armor.data.ArmorQuality;
 import top.arctain.snowTerritory.armor.data.ArmorSetDefinition;
 import top.arctain.snowTerritory.armor.data.ArmorSlot;
 import top.arctain.snowTerritory.armor.data.ArmorStatRange;
+import top.arctain.snowTerritory.armor.data.ArmorBaseDefinition;
 import top.arctain.snowTerritory.utils.ConfigUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ArmorConfigManager {
@@ -157,8 +159,57 @@ public class ArmorConfigManager {
                 }
             }
 
-            ArmorSetDefinition def = new ArmorSetDefinition(id, displayName, baseStats, slotRatios, statRanges);
+            ArmorBaseDefinition base = parseBaseDefinition(section.getConfigurationSection("base"));
+            Map<String, String> slotMaterials = new HashMap<>();
+            ConfigurationSection slotMaterialsSec = section.getConfigurationSection("slot-materials");
+            if (slotMaterialsSec != null) {
+                for (String slotId : slotMaterialsSec.getKeys(false)) {
+                    String mat = slotMaterialsSec.getString(slotId);
+                    if (mat != null && !mat.isBlank()) {
+                        slotMaterials.put(slotId, mat);
+                    }
+                }
+            }
+            ArmorSetDefinition def = new ArmorSetDefinition(id, displayName, baseStats, slotRatios, statRanges, base, slotMaterials);
             sets.put(id.toLowerCase(), def);
+        }
+    }
+
+    private ArmorBaseDefinition parseBaseDefinition(ConfigurationSection baseSec) {
+        if (baseSec == null) {
+            return null;
+        }
+        String set = baseSec.getString("set", null);
+        int requiredLevel = baseSec.getInt("required-level", 0);
+
+        List<String> lore = baseSec.getStringList("lore");
+
+        int[] dyeColor = null;
+        Object dye = baseSec.get("dye-color");
+        if (dye instanceof java.util.List<?> list && list.size() >= 3) {
+            dyeColor = new int[3];
+            for (int i = 0; i < 3; i++) {
+                Object v = list.get(i);
+                dyeColor[i] = v instanceof Number n ? n.intValue() : parseIntOrZero(String.valueOf(v));
+            }
+        } else if (dye instanceof String s && !s.isBlank()) {
+            String[] parts = s.trim().split("\\s+");
+            if (parts.length >= 3) {
+                dyeColor = new int[3];
+                dyeColor[0] = parseIntOrZero(parts[0]);
+                dyeColor[1] = parseIntOrZero(parts[1]);
+                dyeColor[2] = parseIntOrZero(parts[2]);
+            }
+        }
+
+        return new ArmorBaseDefinition(set, requiredLevel, lore, dyeColor);
+    }
+
+    private int parseIntOrZero(String s) {
+        try {
+            return Integer.parseInt(s.trim());
+        } catch (Exception ignored) {
+            return 0;
         }
     }
 

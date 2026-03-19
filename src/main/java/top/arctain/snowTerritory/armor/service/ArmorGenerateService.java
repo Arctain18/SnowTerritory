@@ -4,11 +4,16 @@ import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.item.mmoitem.MMOItem;
 import net.Indyuce.mmoitems.api.item.mmoitem.LiveMMOItem;
 import net.Indyuce.mmoitems.stat.data.DoubleData;
+import net.Indyuce.mmoitems.stat.data.StringListData;
 import net.Indyuce.mmoitems.stat.type.ItemStat;
+import org.bukkit.Color;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import top.arctain.snowTerritory.armor.config.ArmorConfigManager;
 import top.arctain.snowTerritory.armor.data.ArmorQuality;
+import top.arctain.snowTerritory.armor.data.ArmorBaseDefinition;
 import top.arctain.snowTerritory.armor.data.ArmorSetDefinition;
 import top.arctain.snowTerritory.armor.data.ArmorSlot;
 import top.arctain.snowTerritory.armor.data.ArmorStats;
@@ -69,9 +74,34 @@ public class ArmorGenerateService {
             return null;
         }
 
+        String matOverride = set.getSlotMaterial(slotId);
+        if (matOverride != null && !matOverride.isBlank()) {
+            Material mat = Material.matchMaterial(matOverride);
+            if (mat != null && mat.isItem() && built.getType() != mat) {
+                built.setType(mat);
+            }
+        }
+
         ItemStack withStats = applyStatsToItemStack(built, stats);
         if (withStats != null) {
             built = withStats;
+        }
+
+        // 尝试把 base.required-level 写入 MMOItems（如果该字段在当前 MMOItems API 中暴露为 ItemStat）
+        ArmorBaseDefinition baseDef = set.getBase();
+        if (baseDef != null && baseDef.getRequiredLevel() > 0) {
+            ItemStack requiredApplied = applyRequiredLevelIfSupported(built, baseDef.getRequiredLevel());
+            if (requiredApplied != null) {
+                built = requiredApplied;
+            }
+        }
+
+        // lore 交给 MMOItems 的 lore-format 处理：写入 MMOItems 的 LORE Stat
+        if (baseDef != null && baseDef.getLore() != null && !baseDef.getLore().isEmpty()) {
+            ItemStack loreApplied = applyLoreIfSupported(built, baseDef.getLore());
+            if (loreApplied != null) {
+                built = loreApplied;
+            }
         }
         var meta = built.getItemMeta();
         if (meta != null) {
@@ -79,9 +109,51 @@ public class ArmorGenerateService {
             String suffix = quality != null ? quality.getSuffix() : "";
             String name = set.getDisplayName() + slotDisplay + suffix;
             meta.setDisplayName(MessageUtils.colorize(name));
+
+            ArmorBaseDefinition base = set.getBase();
+            if (base != null) {
+                if (meta instanceof LeatherArmorMeta leatherMeta) {
+                    int[] dye = base.getDyeColor();
+                    if (dye != null && dye.length == 3) {
+                        leatherMeta.setColor(Color.fromRGB(dye[0], dye[1], dye[2]));
+                    }
+                }
+            }
+
             built.setItemMeta(meta);
         }
         return built;
+    }
+
+    private ItemStack applyRequiredLevelIfSupported(ItemStack item, int requiredLevel) {
+        try {
+            LiveMMOItem live = new LiveMMOItem(item);
+            ItemStat stat = MMOItems.plugin.getStats().get("REQUIRED_LEVEL");
+            if (stat == null) {
+                stat = MMOItems.plugin.getStats().get("REQUIRED_LEVELS");
+            }
+            if (stat == null) {
+                return null;
+            }
+            live.setData(stat, new DoubleData(requiredLevel));
+            return live.newBuilder().build();
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private ItemStack applyLoreIfSupported(ItemStack item, List<String> loreLines) {
+        try {
+            LiveMMOItem live = new LiveMMOItem(item);
+            ItemStat stat = MMOItems.plugin.getStats().get("LORE");
+            if (stat == null) {
+                return null;
+            }
+            live.setData(stat, new StringListData(loreLines));
+            return live.newBuilder().build();
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private MMOItem getTemplate(String typeId, String templateId) {

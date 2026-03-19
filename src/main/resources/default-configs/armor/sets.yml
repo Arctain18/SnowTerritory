@@ -1,8 +1,20 @@
 ## 制式防具套装配置示例
 
 sets:
-  frost_guard:
-    display-name: "&{#70F4FF}冰霜守卫"
+  c1_standard:
+    display-name: "&{#FF6200}天师府制式"
+    base:
+      set: c1_standard
+      required-level: 0
+      lore:
+        - '   &7来源: <#3c79cf>清<#385de7>澜<#3341ff>渡'
+        - '&f鋈 <GRADIENT:#FF6600:#FF6600>可强化'
+      dye-color: 105 41 0
+    slot-materials:
+      helmet: LEATHER_HELMET
+      chestplate: LEATHER_CHESTPLATE
+      leggings: LEATHER_LEGGINGS
+      boots: LEATHER_BOOTS
     # 基础属性（用于整套的理论总值）
     base-stats:
       defense: 100
@@ -34,6 +46,18 @@ sets:
 
   flame_vanguard:
     display-name: "焰誓先锋"
+    base:
+      set: flame_vanguard
+      required-level: 0
+      lore:
+        - '   &7来源: &{#ff7a18}焰&{#af002d}誓'
+        - '&f鋈 <GRADIENT:#FF6600:#FF6600>可强化'
+      dye-color: 105 41 0
+    slot-materials:
+      helmet: LEATHER_HELMET
+      chestplate: LEATHER_CHESTPLATE
+      leggings: LEATHER_LEGGINGS
+      boots: LEATHER_BOOTS
     base-stats:
       defense: 80
       max-health: 60
