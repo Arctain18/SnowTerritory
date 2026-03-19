@@ -1,6 +1,7 @@
 package top.arctain.snowTerritory.quest;
 
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.event.HandlerList;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.quest.command.QuestCommand;
 import top.arctain.snowTerritory.quest.config.QuestConfigManager;
@@ -63,12 +64,21 @@ public class QuestModule {
     }
 
     public void reload() {
+        if (questListener != null) {
+            HandlerList.unregisterAll(questListener);
+        }
+        if (collectHarvestListener != null) {
+            HandlerList.unregisterAll(collectHarvestListener);
+        }
+
         configManager.loadAll();
         MessageUtils.registerModuleMessages("quest", configManager.getMessagesForMerge());
         questService.reload();
         
         this.questCommand = new QuestCommand(plugin, configManager, questService, databaseDao);
         this.questListener = new QuestListener(plugin, questService, configManager);
+        this.collectHarvestListener = new CollectHarvestListener(questService, configManager);
+        registerListeners();
     }
 
     private void registerListeners() {

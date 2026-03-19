@@ -23,6 +23,7 @@ public class StocksModule {
     private final TradeEngine tradeEngine;
     private final RiskEngine riskEngine;
     private StockCommand stockCommand;
+    private final java.util.Set<String> registeredSymbols = new java.util.HashSet<>();
     
     public StocksModule(Main plugin) {
         this.plugin = plugin;
@@ -53,8 +54,10 @@ public class StocksModule {
         // 注册需要监控的交易对到价格服务
         if (priceService instanceof ExchangeRestPriceSource) {
             ExchangeRestPriceSource priceSource = (ExchangeRestPriceSource) priceService;
+            registeredSymbols.clear();
             for (String symbol : configManager.getAllSymbols().keySet()) {
                 priceSource.addSymbol(symbol);
+                registeredSymbols.add(symbol);
             }
         }
         
@@ -83,7 +86,21 @@ public class StocksModule {
     
     public void reload() {
         configManager.loadAll();
-        // 可以重新加载配置，但价格服务和交易引擎通常不需要重启
+        if (priceService instanceof ExchangeRestPriceSource priceSource) {
+            java.util.Set<String> next = configManager.getAllSymbols().keySet();
+            for (String old : new java.util.HashSet<>(registeredSymbols)) {
+                if (!next.contains(old)) {
+                    priceSource.removeSymbol(old);
+                    registeredSymbols.remove(old);
+                }
+            }
+            for (String symbol : next) {
+                if (!registeredSymbols.contains(symbol)) {
+                    priceSource.addSymbol(symbol);
+                    registeredSymbols.add(symbol);
+                }
+            }
+        }
     }
     
     public StockCommand getStockCommand() {

@@ -131,6 +131,9 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         if (plugin.getStfishModule() != null) {
             plugin.getStfishModule().reload();
         }
+        if (plugin.getArmorModule() != null) {
+            plugin.getArmorModule().reload();
+        }
         MessageUtils.sendSuccess(sender, "command.reload-success", "&a✓ &f插件配置已重载！");
         return true;
     }

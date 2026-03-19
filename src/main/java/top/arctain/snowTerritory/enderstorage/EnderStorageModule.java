@@ -1,6 +1,7 @@
 package top.arctain.snowTerritory.enderstorage;
 
 import org.bukkit.command.PluginCommand;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.enderstorage.command.EnderStorageCommand;
@@ -23,6 +24,7 @@ public class EnderStorageModule {
     private LootStorageGUI lootStorageGUI;
     private EnderStorageCommand enderCommand;
     private MythicDropListener mythicDropListener;
+    private LootGuiListener lootGuiListener;
 
     public EnderStorageModule(Main plugin) {
         this.plugin = plugin;
@@ -49,11 +51,20 @@ public class EnderStorageModule {
     }
 
     public void reload() {
+        if (mythicDropListener != null) {
+            HandlerList.unregisterAll(mythicDropListener);
+        }
+        if (lootGuiListener != null) {
+            HandlerList.unregisterAll(lootGuiListener);
+        }
+
         configManager.loadAll();
         MessageUtils.registerModuleMessages("enderstorage", configManager.getMessagesForMerge());
         lootStorageService.reload();
         this.lootStorageGUI = new LootStorageGUI(plugin, configManager, lootStorageService);
         this.enderCommand = new EnderStorageCommand(plugin, configManager, lootStorageService, lootStorageGUI);
+        registerCommand();
+        registerListeners();
     }
 
     private void registerCommand() {
@@ -72,7 +83,8 @@ public class EnderStorageModule {
         pm.registerEvents(mythicDropListener, plugin);
         
         if (lootStorageGUI != null) {
-            pm.registerEvents(new LootGuiListener(plugin, lootStorageGUI, lootStorageService), plugin);
+            this.lootGuiListener = new LootGuiListener(plugin, lootStorageGUI, lootStorageService);
+            pm.registerEvents(lootGuiListener, plugin);
         }
     }
 
