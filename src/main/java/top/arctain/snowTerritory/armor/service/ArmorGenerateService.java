@@ -4,6 +4,7 @@ import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.item.mmoitem.MMOItem;
 import net.Indyuce.mmoitems.api.item.mmoitem.LiveMMOItem;
 import net.Indyuce.mmoitems.stat.data.DoubleData;
+import net.Indyuce.mmoitems.stat.data.BooleanData;
 import net.Indyuce.mmoitems.stat.data.StringListData;
 import net.Indyuce.mmoitems.stat.type.ItemStat;
 import org.bukkit.Color;
@@ -87,6 +88,12 @@ public class ArmorGenerateService {
             built = withStats;
         }
 
+        // MMOItems 的无限耐久：不要用原版 ItemMeta 的 unbreakable，而是写入 MMOItems 的 UNBREAKABLE Stat
+        ItemStack unbreakableApplied = applyUnbreakableIfSupported(built, true);
+        if (unbreakableApplied != null) {
+            built = unbreakableApplied;
+        }
+
         // 尝试把 base.required-level 写入 MMOItems（如果该字段在当前 MMOItems API 中暴露为 ItemStat）
         ArmorBaseDefinition baseDef = set.getBase();
         if (baseDef != null && baseDef.getRequiredLevel() > 0) {
@@ -150,6 +157,20 @@ public class ArmorGenerateService {
                 return null;
             }
             live.setData(stat, new StringListData(loreLines));
+            return live.newBuilder().build();
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private ItemStack applyUnbreakableIfSupported(ItemStack item, boolean unbreakable) {
+        try {
+            LiveMMOItem live = new LiveMMOItem(item);
+            ItemStat stat = MMOItems.plugin.getStats().get("UNBREAKABLE");
+            if (stat == null) {
+                return null;
+            }
+            live.setData(stat, new BooleanData(unbreakable));
             return live.newBuilder().build();
         } catch (Exception ignored) {
             return null;

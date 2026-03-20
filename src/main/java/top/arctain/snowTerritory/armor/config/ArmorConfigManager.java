@@ -113,6 +113,9 @@ public class ArmorConfigManager {
                 }
             }
         }
+        if (!statMapping.containsKey("defense") || "ARMOR".equalsIgnoreCase(statMapping.get("defense"))) {
+            statMapping.put("defense", "DEFENSE");
+        }
     }
 
     private void loadSetsConfig() {

@@ -48,7 +48,7 @@ armor:
 
   # 属性键名映射到 MMOItems stat（示例，需配合 ArmorStats 与生成逻辑）
   stat-mapping:
-    defense: ARMOR
+    defense: DEFENSE
     max-health: MAX_HEALTH
     toughness: TOUGHNESS
     dodge: DODGE_RATE
