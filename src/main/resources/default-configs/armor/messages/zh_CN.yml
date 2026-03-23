@@ -1,6 +1,7 @@
 ## 制式防具模块消息
 
-command-usage: "&e用法: &f/sn armor generate all <套装ID>"
+command-usage: "&e用法: &f/sn armor generate all <套装ID> &7或 &f<套装ID>[w1,w2,w3] &7(普通/精品/极品权重)"
+command-invalid-weights: "&c✗ &f品质权重须为三个整数，例如: &ec1_standard[70,25,5]"
 command-no-permission: "&c✗ &f您没有权限使用该命令"
 command-player-only: "&c✗ &f此命令仅限玩家使用"
 command-unknown-set: "&c✗ &f未找到套装: &e{set}"

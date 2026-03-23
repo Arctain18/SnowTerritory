@@ -20,6 +20,7 @@ armor:
       template-id: ARMOR_BOOTS_TEMPLATE
 
   # 品质配置：权重=概率权重，multiplier=数值倍率，suffix=名称后缀
+  # 指令覆盖权重 /sn armor generate all <套装ID>[w1,w2,w3] 顺序固定为 common → rare → epic（与下列键名一致）
   qualities:
     common:
       display-name: "普通"

@@ -12,6 +12,8 @@ import java.util.Random;
 
 public class ArmorRandomService {
 
+    private static final String[] QUALITY_ROLL_ORDER = {"common", "rare", "epic"};
+
     private final ArmorConfigManager config;
     private final Random random = new Random();
 
@@ -20,6 +22,16 @@ public class ArmorRandomService {
     }
 
     public ArmorQuality rollQuality() {
+        return rollQuality(null);
+    }
+
+    public ArmorQuality rollQuality(int[] weightOverride) {
+        if (weightOverride != null && weightOverride.length == 3) {
+            ArmorQuality rolled = rollQualityOrderedWeights(weightOverride);
+            if (rolled != null) {
+                return rolled;
+            }
+        }
         Map<String, ArmorQuality> qualities = config.getQualities();
         if (qualities.isEmpty()) {
             return null;
@@ -40,6 +52,40 @@ public class ArmorRandomService {
             }
         }
         return qualities.values().iterator().next();
+    }
+
+    private ArmorQuality rollQualityOrderedWeights(int[] weights) {
+        Map<String, ArmorQuality> qualities = config.getQualities();
+        int total = 0;
+        for (int i = 0; i < QUALITY_ROLL_ORDER.length; i++) {
+            ArmorQuality q = qualities.get(QUALITY_ROLL_ORDER[i]);
+            if (q == null) {
+                continue;
+            }
+            total += Math.max(0, weights[i]);
+        }
+        if (total <= 0) {
+            return null;
+        }
+        int roll = random.nextInt(total);
+        int sum = 0;
+        for (int i = 0; i < QUALITY_ROLL_ORDER.length; i++) {
+            ArmorQuality q = qualities.get(QUALITY_ROLL_ORDER[i]);
+            if (q == null) {
+                continue;
+            }
+            sum += Math.max(0, weights[i]);
+            if (roll < sum) {
+                return q;
+            }
+        }
+        for (String id : QUALITY_ROLL_ORDER) {
+            ArmorQuality q = qualities.get(id);
+            if (q != null) {
+                return q;
+            }
+        }
+        return null;
     }
 
     public ArmorStats rollStatsForSlot(ArmorSetDefinition set, String slotId, ArmorQuality quality) {

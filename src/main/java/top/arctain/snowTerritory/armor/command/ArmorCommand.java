@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import top.arctain.snowTerritory.armor.config.ArmorConfigManager;
 import top.arctain.snowTerritory.armor.service.ArmorGenerateService;
+import top.arctain.snowTerritory.armor.util.ArmorSetArgParser;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length < 3) {
             MessageUtils.sendConfigMessage(sender, "armor.command-usage",
-                    "&e用法: /sn armor generate all <套装ID>");
+                    "&e用法: /sn armor generate all <套装ID>[普通,精品,极品权重]");
             return true;
         }
         String sub = args[0].toLowerCase();
@@ -37,13 +38,13 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
         String action = args[1].toLowerCase();
         if (!action.equals("generate")) {
             MessageUtils.sendConfigMessage(sender, "armor.command-usage",
-                    "&e用法: /sn armor generate all <套装ID>");
+                    "&e用法: /sn armor generate all <套装ID>[普通,精品,极品权重]");
             return true;
         }
         String mode = args[2].toLowerCase();
         if (!mode.equals("all")) {
             MessageUtils.sendConfigMessage(sender, "armor.command-usage",
-                    "&e用法: /sn armor generate all <套装ID>");
+                    "&e用法: /sn armor generate all <套装ID>[普通,精品,极品权重]");
             return true;
         }
         if (!(sender instanceof Player player)) {
@@ -58,11 +59,18 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
         }
         if (args.length < 4) {
             MessageUtils.sendConfigMessage(sender, "armor.command-usage",
-                    "&e用法: /sn armor generate all <套装ID>");
+                    "&e用法: /sn armor generate all <套装ID>[普通,精品,极品权重]");
             return true;
         }
-        String setId = args[3];
-        var items = generateService.generateFullSet(player, setId);
+        ArmorSetArgParser.Parsed parsed = ArmorSetArgParser.parse(args[3]);
+        String setId = parsed.setId();
+        if (parsed.qualityWeights() != null && parsed.qualityWeights().length == 0) {
+            MessageUtils.sendConfigMessage(player, "armor.command-invalid-weights",
+                    "&c✗ &f品质权重格式错误，需为三个非负整数: &e套装ID[w1,w2,w3] &7(对应 common/rare/epic)");
+            return true;
+        }
+        int[] weightOverride = parsed.hasQualityWeights() ? parsed.qualityWeights() : null;
+        var items = generateService.generateFullSet(player, setId, weightOverride);
         if (items.isEmpty()) {
             return true;
         }
@@ -74,9 +82,13 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
                 }
             });
         }
+        var setDef = configManager.getSet(setId);
+        String display = setDef != null && setDef.getDisplayName() != null && !setDef.getDisplayName().isBlank()
+                ? setDef.getDisplayName()
+                : setId;
         MessageUtils.sendConfigMessage(player, "armor.generate-set-success",
                 "&a✓ &f已为 &e{player} &f生成 &e{set-display} &f套装",
-                "player", player.getName(), "set-display", setId);
+                "player", player.getName(), "set-display", display);
         return true;
     }
 
@@ -102,9 +114,9 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
             return result;
         }
         if (args.length == 4 && args[0].equalsIgnoreCase("armor") && args[1].equalsIgnoreCase("generate") && args[2].equalsIgnoreCase("all")) {
-            String input = args[3].toLowerCase();
+            String prefix = ArmorSetArgParser.tabCompletePrefix(args[3]).toLowerCase();
             configManager.getAllSets().keySet().stream()
-                    .filter(id -> id.toLowerCase().startsWith(input))
+                    .filter(id -> id.toLowerCase().startsWith(prefix))
                     .sorted()
                     .forEach(result::add);
             return result;

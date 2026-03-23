@@ -1,5 +1,6 @@
 package top.arctain.snowTerritory.stfish.service;
 
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import top.arctain.snowTerritory.stfish.config.StfishConfigManager;
 import top.arctain.snowTerritory.stfish.data.FishDefinition;
@@ -19,9 +20,10 @@ public class FishLootService {
     }
 
     public String getWeatherKey(World world) {
-        if (world == null) return "sun";
-        if (world.isThundering()) return "storm";
-        if (world.hasStorm()) return "rain";
+        World weatherWorld = resolveWeatherWorld(world);
+        if (weatherWorld == null) return "sun";
+        if (weatherWorld.isThundering()) return "storm";
+        if (weatherWorld.hasStorm()) return "rain";
         return "sun";
     }
 
@@ -48,5 +50,12 @@ public class FishLootService {
         List<FishDefinition> list = configManager.getFishByTier().get(tier);
         if (list == null || list.isEmpty()) return null;
         return list.get(ThreadLocalRandom.current().nextInt(list.size()));
+    }
+
+    private World resolveWeatherWorld(World fallback) {
+        String configured = configManager.getWeatherWorldName();
+        if (configured.isBlank()) return fallback;
+        World configuredWorld = Bukkit.getWorld(configured);
+        return configuredWorld != null ? configuredWorld : fallback;
     }
 }

@@ -35,6 +35,10 @@ public class ArmorGenerateService {
     }
 
     public List<ItemStack> generateFullSet(Player player, String setId) {
+        return generateFullSet(player, setId, null);
+    }
+
+    public List<ItemStack> generateFullSet(Player player, String setId, int[] qualityWeightOverride) {
         ArmorSetDefinition set = config.getSet(setId);
         if (set == null) {
             MessageUtils.sendConfigMessage(player, "armor.command-unknown-set",
@@ -45,7 +49,7 @@ public class ArmorGenerateService {
         for (Map.Entry<String, ArmorSlot> entry : config.getSlots().entrySet()) {
             String slotId = entry.getKey();
             ArmorSlot slot = entry.getValue();
-            ItemStack item = generatePiece(player, set, slotId, slot);
+            ItemStack item = generatePiece(player, set, slotId, slot, qualityWeightOverride);
             if (item != null) {
                 result.add(item);
             }
@@ -53,8 +57,9 @@ public class ArmorGenerateService {
         return result;
     }
 
-    private ItemStack generatePiece(Player player, ArmorSetDefinition set, String slotId, ArmorSlot slot) {
-        ArmorQuality quality = randomService.rollQuality();
+    private ItemStack generatePiece(Player player, ArmorSetDefinition set, String slotId, ArmorSlot slot,
+                                    int[] qualityWeightOverride) {
+        ArmorQuality quality = randomService.rollQuality(qualityWeightOverride);
         ArmorStats stats = randomService.rollStatsForSlot(set, slotId, quality);
         String templateId = slot.getTemplateId();
         if (templateId == null || templateId.isEmpty()) {
