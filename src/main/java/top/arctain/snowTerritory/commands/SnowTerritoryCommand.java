@@ -112,6 +112,9 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         }
 
         config.reloadConfig();
+        if (plugin.getStvipModule() != null) {
+            plugin.getStvipModule().reload();
+        }
         // 同步重载 Reinforce 模块
         if (plugin.getReinforceModule() != null) {
             plugin.getReinforceModule().reload();
@@ -271,9 +274,9 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             String m = args[2].toLowerCase();
             if ("all".equals(m) || "全部".equals(m)) {
                 modules = null; // null 表示删除整个目录
-            } else if (!java.util.Set.of("reinforce", "enderstorage", "es", "quest", "stocks", "stfish", "armor").contains(m)) {
+            } else if (!java.util.Set.of("stvip", "reinforce", "enderstorage", "es", "quest", "stocks", "stfish", "armor").contains(m)) {
                 MessageUtils.sendConfigMessage(sender, "debug.invalid-module",
-                        "&c✗ &f未知模块: {module}，可选: reinforce, enderstorage, quest, stocks, stfish, armor, all", "module", m);
+                        "&c✗ &f未知模块: {module}，可选: stvip, reinforce, enderstorage, quest, stocks, stfish, armor, all", "module", m);
                 return true;
             } else {
                 modules = "es".equals(m) ? java.util.List.of("enderstorage") : java.util.List.of(m);
@@ -300,6 +303,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         File dataFolder = plugin.getDataFolder();
         int count = ConfigUtils.deleteConfigFilesExcludingDatabase(dataFolder);
         config.reloadConfig();
+        if (plugin.getStvipModule() != null) plugin.getStvipModule().reload();
         if (reinforceModule != null) reinforceModule.reload();
         if (enderModule != null) enderModule.reload();
         if (questModule != null) questModule.reload();
@@ -314,6 +318,8 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         int total = 0;
         for (String mod : modules) {
             total += switch (mod) {
+                case "stvip" -> plugin.getStvipModule() != null
+                        ? doResetModule(plugin.getStvipModule().getConfigManager().getBaseDir(), () -> plugin.getStvipModule().reload()) : 0;
                 case "reinforce" -> reinforceModule != null ? doResetModule(reinforceModule.getConfigManager().getBaseDir(), () -> reinforceModule.reload()) : 0;
                 case "enderstorage" -> enderModule != null ? doResetModule(enderModule.getConfigManager().getBaseDir(), () -> enderModule.reload()) : 0;
                 case "quest" -> questModule != null ? doResetModule(questModule.getConfigManager().getBaseDir(), () -> questModule.reload()) : 0;
@@ -392,6 +398,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         if (args.length == 3 && args[0].equalsIgnoreCase("debug") && args[1].equalsIgnoreCase("resetconfig")) {
             List<String> modules = new ArrayList<>();
             String input = args[2].toLowerCase();
+            if ("stvip".startsWith(input)) modules.add("stvip");
             if ("reinforce".startsWith(input)) modules.add("reinforce");
             if ("enderstorage".startsWith(input) || "es".startsWith(input)) modules.add("enderstorage");
             if ("quest".startsWith(input)) modules.add("quest");

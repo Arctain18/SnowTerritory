@@ -1,7 +1,9 @@
 package top.arctain.snowTerritory.stfish.service;
 
+import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.stfish.config.StfishConfigManager;
 import top.arctain.snowTerritory.stfish.data.FishTier;
+import top.arctain.snowTerritory.stvip.service.StvipService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,15 +15,18 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FishMarketService {
 
     private final StfishConfigManager configManager;
+    private final StvipService stvipService;
     private final Map<UUID, List<SaleRecord>> playerSales = new ConcurrentHashMap<>();
 
-    public FishMarketService(StfishConfigManager configManager) {
+    public FishMarketService(StfishConfigManager configManager, StvipService stvipService) {
         this.configManager = configManager;
+        this.stvipService = stvipService;
     }
 
     public record SellQuote(double price, boolean priceDecayed) {}
 
-    public SellQuote calculatePrice(String speciesId, FishTier tier, double lengthM, double lengthMax, UUID playerId) {
+    public SellQuote calculatePrice(String speciesId, FishTier tier, double lengthM, double lengthMax, Player player) {
+        UUID playerId = player.getUniqueId();
         double base = configManager.getMarketBasePrice(speciesId);
         double tierMult = configManager.getTierMultiplier(tier);
         double lengthFactor = lengthMax > 0 ? Math.min(1.0, lengthM / lengthMax) : 1.0;
@@ -31,6 +36,9 @@ public class FishMarketService {
         boolean decayed = recentCount >= configManager.getDecayThreshold();
         if (decayed) {
             price *= configManager.getDecayFactor();
+        }
+        if (stvipService != null) {
+            price *= stvipService.getFishSellMultiplier(player);
         }
         return new SellQuote(Math.max(0.01, price), decayed);
     }

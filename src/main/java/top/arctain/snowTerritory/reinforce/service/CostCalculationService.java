@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.reinforce.config.CostConfigManager;
 import top.arctain.snowTerritory.reinforce.data.CostConfig;
 import top.arctain.snowTerritory.reinforce.config.ReinforceConfigManager;
+import top.arctain.snowTerritory.stvip.service.StvipService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,15 +19,18 @@ public class CostCalculationService {
     private final CostConfigManager costConfigManager;
     private final MMOCoreService mmocoreService;
     private final ExpressionService expressionService;
+    private final StvipService stvipService;
 
     public CostCalculationService(ReinforceConfigManager configManager,
                                   CostConfigManager costConfigManager,
                                   MMOCoreService mmocoreService,
-                                  ExpressionService expressionService) {
+                                  ExpressionService expressionService,
+                                  StvipService stvipService) {
         this.configManager = configManager;
         this.costConfigManager = costConfigManager;
         this.mmocoreService = mmocoreService;
         this.expressionService = expressionService;
+        this.stvipService = stvipService;
     }
 
     /**
@@ -41,15 +45,15 @@ public class CostCalculationService {
         
         // 如果物品没有配置，使用全局默认配置
         if (itemConfig == null || !itemConfig.isEnabled()) {
-            return configManager.getCostVaultGold();
+            return applyReinforceVipGold(player, configManager.getCostVaultGold());
         }
         
         CostConfig goldConfig = itemConfig.getGoldCost();
         if (goldConfig == null || !goldConfig.isValid()) {
-            return configManager.getCostVaultGold();
+            return applyReinforceVipGold(player, configManager.getCostVaultGold());
         }
         
-        return calculateCost(player, goldConfig, reinforceLevel);
+        return applyReinforceVipGold(player, calculateCost(player, goldConfig, reinforceLevel));
     }
 
     /**
@@ -64,15 +68,29 @@ public class CostCalculationService {
         
         // 如果物品没有配置，使用全局默认配置
         if (itemConfig == null || !itemConfig.isEnabled()) {
-            return configManager.getCostPlayerPoints();
+            return applyReinforceVipPoints(player, configManager.getCostPlayerPoints());
         }
         
         CostConfig pointsConfig = itemConfig.getPointsCost();
         if (pointsConfig == null || !pointsConfig.isValid()) {
-            return configManager.getCostPlayerPoints();
+            return applyReinforceVipPoints(player, configManager.getCostPlayerPoints());
         }
         
-        return (int) Math.round(calculateCost(player, pointsConfig, reinforceLevel));
+        return applyReinforceVipPoints(player, (int) Math.round(calculateCost(player, pointsConfig, reinforceLevel)));
+    }
+
+    private double applyReinforceVipGold(Player player, double base) {
+        if (stvipService == null) {
+            return Math.max(0, base);
+        }
+        return Math.max(0, base * stvipService.getReinforceCostMultiplier(player));
+    }
+
+    private int applyReinforceVipPoints(Player player, int base) {
+        if (stvipService == null) {
+            return Math.max(0, base);
+        }
+        return Math.max(0, (int) Math.round(base * stvipService.getReinforceCostMultiplier(player)));
     }
 
     /**

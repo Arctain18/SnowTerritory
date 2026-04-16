@@ -12,6 +12,8 @@ import top.arctain.snowTerritory.armor.ArmorModule;
 import top.arctain.snowTerritory.reinforce.ReinforceModule;
 import top.arctain.snowTerritory.stfish.StfishModule;
 import top.arctain.snowTerritory.stocks.StocksModule;
+import top.arctain.snowTerritory.stvip.StvipModule;
+import top.arctain.snowTerritory.stvip.service.StvipService;
 import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.NBTUtils;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,6 +27,7 @@ public class Main extends JavaPlugin {
     private StocksModule stocksModule;
     private StfishModule stfishModule;
     private ArmorModule armorModule;
+    private StvipModule stvipModule;
 
     @Override
     public void onEnable() {
@@ -45,6 +48,13 @@ public class Main extends JavaPlugin {
         
         // 设置 MessageUtils 的配置引用
         MessageUtils.setConfig(pluginConfig);
+
+        if (pluginConfig.isModuleEnabled("stvip")) {
+            this.stvipModule = new StvipModule(this);
+            this.stvipModule.enable();
+        } else {
+            MessageUtils.logInfo("ST VIP 模块已禁用（配置文件中 modules.stvip = false）");
+        }
 
         // 初始化 Reinforce 模块
         if (pluginConfig.isModuleEnabled("reinforce")) {
@@ -120,6 +130,9 @@ public class Main extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (stvipModule != null) {
+            stvipModule.disable();
+        }
         if (reinforceModule != null) {
             reinforceModule.disable();
         }
@@ -198,5 +211,14 @@ public class Main extends JavaPlugin {
 
     public ArmorModule getArmorModule() {
         return armorModule;
+    }
+
+    public StvipModule getStvipModule() {
+        return stvipModule;
+    }
+
+    /** ST VIP 未启用时返回 null。 */
+    public StvipService getStvipService() {
+        return stvipModule != null ? stvipModule.getService() : null;
     }
 }

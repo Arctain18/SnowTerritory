@@ -8,7 +8,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.reinforce.config.ReinforceConfigManager;
-import top.arctain.snowTerritory.reinforce.service.*;
+import top.arctain.snowTerritory.reinforce.service.CharmService;
+import top.arctain.snowTerritory.reinforce.service.CostCalculationService;
+import top.arctain.snowTerritory.reinforce.service.EconomyService;
+import top.arctain.snowTerritory.reinforce.service.ExpressionService;
+import top.arctain.snowTerritory.reinforce.service.MMOCoreService;
+import top.arctain.snowTerritory.reinforce.service.PlayerPointsService;
 import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.ColorUtils;
 
@@ -36,10 +41,11 @@ public class ReinforceGUI {
         this.charmService = new CharmService(config);
         this.mmocoreService = new MMOCoreService();
         this.costCalculationService = new CostCalculationService(
-            config, 
-            config.getCostConfigManager(), 
+            config,
+            config.getCostConfigManager(),
             mmocoreService,
-            new ExpressionService()
+            new ExpressionService(),
+            plugin.getStvipService()
         );
         this.confirmButtonLoreService = new ConfirmButtonLoreService(
             config, 

@@ -1,235 +1,244 @@
-# SnowTerritory - MMOItems 强化与战利品存储插件
+# SnowTerritory
 
-一个功能完整的 Minecraft Paper 服务器插件，包含物品强化系统和战利品存储系统。
+SnowTerritory is a modular **Paper 1.21** plugin for Minecraft servers that extend **MMOItems**-based gameplay. It ships several optional features—reinforcement, loot storage, quests, paper trading, fishing, and procedural armor sets—behind toggles in the main config.
 
-## 功能特性
+**Version:** 1.2.0 (see `pom.xml`)  
+**Main class:** `top.arctain.snowTerritory.Main`  
+**Package:** `top.arctain.snowTerritory`
 
-### 🔨 Reinforce（强化）模块
-- ✅ **物品强化系统**：支持成功/失败/维持三种结果
-- ✅ **GUI 界面**：直观的图形化强化界面
-- ✅ **概率系统**：可配置不同等级的成功率
-- ✅ **保护机制**：保护符防止失败降级
-- ✅ **增强机制**：强化符提升成功率
-- ✅ **经济集成**：支持 Vault 和 PlayerPoints
-- ✅ **属性修改**：自动修改物品的攻击力、防御力等属性
-- ✅ **等级显示**：物品名称显示强化等级（+1, +2...）
+---
 
-### 📦 EnderStorage（末影存储）模块
-- ✅ **战利品仓库**：快速存储游戏物品，省略地皮系统繁琐的实体箱子存储
-- ✅ **自动拾取**：MythicMobs 掉落物自动入库（需权限）
-- ✅ **白名单系统**：支持 MMOItems 物品和原版物品的白名单配置
-- ✅ **容量解锁**：基于权限节点的仓库容量和单品上限解锁
-- ✅ **GUI 界面**：分页浏览、批量存取物品
-- ✅ **数据库存储**：SQLite 数据库持久化存储
-- ✅ **多语言支持**：可配置的消息系统
+## Features
 
-## 依赖要求
+### Reinforce
 
-### 必需依赖
-- **Paper/Spigot 1.21.1**
-- **MMOItems 6.9.5+**
+- GUI-driven **MMOItems reinforcement** with configurable success / maintain / fail-degrade behavior.
+- **Cost system:** Vault currency, PlayerPoints, and material slots (see module config).
+- **Charm slots:** preservation and upgrade tokens (MMOItems types from config).
+- **MMOCore integration (optional):** class/level display in the UI when MMOCore is present; gracefully disabled if not.
 
-### 可选依赖
-- **Vault** - 用于金币消耗功能
-- **PlayerPoints** - 用于点券消耗功能
-- **MythicMobs 5.7.2+** - 用于战利品自动拾取（EnderStorage 模块）
+### EnderStorage (loot warehouse)
 
-## 安装方法
+- **Per-player loot storage** with paginated GUI (SQLite by default, HikariCP connection pooling).
+- **Whitelist** driven by `gui.yml` → `gui.materials` (MMOItems type → item id → per-item stack cap and optional lore).
+- **Progression:** extra slots and per-item caps via permission-based rules (`progression/size.yml`, `progression/stack.yml`).
+- **MythicMobs:** optional auto-pickup of whitelisted drops for players with the right permission.
+- Standalone command `snowterritoryenderstorage` (alias `stes`) is registered in addition to `/sn es`.
 
-1. 将编译好的 `SnowTerritory-1.0.jar` 放入服务器的 `plugins` 文件夹
-2. 确保已安装 MMOItems 插件
-3. 启动服务器，插件会自动生成配置文件
-4. 根据需要修改配置文件：
-   - `plugins/SnowTerritory/config.yml` - Reinforce 模块配置
-   - `plugins/SnowTerritory/enderstorage/` - EnderStorage 模块配置
+### Quest
 
-## 使用方法
+- **Material** and **collect** style quests, rewards, time bonuses, and **bounty** tasks (see `quest/` defaults).
+- **SQLite** persistence for quest data.
+- Admin reload: `/sn q reload` (permission `st.quest.admin`).
+- **Kill** quest type is not implemented; attempting to accept it shows a not-implemented message.
 
-### 主命令
+### Stocks (futures-style trading)
 
-主命令：`/snowterritory` 或 `/sn`
+- In-game **contracts** with configurable symbols (e.g. `BTCUSDT`, `ETHUSDT`), leverage, margin, and fees.
+- **Price feed** via REST (default sample uses CoinGecko-style config in `stocks/config.yml`).
+- Commands: price query, open/close positions, margin, leverage, balance (players only).
 
-#### Reinforce（强化）模块命令
-- `/sn r` 或 `/sn reinforce` - 打开物品强化界面（需要权限 `mmoitemseditor.edit`）
-- `/sn r <玩家名>` - 为其他玩家打开强化界面（需要权限 `mmoitemseditor.openforothers`）
-- `/sn checkid` 或 `/sn check` - 查看手中物品的 MMOItems ID（需要权限 `mmoitemseditor.itemid`）
+### ST Fish
 
-#### EnderStorage（末影存储）模块命令
-- `/sn es` 或 `/sn enderstorage` - 打开战利品仓库 GUI（需要权限 `st.loot.use`）
-- `/sn es reload` - 重载 EnderStorage 配置（需要权限 `st.loot.admin`）
-- `/sn es give <玩家> <物品key> <数量>` - 管理员发放物品到仓库（需要权限 `st.loot.admin`）
+- **Fish atlas** GUI, fish definitions and tiers in YAML.
+- **Admin give:** `/sn fish give <player> <fishId> [amount]`.
+- **Weather summon:** `/sn weather summon` (costs Vault balance; requires economy + permission).
 
-#### 通用命令
-- `/sn reload` - 重载插件配置（需要权限 `mmoitemseditor.reload`）
+### Armor
 
-### 强化流程
+- Generates **full MMOItems armor sets** from `armor/sets.yml` and related config.
+- Command: `/sn armor generate all <setId>[w1,w2,w3]` — optional three non-negative integer weights for common / rare / epic quality rolls.
+- Overflow drops at the player’s feet if inventory is full.
 
-1. 手持或背包中有 MMOItems 物品
-2. 执行 `/sn r` 打开强化界面
-3. 在武器槽位放置要强化的物品
-4. （可选）放置保护符防止降级
-5. （可选）放置强化符提升成功率
-6. 在材料槽位放置所需材料
-7. 点击确认按钮进行强化
+### Core / misc
 
-### 强化结果
+- **PlaceholderAPI** parsing in messages when the plugin is installed (otherwise text is unchanged).
+- **`/sn debug resetconfig`** — destructive config reset with in-game confirmation (see [Debug](#debug)); database files are kept.
 
-- **成功**：物品等级 +1，属性提升
-- **失败降级**：物品等级 -1，属性降低（使用保护符可避免）
-- **维持不变**：等级和属性不变
+---
 
-### 战利品仓库使用
+## Requirements
 
-1. **打开仓库**：执行 `/sn es` 打开仓库 GUI
-2. **存入物品**：
-   - 左键点击仓库中的物品槽位：存入 8 个
-   - Shift + 左键：存入 64 个
-   - 物品必须在白名单中才能存入
-3. **取出物品**：
-   - 右键点击仓库中的物品槽位：取出 8 个
-   - Shift + 右键：取出 64 个
-4. **自动拾取**：拥有 `st.loot.auto` 权限的玩家，击杀怪物时白名单物品会自动入库
+| Component | Required |
+|-----------|----------|
+| **Server** | Paper (or compatible) **1.21.x** — API targets **1.21.1** |
+| **Java** | **21** |
+| **MMOItems** | **Yes** (hard dependency in `plugin.yml`) |
 
-## 配置说明
+### Soft dependencies
 
-### Reinforce 模块配置
+- **Vault** — gold costs (Reinforce, ST Fish weather summon, etc.) when an economy provider is present.
+- **PlayerPoints** — point costs where configured (e.g. Reinforce).
+- **PlaceholderAPI** — placeholders in configured messages.
+- **MythicMobs** — enhanced / auto loot behavior for EnderStorage when installed.
+- **MMOCore** — optional Reinforce UI enhancements (no hard runtime requirement).
 
-配置文件位于 `plugins/SnowTerritory/config.yml`
+---
 
-主要配置项：
+## Installation
+
+1. Build or obtain `SnowTerritory-1.2.0.jar` (artifact name follows `${project.version}` in Maven).
+2. Place the JAR in the server `plugins` folder.
+3. Ensure **MMOItems** is installed and loads before SnowTerritory.
+4. Start the server once to generate `plugins/SnowTerritory/`.
+5. Edit `plugins/SnowTerritory/config.yml` — especially `modules:` — to enable or disable features.
+
+Default module flags (all `true` in shipped defaults):
+
 ```yaml
-reinforce:
-  # 失败降级概率
-  fail-degrade-chance: 0.3
-  
-  # 维持概率
-  maintain-chance: 0.2
-  
-  # 成功时属性提升百分比
-  attribute-boost-percent: 1.1  # 1.1 = +10%
-  
-  # 不同等级的成功率
-  success-rates:
-    level-0: 0.9   # 0级升1级: 90%
-    level-1: 0.8   # 1级升2级: 80%
-    # ...
-  
-  # 消耗配置
-  cost:
-    vault-gold: 1000      # 金币消耗
-    player-points: 50     # 点券消耗
-    materials: 6          # 材料数量
+modules:
+  reinforce: true
+  enderstorage: true
+  quest: true
+  stocks: true
+  stfish: true
+  armor: true
 ```
 
-详细配置说明请查看生成的 `config.yml` 文件中的注释。
+---
 
-### EnderStorage 模块配置
+## Configuration layout
 
-配置文件位于 `plugins/SnowTerritory/enderstorage/`
+| Path | Purpose |
+|------|---------|
+| `plugins/SnowTerritory/config.yml` | Global toggles, shared message prefix/help/debug strings |
+| `plugins/SnowTerritory/reinforce/` | Reinforce rules, GUI, costs (`config.yml`, optional cost YAML) |
+| `plugins/SnowTerritory/enderstorage/` | DB settings, `gui.yml` (whitelist + GUI), `messages/`, `progression/` |
+| `plugins/SnowTerritory/quest/` | Tasks, rewards, bounty, whitelists, messages |
+| `plugins/SnowTerritory/stocks/` | Exchange URL, symbols, risk/price intervals |
+| `plugins/SnowTerritory/stfish/` | Fish definitions, economy hooks, weather world |
+| `plugins/SnowTerritory/armor/` | Set definitions, qualities, stat mapping, messages |
 
-- `config.yml` - 数据库、基础开关、调试、默认消息语言
-- `messages/*.yml` - 多语言文本（提示、错误、GUI 文本）
-- `loot/whitelist.yml` - 可存储物品列表、默认单品容量、显示名
-- `progression/size.yml` - 仓库容量解锁规则（权限节点 → 槽位数）
-- `progression/stack.yml` - 单品上限解锁规则（权限节点 → 单品上限）
+First-run files are copied from the plugin JAR under `default-configs/` (see `src/main/resources/default-configs/` in the source tree).
 
-详细配置说明请查看 [文档目录](docs/) 中的相关文档。
+### Messages and placeholders
 
-## 权限
+- Global chat strings live under `messages` in the main `config.yml`.
+- Each module can register its own message YAML; lookups use `{key}` style placeholders as documented in the default configs.
+- Color formats supported by the project include `&` codes and hex/gradient styles as described in the default `config.yml` comments.
 
-### Reinforce 模块权限
-- `mmoitemseditor.use` - 使用 SnowTerritory 命令（默认：OP）
-- `mmoitemseditor.edit` - 使用物品编辑功能（默认：OP）
-- `mmoitemseditor.reload` - 重载插件配置（默认：OP）
-- `mmoitemseditor.itemid` - 查看物品ID（默认：OP）
-- `mmoitemseditor.openforothers` - 为其他玩家打开物品强化界面（默认：OP）
+---
 
-### EnderStorage 模块权限
-- `st.loot.use` - 打开战利品仓库（默认：true）
-- `st.loot.auto` - 掉落物自动入库（默认：OP）
-- `st.loot.admin` - 管理战利品仓库（默认：OP）
-- `st.loot.size.X` - 仓库容量等级（X 为等级数字）
-- `st.loot.stack.X` - 单品上限等级（X 为等级数字）
+## Commands
 
-## 文档
+Primary command: **`/snowterritory`** (alias **`/sn`**). Subcommands below assume `/sn`.
 
-- [测试指南](docs/TEST_GUIDE.md) - 详细的测试清单和测试方法
-- [逻辑流程图](docs/FLOWCHART.md) - 插件完整逻辑判定流程图
+| Command | Description |
+|---------|-------------|
+| `/sn` | Help |
+| `/sn reload` | Reload main config and all **enabled** modules (`mmoitemseditor.reload` or OP) |
+| `/sn r [player]` | Open Reinforce GUI for self or target (`reinforce` module) |
+| `/sn checkid` | Show MMOItems id of held item |
+| `/sn es` | Open EnderStorage GUI (`st.loot.use`) |
+| `/sn es reload` | Reload EnderStorage (`st.loot.admin`) |
+| `/sn es give <player> <itemKey> <amount>` | Admin deposit to warehouse |
+| `/sn q`, `/sn quest` | Quest: list; `accept`/`a`, `complete`/`c`, `setlevel`, `getlevel`, `reload` (see in-game usage) |
+| `/sn stock …` | Stocks: `price`, `open`, `close`, `pos`, `margin`, `setlev`, `bal` (player-only) |
+| `/sn fish` | Open fish atlas (`st.fish.use`) |
+| `/sn fish give <player> <fishId> [amount]` | Give fish (`st.fish.give`) |
+| `/sn weather summon` | Paid weather summon (`st.fish.weather`, Vault) |
+| `/sn armor generate all <setId>[w1,w2,w3]` | Generate full armor set (`st.armor.generate`) |
+| `/sn debug resetconfig [module]` | Reset config files after typing `yes` (see [Debug](#debug)) |
 
-## 开发信息
+**EnderStorage** is also exposed as **`/snowterritoryenderstorage`** (alias **`/stes`**) per `plugin.yml`.
 
-### 编译
+### Debug
+
+`/sn debug resetconfig` prompts for confirmation (`yes` within 30 seconds). With no module argument, it removes configurable files under the plugin data folder **except** `*.db` databases, then reloads. Modules: `reinforce`, `enderstorage`, `quest`, `stocks`, `stfish`, `armor`, or `all`.
+
+---
+
+## Permissions
+
+Declared in `plugin.yml` (summarized):
+
+| Permission | Default | Use |
+|------------|---------|-----|
+| `mmoitemseditor.use` | op | Base `/sn` usage |
+| `mmoitemseditor.edit` | op | Reinforce GUI (self) |
+| `mmoitemseditor.reload` | op | `/sn reload`, debug reset |
+| `mmoitemseditor.itemid` | op | `/sn checkid` |
+| `mmoitemseditor.openforothers` | op | `/sn r <player>` |
+| `st.loot.use` | true | Open loot warehouse |
+| `st.loot.auto` | op | Auto-pickup to warehouse |
+| `st.loot.admin` | op | EnderStorage admin |
+| `st.fish.use` | true | Fish atlas |
+| `st.fish.weather` | op | Weather summon |
+| `st.fish.give` | op | Give fish |
+| `st.armor.generate` | op | Armor set generation |
+
+Quest admin reload uses **`st.quest.admin`** (used in code; add to `plugin.yml` on your server if you rely on permission plugins to define unknown nodes).
+
+EnderStorage slot/stack progression permissions are configured in `enderstorage/progression/*.yml` (e.g. `st.loot.size.*` style nodes — align with your edited YAML).
+
+---
+
+## Building
 
 ```bash
 mvn clean package
 ```
 
-编译后的文件位于 `target/SnowTerritory-1.0.jar`
+Output: `target/SnowTerritory-1.2.0.jar`
 
-### 项目结构
+### Bundled runtime libraries
 
-```
-src/main/java/top/arctain/snowTerritory/
-├── Main.java                    # 主类
-├── commands/                    # 命令处理
-│   ├── SnowTerritoryCommand.java
-│   ├── ItemIdCommand.java
-│   └── ...
-├── config/                      # 配置管理
-│   └── PluginConfig.java
-├── gui/                         # GUI界面
-│   └── ItemEditorGUI.java
-├── listeners/                   # 事件监听
-│   ├── GUIListener.java
-│   └── ItemEditListener.java
-├── enderstorage/                # EnderStorage 模块
-│   ├── EnderStorageModule.java
-│   ├── command/
-│   ├── config/
-│   ├── gui/
-│   ├── listener/
-│   └── service/
-└── utils/                       # 工具类
-    ├── Utils.java
-    ├── MessageUtils.java
-    └── ...
+The shaded JAR includes **HikariCP**, **SQLite JDBC**, and **exp4j**. The Maven Shade plugin **excludes non-Windows SQLite native libraries** in the default POM to trim size. If you deploy on **Linux**, adjust the `sqlite-jdbc` filter in `pom.xml` to keep the appropriate native artifacts and exclude others.
+
+### Optional remote deploy profile
+
+The POM defines a **`deploy`** profile that runs `scp` after package (host/path placeholders). Activate with:
+
+```bash
+mvn clean package -Pdeploy
 ```
 
-## 常见问题
-
-### Q: 插件无法启用？
-A: 请确保已安装 MMOItems 插件，并检查控制台错误信息。
-
-### Q: 强化后物品属性没有变化？
-A: 请确保物品是有效的 MMOItems 物品，并且物品有可修改的属性。
-
-### Q: 经济系统不工作？
-A: 请确保已安装 Vault 和对应的经济插件（如 EssentialsX），或 PlayerPoints 插件。
-
-### Q: 战利品仓库无法打开？
-A: 请检查是否有 `st.loot.use` 权限，并确认 EnderStorage 模块已正确加载。
-
-### Q: 物品无法存入仓库？
-A: 请检查物品是否在 `loot/whitelist.yml` 白名单中配置。
-
-## 更新日志
-
-### v1.0
-- ✅ 初始版本
-- ✅ 实现基本的物品强化功能
-- ✅ 支持 GUI 界面
-- ✅ 集成经济系统
-- ✅ 实现 EnderStorage 战利品仓库模块
-- ✅ 支持自动拾取、白名单、容量解锁等功能
-
-## 作者
-
-**Arctain**
-
-## 许可证
-
-本项目为私有项目，未经授权不得使用。
+Override `deploy.host`, `deploy.user`, and `deploy.path` via `-D` properties or Maven settings if needed.
 
 ---
 
-**注意**：本插件需要 MMOItems 插件才能正常工作。请确保服务器已正确安装并配置 MMOItems。
+## Project layout (source)
+
+```
+src/main/java/top/arctain/snowTerritory/
+├── Main.java                 # Plugin bootstrap, module lifecycle
+├── config/                   # Global PluginConfig
+├── commands/                 # Root command, item id, debug reset
+├── listeners/                # Shared listeners
+├── utils/                    # Config, messages, NBT, placeholders, etc.
+├── reinforce/                # Reinforce module
+├── enderstorage/             # Loot storage module
+├── quest/                    # Quest module
+├── stocks/                   # Stocks module
+├── stfish/                   # Fishing module
+└── armor/                    # Armor generation module
+```
+
+---
+
+## Documentation
+
+- **Detailed usage (Chinese):** [`docs/USAGE.md`](docs/USAGE.md) — installation, commands, permissions, per-module configuration and workflows.
+- Other Chinese material under [`docs/`](docs/README.md): test guide, flowcharts.
+
+---
+
+## Troubleshooting
+
+- **Plugin disables on startup** — MMOItems must be installed; check the console for the dependency error from `Main.checkDependencies()`.
+- **Reinforce costs not deducting** — Install **Vault** and an economy provider, and/or **PlayerPoints**, matching your `reinforce` cost config.
+- **Cannot deposit items in EnderStorage** — Add entries under `gui.materials` in `plugins/SnowTerritory/enderstorage/gui.yml`.
+- **Stocks prices stale or failing** — Verify `stocks/config.yml` exchange settings and network access from the game server.
+- **ST Fish weather “economy disabled”** — Vault must be present and hooked to an economy plugin.
+
+---
+
+## Author & license
+
+**Author:** Arctain (see `plugin.yml` / `website`)
+
+This project is **private**; do not redistribute or use without authorization from the rights holder.
+
+---
+
+SnowTerritory is built for servers that already run **MMOItems**. Configure each module under `plugins/SnowTerritory/` and set `modules.*` to `false` to disable anything you do not use.

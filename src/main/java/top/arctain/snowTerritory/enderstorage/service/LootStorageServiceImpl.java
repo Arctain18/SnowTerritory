@@ -192,7 +192,9 @@ public class LootStorageServiceImpl implements LootStorageService {
 
     @Override
     public int resolveSlots(Player player) {
-        return resolver.resolveSlots(player);
+        int base = resolver.resolveSlots(player);
+        var vip = plugin.getStvipService();
+        return base + (vip != null ? vip.getLootExtraSlots(player) : 0);
     }
 
     @Override
@@ -200,7 +202,9 @@ public class LootStorageServiceImpl implements LootStorageService {
         int configured = Optional.ofNullable(whitelist.get(itemKey))
                 .map(WhitelistEntry::getDefaultMax)
                 .orElse(256);
-        return Math.max(configured, resolver.resolvePerItemMax(player));
+        int base = Math.max(configured, resolver.resolvePerItemMax(player));
+        var vip = plugin.getStvipService();
+        return base + (vip != null ? vip.getLootExtraPerItemMax(player) : 0);
     }
 
     private Map<String, Integer> getPlayerData(UUID playerId) {

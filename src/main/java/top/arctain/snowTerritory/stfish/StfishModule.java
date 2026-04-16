@@ -38,7 +38,7 @@ public class StfishModule {
         this.itemFactory = new FishItemFactory(plugin, configManager);
         this.weatherService = new WeatherService(configManager, economyService);
         this.atlasGUI = new FishAtlasGUI(configManager, itemFactory);
-        FishMarketService marketService = new FishMarketService(configManager);
+        FishMarketService marketService = new FishMarketService(configManager, plugin.getStvipService());
         FishSellService sellService = new FishSellService(configManager, marketService, economyService, itemFactory);
         this.stfishCommand = new StfishCommand(configManager, weatherService, economyService, atlasGUI, itemFactory);
         this.fishSellListener = new FishSellListener(sellService);

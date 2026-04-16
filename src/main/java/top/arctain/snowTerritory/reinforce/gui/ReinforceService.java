@@ -8,7 +8,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.reinforce.config.ReinforceConfigManager;
-import top.arctain.snowTerritory.reinforce.service.*;
+import top.arctain.snowTerritory.reinforce.service.CharmService;
+import top.arctain.snowTerritory.reinforce.service.CostCalculationService;
+import top.arctain.snowTerritory.reinforce.service.EconomyService;
+import top.arctain.snowTerritory.reinforce.service.PlayerPointsService;
 import top.arctain.snowTerritory.reinforce.utils.ReinforceUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
@@ -100,9 +103,8 @@ public class ReinforceService {
             goldCost = costCalculationService.calculateGoldCost(player, itemId, nextLevel);
             pointsCost = costCalculationService.calculatePointsCost(player, itemId, nextLevel);
         } else {
-            // 回退到全局配置
-            goldCost = config.getCostVaultGold();
-            pointsCost = config.getCostPlayerPoints();
+            goldCost = applyVipGold(player, config.getCostVaultGold());
+            pointsCost = applyVipPoints(player, config.getCostPlayerPoints());
         }
         
         if (economyService.isEnabled() && goldCost > 0) {
@@ -234,5 +236,21 @@ public class ReinforceService {
             MessageUtils.sendError(player, "reinforce.error", "&c✗ &f强化过程中发生错误: &e{error}", "error", e.getMessage());
             MessageUtils.logError("强化过程中发生错误: " + e.getMessage());
         }
+    }
+
+    private double applyVipGold(Player player, double base) {
+        var vip = plugin.getStvipService();
+        if (vip == null) {
+            return Math.max(0, base);
+        }
+        return Math.max(0, base * vip.getReinforceCostMultiplier(player));
+    }
+
+    private int applyVipPoints(Player player, int base) {
+        var vip = plugin.getStvipService();
+        if (vip == null) {
+            return Math.max(0, base);
+        }
+        return Math.max(0, (int) Math.round(base * vip.getReinforceCostMultiplier(player)));
     }
 }

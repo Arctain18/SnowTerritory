@@ -1,0 +1,36 @@
+# ST VIP — 权限分档，取玩家拥有的最高 priority 档
+# 路径: plugins/SnowTerritory/stvip/config.yml
+
+# 进服提示（仅对有 VIP 权限的玩家）。默认关闭。
+join-message:
+  enabled: false
+  message: "&7欢迎 &f{display} &7进入服务器"
+
+tiers:
+  vip1:
+    permission: st.vip.1
+    display-name: "Fatalism"
+    priority: 1
+    perks:
+      reinforce-cost-multiplier: 1.0
+      fish-sell-multiplier: 1.0
+      loot-extra-slots: 0
+      loot-extra-per-item-max: 0
+  vip2:
+    permission: st.vip.2
+    display-name: "Aetherion"
+    priority: 2
+    perks:
+      reinforce-cost-multiplier: 1.0
+      fish-sell-multiplier: 1.0
+      loot-extra-slots: 0
+      loot-extra-per-item-max: 0
+  vip3:
+    permission: st.vip.3
+    display-name: "ἐντελέχεια"
+    priority: 3
+    perks:
+      reinforce-cost-multiplier: 1.0
+      fish-sell-multiplier: 1.0
+      loot-extra-slots: 0
+      loot-extra-per-item-max: 0

@@ -54,4 +54,13 @@ permissions:
   st.armor.generate:
     description: 生成制式防具套装
     default: op
+  st.vip.1:
+    description: ST VIP 等级 1（展示名见 stvip/config.yml）
+    default: false
+  st.vip.2:
+    description: ST VIP 等级 2（展示名见 stvip/config.yml）
+    default: false
+  st.vip.3:
+    description: ST VIP 等级 3（展示名见 stvip/config.yml）
+    default: false
 

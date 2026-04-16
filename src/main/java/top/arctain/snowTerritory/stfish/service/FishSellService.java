@@ -48,7 +48,7 @@ public class FishSellService {
         double length = FishItemFactory.getStFishLength(item);
         double lengthMax = def.lengthMax();
 
-        var quote = marketService.calculatePrice(type, tier, length, lengthMax, player.getUniqueId());
+        var quote = marketService.calculatePrice(type, tier, length, lengthMax, player);
         if (!economyService.deposit(player, quote.price())) {
             return SellResult.NO_ECONOMY;
         }
