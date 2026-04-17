@@ -9,6 +9,7 @@ import top.arctain.snowTerritory.armor.data.ArmorSetDefinition;
 import top.arctain.snowTerritory.armor.data.ArmorSlot;
 import top.arctain.snowTerritory.armor.data.ArmorStatRange;
 import top.arctain.snowTerritory.armor.data.ArmorBaseDefinition;
+import top.arctain.snowTerritory.armor.data.ArmorGenerationCost;
 import top.arctain.snowTerritory.utils.ConfigUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
@@ -35,6 +36,11 @@ public class ArmorConfigManager {
     private double globalMaxMultiplier;
     private Map<String, String> statMapping = new HashMap<>();
     private Map<String, ArmorSetDefinition> sets = new HashMap<>();
+    private Map<String, int[]> generationProfiles = new HashMap<>();
+    private ArmorGenerationCost defaultGenerationCost = new ArmorGenerationCost(
+            2000, 168, 20, 25, 2, ArmorGenerationCost.Mode.ADDITIVE
+    );
+    private String qpCurrencyId = "qp";
 
     public ArmorConfigManager(Main plugin) {
         this.plugin = plugin;
@@ -116,6 +122,10 @@ public class ArmorConfigManager {
         if (!statMapping.containsKey("defense") || "ARMOR".equalsIgnoreCase(statMapping.get("defense"))) {
             statMapping.put("defense", "DEFENSE");
         }
+
+        loadGenerationProfiles(armor);
+        loadDefaultGenerationCost(armor);
+        loadQpProvider(armor);
     }
 
     private void loadSetsConfig() {
@@ -173,9 +183,82 @@ public class ArmorConfigManager {
                     }
                 }
             }
-            ArmorSetDefinition def = new ArmorSetDefinition(id, displayName, baseStats, slotRatios, statRanges, base, slotMaterials);
+            ArmorGenerationCost generationCost = parseGenerationCost(section.getConfigurationSection("generation-cost"), defaultGenerationCost);
+            ArmorSetDefinition def = new ArmorSetDefinition(id, displayName, baseStats, slotRatios, statRanges, base, slotMaterials, generationCost);
             sets.put(id.toLowerCase(), def);
         }
+    }
+
+    private void loadGenerationProfiles(ConfigurationSection armor) {
+        generationProfiles.clear();
+        ConfigurationSection section = armor.getConfigurationSection("generation-profiles");
+        if (section == null) {
+            generationProfiles.put("common", new int[]{60, 30, 10});
+            generationProfiles.put("ex", new int[]{30, 50, 20});
+            return;
+        }
+        for (String profile : section.getKeys(false)) {
+            int[] weights = parseProfileWeights(section, profile);
+            if (weights != null) {
+                generationProfiles.put(profile.toLowerCase(), weights);
+            }
+        }
+        if (!generationProfiles.containsKey("common")) {
+            generationProfiles.put("common", new int[]{60, 30, 10});
+        }
+        if (!generationProfiles.containsKey("ex")) {
+            generationProfiles.put("ex", new int[]{30, 50, 20});
+        }
+    }
+
+    private int[] parseProfileWeights(ConfigurationSection section, String key) {
+        List<Integer> list = section.getIntegerList(key);
+        if (list.size() >= 3) {
+            return new int[]{Math.max(0, list.get(0)), Math.max(0, list.get(1)), Math.max(0, list.get(2))};
+        }
+        ConfigurationSection node = section.getConfigurationSection(key);
+        if (node != null) {
+            int c = node.getInt("common", -1);
+            int r = node.getInt("rare", -1);
+            int e = node.getInt("epic", -1);
+            if (c >= 0 && r >= 0 && e >= 0) {
+                return new int[]{Math.max(0, c), Math.max(0, r), Math.max(0, e)};
+            }
+        }
+        MessageUtils.logWarning("armor.generation-profiles." + key + " 配置无效，已忽略");
+        return null;
+    }
+
+    private void loadDefaultGenerationCost(ConfigurationSection armor) {
+        ConfigurationSection sec = armor.getConfigurationSection("generation-cost");
+        defaultGenerationCost = parseGenerationCost(sec, defaultGenerationCost);
+    }
+
+    private ArmorGenerationCost parseGenerationCost(ConfigurationSection section, ArmorGenerationCost fallback) {
+        if (section == null) {
+            return fallback;
+        }
+        double slBase = section.getDouble("sl-base", fallback.getSlBase());
+        double qpBase = section.getDouble("qp-base", fallback.getQpBase());
+        int threshold = section.getInt("level-threshold", fallback.getLevelThreshold());
+        double slPerLevel = section.getDouble("sl-per-level", fallback.getSlPerLevel());
+        double qpPerLevel = section.getDouble("qp-per-level", fallback.getQpPerLevel());
+        String modeText = section.getString("mode", fallback.getMode().name());
+        ArmorGenerationCost.Mode mode;
+        try {
+            mode = ArmorGenerationCost.Mode.valueOf(modeText.toUpperCase());
+        } catch (Exception e) {
+            mode = fallback.getMode();
+        }
+        return new ArmorGenerationCost(slBase, qpBase, threshold, slPerLevel, qpPerLevel, mode);
+    }
+
+    private void loadQpProvider(ConfigurationSection armor) {
+        ConfigurationSection section = armor.getConfigurationSection("qp-provider");
+        if (section == null) {
+            return;
+        }
+        this.qpCurrencyId = section.getString("currency-id", qpCurrencyId);
     }
 
     private ArmorBaseDefinition parseBaseDefinition(ConfigurationSection baseSec) {
@@ -288,6 +371,31 @@ public class ArmorConfigManager {
 
     public File getBaseDir() {
         return baseDir;
+    }
+
+    public int[] getGenerationProfileWeights(String profile) {
+        if (profile == null) {
+            return null;
+        }
+        int[] weights = generationProfiles.get(profile.toLowerCase());
+        return weights == null ? null : new int[]{weights[0], weights[1], weights[2]};
+    }
+
+    public Map<String, int[]> getGenerationProfiles() {
+        Map<String, int[]> copy = new HashMap<>();
+        for (Map.Entry<String, int[]> e : generationProfiles.entrySet()) {
+            int[] w = e.getValue();
+            copy.put(e.getKey(), new int[]{w[0], w[1], w[2]});
+        }
+        return Collections.unmodifiableMap(copy);
+    }
+
+    public ArmorGenerationCost getDefaultGenerationCost() {
+        return defaultGenerationCost;
+    }
+
+    public String getQpCurrencyId() {
+        return qpCurrencyId;
     }
 }
 

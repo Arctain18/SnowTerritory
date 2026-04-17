@@ -9,6 +9,7 @@ import net.Indyuce.mmoitems.stat.data.StringListData;
 import net.Indyuce.mmoitems.stat.type.ItemStat;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -35,13 +36,18 @@ public class ArmorGenerateService {
     }
 
     public List<ItemStack> generateFullSet(Player player, String setId) {
-        return generateFullSet(player, setId, null);
+        return generateFullSet(player, player, setId, null);
     }
 
-    public List<ItemStack> generateFullSet(Player player, String setId, int[] qualityWeightOverride) {
+    /**
+     * @param target  接收物品的玩家（用于生成逻辑，需在线）
+     * @param feedback  提示信息发送给谁（控制台代发时发给控制台）
+     */
+    public List<ItemStack> generateFullSet(Player target, CommandSender feedback, String setId, int[] qualityWeightOverride) {
+        CommandSender to = feedback != null ? feedback : target;
         ArmorSetDefinition set = config.getSet(setId);
         if (set == null) {
-            MessageUtils.sendConfigMessage(player, "armor.command-unknown-set",
+            MessageUtils.sendConfigMessage(to, "armor.command-unknown-set",
                     "&c✗ &f未找到套装: {set}", "set", setId);
             return List.of();
         }
@@ -49,7 +55,7 @@ public class ArmorGenerateService {
         for (Map.Entry<String, ArmorSlot> entry : config.getSlots().entrySet()) {
             String slotId = entry.getKey();
             ArmorSlot slot = entry.getValue();
-            ItemStack item = generatePiece(player, set, slotId, slot, qualityWeightOverride);
+            ItemStack item = generatePiece(to, set, slotId, slot, qualityWeightOverride);
             if (item != null) {
                 result.add(item);
             }
@@ -57,25 +63,25 @@ public class ArmorGenerateService {
         return result;
     }
 
-    private ItemStack generatePiece(Player player, ArmorSetDefinition set, String slotId, ArmorSlot slot,
+    private ItemStack generatePiece(CommandSender feedback, ArmorSetDefinition set, String slotId, ArmorSlot slot,
                                     int[] qualityWeightOverride) {
         ArmorQuality quality = randomService.rollQuality(qualityWeightOverride);
         ArmorStats stats = randomService.rollStatsForSlot(set, slotId, quality);
         String templateId = slot.getTemplateId();
         if (templateId == null || templateId.isEmpty()) {
-            MessageUtils.sendConfigMessage(player, "armor.command-missing-mmoitems",
+            MessageUtils.sendConfigMessage(feedback, "armor.command-missing-mmoitems",
                     "&c✗ &f未找到 MMOItems 模板，无法生成防具");
             return null;
         }
         MMOItem mmoItem = getTemplate(config.getMmoitemsType(), templateId);
         if (mmoItem == null) {
-            MessageUtils.sendConfigMessage(player, "armor.command-missing-mmoitems",
+            MessageUtils.sendConfigMessage(feedback, "armor.command-missing-mmoitems",
                     "&c✗ &f未找到 MMOItems 模板，无法生成防具");
             return null;
         }
         ItemStack built = mmoItem.newBuilder().build();
         if (built == null || built.getType().isAir()) {
-            MessageUtils.sendConfigMessage(player, "armor.command-missing-mmoitems",
+            MessageUtils.sendConfigMessage(feedback, "armor.command-missing-mmoitems",
                     "&c✗ &f生成 MMOItems 物品失败");
             return null;
         }

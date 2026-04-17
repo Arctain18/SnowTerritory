@@ -20,7 +20,6 @@ armor:
       template-id: ARMOR_BOOTS_TEMPLATE
 
   # 品质配置：权重=概率权重，multiplier=数值倍率，suffix=名称后缀
-  # 指令覆盖权重 /sn armor generate all <套装ID>[w1,w2,w3] 顺序固定为 common → rare → epic（与下列键名一致）
   qualities:
     common:
       display-name: "普通"
@@ -37,6 +36,29 @@ armor:
       suffix: " &{#9C0000}Ex+"
       weight: 5
       value-multiplier: 1.25
+
+  # 生成概率模板：/sn armor generate all <套装ID> <profile> [玩家名]
+  # 权重顺序固定：common, rare, epic
+  generation-profiles:
+    common: [60, 30, 10]
+    ex: [30, 50, 20]
+
+  # 生成费用默认配置（可被 sets.yml 中单套装覆盖）
+  # mode:
+  # - additive: final = base + (level-threshold) * per-level (仅高于阈值部分)
+  # - percent:  final = base * (1 + (level-threshold) * per-level)
+  generation-cost:
+    mode: additive
+    level-threshold: 20
+    sl-base: 2000
+    qp-base: 168
+    sl-per-level: 25
+    qp-per-level: 2
+
+  # QP 来源（CoinsEngine 自定义货币）
+  qp-provider:
+    # 可填 qp / starember / 你在 CoinsEngine 中定义的任意货币ID
+    currency-id: "qp"
 
   # 正态分布随机参数（所有属性的默认扰动范围）
   random:

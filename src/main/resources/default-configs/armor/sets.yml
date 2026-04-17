@@ -44,6 +44,15 @@ sets:
         min-multiplier: 0.9
         max-multiplier: 1.1
 
+    # 套装生成费用（可选，不填则使用 armor/config.yml 的 generation-cost 默认）
+    generation-cost:
+      mode: additive
+      level-threshold: 20
+      sl-base: 2000
+      qp-base: 168
+      sl-per-level: 25
+      qp-per-level: 2
+
   flame_vanguard:
     display-name: "焰誓先锋"
     base:
@@ -68,4 +77,12 @@ sets:
       chestplate: 0.42
       leggings: 0.2
       boots: 0.16
+
+    generation-cost:
+      mode: additive
+      level-threshold: 20
+      sl-base: 2400
+      qp-base: 180
+      sl-per-level: 30
+      qp-per-level: 3
 

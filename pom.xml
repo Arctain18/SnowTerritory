@@ -156,6 +156,10 @@
             <id>placeholderapi</id>
             <url>https://repo.helpch.at/releases/</url>
         </repository>
+        <repository>
+            <id>nightexpress-releases</id>
+            <url>https://repo.nightexpressdev.com/releases</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -227,6 +231,23 @@
             <version>2.12.2</version>
             <scope>provided</scope>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>su.nightexpress.coinsengine</groupId>
+            <artifactId>CoinsEngine</artifactId>
+            <version>2.4.1</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+            <exclusions>
+                <exclusion>
+                    <groupId>su.nightexpress.nightcore</groupId>
+                    <artifactId>nightcore</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>me.clip</groupId>
+                    <artifactId>placeholderapi</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>

@@ -2,6 +2,8 @@ package top.arctain.snowTerritory.armor;
 
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.armor.config.ArmorConfigManager;
+import top.arctain.snowTerritory.armor.service.ArmorConfirmSessionService;
+import top.arctain.snowTerritory.armor.service.ArmorCostService;
 import top.arctain.snowTerritory.armor.service.ArmorGenerateService;
 import top.arctain.snowTerritory.armor.service.ArmorRandomService;
 import top.arctain.snowTerritory.armor.command.ArmorCommand;
@@ -12,13 +14,17 @@ public class ArmorModule {
     private final ArmorConfigManager configManager;
     private final ArmorRandomService randomService;
     private final ArmorGenerateService generateService;
+    private final ArmorCostService costService;
+    private final ArmorConfirmSessionService confirmSessionService;
     private final ArmorCommand armorCommand;
 
     public ArmorModule(Main plugin) {
         this.configManager = new ArmorConfigManager(plugin);
         this.randomService = new ArmorRandomService(configManager);
         this.generateService = new ArmorGenerateService(configManager, randomService);
-        this.armorCommand = new ArmorCommand(generateService, configManager);
+        this.costService = new ArmorCostService(configManager);
+        this.confirmSessionService = new ArmorConfirmSessionService();
+        this.armorCommand = new ArmorCommand(generateService, configManager, costService, confirmSessionService);
     }
 
     public void enable() {

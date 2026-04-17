@@ -13,6 +13,7 @@ public class ArmorSetDefinition {
     private final Map<String, ArmorStatRange> statRanges;
     private final ArmorBaseDefinition base;
     private final Map<String, String> slotMaterials;
+    private final ArmorGenerationCost generationCost;
 
     public ArmorSetDefinition(String id,
                               String displayName,
@@ -20,7 +21,8 @@ public class ArmorSetDefinition {
                               Map<String, Double> slotRatios,
                               Map<String, ArmorStatRange> statRanges,
                               ArmorBaseDefinition base,
-                              Map<String, String> slotMaterials) {
+                              Map<String, String> slotMaterials,
+                              ArmorGenerationCost generationCost) {
         this.id = id;
         this.displayName = displayName;
         this.baseStats = new HashMap<>(baseStats);
@@ -28,6 +30,7 @@ public class ArmorSetDefinition {
         this.statRanges = new HashMap<>(statRanges);
         this.base = base;
         this.slotMaterials = slotMaterials != null ? new HashMap<>(slotMaterials) : new HashMap<>();
+        this.generationCost = generationCost;
     }
 
     public String getId() {
@@ -69,6 +72,10 @@ public class ArmorSetDefinition {
 
     public Map<String, String> getSlotMaterials() {
         return Collections.unmodifiableMap(slotMaterials);
+    }
+
+    public ArmorGenerationCost getGenerationCost() {
+        return generationCost;
     }
 }
 

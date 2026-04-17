@@ -1,14 +1,26 @@
 ## 制式防具模块消息
 
-command-usage: "&e用法: &f/sn armor generate all <套装ID> &7或 &f<套装ID>[w1,w2,w3] &7(普通/精品/极品权重)"
-command-invalid-weights: "&c✗ &f品质权重须为三个整数，例如: &ec1_standard[70,25,5]"
+command-usage: "&e用法: &f/sn armor generate all <套装ID> <profile> &7[&f玩家名&7]"
 command-no-permission: "&c✗ &f您没有权限使用该命令"
-command-player-only: "&c✗ &f此命令仅限玩家使用"
+command-console-need-player: "&c✗ &f控制台执行必须指定在线玩家名"
+command-target-not-found: "&c✗ &f未找到在线玩家: &e{name}"
+command-invalid-profile: "&c✗ &f无效概率模板: &e{profile}"
+command-player-only-confirm: "&c✗ &f该操作仅限玩家使用"
 command-unknown-set: "&c✗ &f未找到套装: &e{set}"
 command-missing-mmoitems: "&c✗ &f未找到 MMOItems 或相关模板，无法生成防具"
 
 generate-set-success: "&a✓ &f已为 &e{player} &f生成 &e{set-display} &f套装"
 generate-piece-summary: "&7- &f{slot} &8| &f{quality} &7({stats})"
+
+confirm-header: "&b✦ &f即将为你生成制式防具：&e{set} &7(profile: &f{profile}&7)"
+confirm-player-info: "&7玩家: &f{name} &8| &7等级: &f{level} &8| &7职业: &f{class}"
+confirm-cost-preview: "&7本次消耗: Sl &8{rawSl} &7-> &a{finalSl} &7QP &8{rawQp} &7-> &a{finalQp}{vip}"
+confirm-token-missing: "&c✗ &f缺少确认令牌，请重新执行生成命令"
+confirm-expired: "&c✗ &f确认已过期，请重新执行命令"
+confirm-insufficient: "&c✗ &f货币不足，无法生成。SL 缺少: &e{sl} &7| QP 缺少: &e{qp}"
+confirm-charge-failed: "&c✗ &f扣费失败，请检查经济插件状态"
+confirm-cancelled: "&e⚠ &f已取消本次防具生成"
+cancel-token-missing: "&e⚠ &f已取消当前生成请求"
 
 quality-common: "&7普通"
 quality-rare: "&a精品"

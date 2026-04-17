@@ -10,7 +10,7 @@ modules:
   reinforce: true
   enderstorage: true
   quest: true
-  stocks: true
+  stocks: false
   stfish: true
   armor: true
 
