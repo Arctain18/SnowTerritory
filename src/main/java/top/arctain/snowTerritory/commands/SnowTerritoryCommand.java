@@ -74,6 +74,8 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             return handleFish(sender, args);
         } else if (subCommand.equals("armor")) {
             return handleArmor(sender, args);
+        } else if (subCommand.equals("vip")) {
+            return handleVip(sender, args);
         } else if (subCommand.equals("debug")) {
             return handleDebug(sender, args);
         } else {
@@ -298,6 +300,31 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean handleVip(CommandSender sender, String[] args) {
+        if (plugin.getStvipModule() == null || plugin.getStvipService() == null) {
+            MessageUtils.sendError(sender, "command.feature-missing", "&c✗ &fST VIP 功能未启用");
+            return true;
+        }
+        if (!sender.isOp() && !sender.hasPermission("mmoitemseditor.reload")) {
+            MessageUtils.sendError(sender, "command.no-permission", "&c✗ &f您没有权限使用此命令！");
+            return true;
+        }
+        if (args.length < 5 || !"give".equalsIgnoreCase(args[1])) {
+            MessageUtils.sendConfigMessage(sender, "stvip.command-usage",
+                    "&e用法: /sn vip give <player> <vip1|vip2|vip3> <时长, 例如 7d>");
+            return true;
+        }
+        String playerName = args[2];
+        org.bukkit.OfflinePlayer target = plugin.getServer().getOfflinePlayer(playerName);
+        if (target == null || target.getUniqueId() == null) {
+            MessageUtils.sendConfigMessage(sender, "stvip.command-player-not-found",
+                    "&c✗ &f未找到玩家: {name}", "name", playerName);
+            return true;
+        }
+        plugin.getStvipService().grantTemporaryVip(sender, target, args[3], args[4]);
+        return true;
+    }
+
     /** 删除整个 SnowTerritory 配置目录（保留 .db 数据库文件），重载所有配置。返回删除的文件数。 */
     private int executeResetAll() {
         File dataFolder = plugin.getDataFolder();
@@ -371,6 +398,9 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             if ("armor".startsWith(input)) {
                 completions.add("armor");
             }
+            if ("vip".startsWith(input)) {
+                completions.add("vip");
+            }
             if ("debug".startsWith(input)) {
                 completions.add("debug");
             }
@@ -407,6 +437,32 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             if ("armor".startsWith(input)) modules.add("armor");
             if ("all".startsWith(input) || "全部".startsWith(input)) modules.add("all");
             return modules;
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("vip")) {
+            if ("give".startsWith(args[1].toLowerCase())) {
+                return List.of("give");
+            }
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("vip") && args[1].equalsIgnoreCase("give")) {
+            List<String> playerNames = new ArrayList<>();
+            String input = args[2].toLowerCase();
+            for (Player player : plugin.getServer().getOnlinePlayers()) {
+                if (player.getName().toLowerCase().startsWith(input)) {
+                    playerNames.add(player.getName());
+                }
+            }
+            return playerNames;
+        }
+        if (args.length == 4 && args[0].equalsIgnoreCase("vip") && args[1].equalsIgnoreCase("give")) {
+            List<String> tiers = new ArrayList<>();
+            String input = args[3].toLowerCase();
+            if ("vip1".startsWith(input)) tiers.add("vip1");
+            if ("vip2".startsWith(input)) tiers.add("vip2");
+            if ("vip3".startsWith(input)) tiers.add("vip3");
+            return tiers;
+        }
+        if (args.length == 5 && args[0].equalsIgnoreCase("vip") && args[1].equalsIgnoreCase("give")) {
+            return List.of("7d", "30d", "90d");
         }
 
         // /sn es 子命令补全

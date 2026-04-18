@@ -21,7 +21,7 @@ public class StvipModule {
     public StvipModule(Main plugin) {
         this.plugin = plugin;
         this.configManager = new StvipConfigManager(plugin);
-        this.service = new StvipService(configManager);
+        this.service = new StvipService(plugin, configManager);
     }
 
     public void enable() {

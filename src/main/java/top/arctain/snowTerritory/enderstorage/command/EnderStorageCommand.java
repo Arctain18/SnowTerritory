@@ -129,8 +129,8 @@ public class EnderStorageCommand implements CommandExecutor, TabCompleter {
 
         int perItemMax = service.resolvePerItemMax(target, itemKey);
         int slotLimit = service.resolveSlots(target);
-        service.add(target.getUniqueId(), itemKey, amount, perItemMax, slotLimit);
-        MessageUtils.sendConfigMessage(sender, "enderstorage.give-success", "&a✓ &f已发放 " + amount + "x " + itemKey + " 给 " + target.getName(), "amount", String.valueOf(amount), "itemKey", itemKey, "player", target.getName());
+        int stored = service.add(target.getUniqueId(), itemKey, amount, perItemMax, slotLimit);
+        MessageUtils.sendConfigMessage(sender, "enderstorage.give-success", "&a✓ &f已发放 " + stored + "x " + itemKey + " 给 " + target.getName(), "amount", String.valueOf(stored), "itemKey", itemKey, "player", target.getName());
         return true;
     }
 

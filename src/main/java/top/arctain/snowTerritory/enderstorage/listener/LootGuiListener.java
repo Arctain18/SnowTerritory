@@ -1,6 +1,8 @@
 package top.arctain.snowTerritory.enderstorage.listener;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -68,8 +70,18 @@ public class LootGuiListener implements Listener {
             }
             int perItemMax = service.resolvePerItemMax(player, key);
             int slotLimit = service.resolveSlots(player);
-            service.add(player.getUniqueId(), key, moved, perItemMax, slotLimit);
-            MessageUtils.sendConfigMessage(player, "enderstorage.deposit-success", "&a✓ &f存入 " + moved + "x " + entry.getDisplay(), "amount", String.valueOf(moved), "item", entry.getDisplay());
+            int stored = service.add(player.getUniqueId(), key, moved, perItemMax, slotLimit);
+            if (stored > 0) {
+                MessageUtils.sendConfigMessage(player, "enderstorage.deposit-success", "&a✓ &f存入 " + stored + "x " + entry.getDisplay(), "amount", String.valueOf(stored), "item", entry.getDisplay());
+            }
+            int refund = moved - stored;
+            if (refund > 0) {
+                refundToPlayer(player, entry, refund);
+                playLimitSound(player);
+                MessageUtils.sendConfigMessage(player, "enderstorage.exceed-limit-refund",
+                        "&c✗ &f仓库已达到该物品上限，已退还 {amount}x {item}",
+                        "amount", String.valueOf(refund), "item", entry.getDisplay());
+            }
         } else {
             // 取出
             int current = service.getAmount(player.getUniqueId(), key);
@@ -125,6 +137,29 @@ public class LootGuiListener implements Listener {
             if (remaining <= 0) break;
         }
         return amount - remaining;
+    }
+
+    private void refundToPlayer(Player player, WhitelistEntry entry, int amount) {
+        int remaining = amount;
+        while (remaining > 0) {
+            ItemStack stack = guiBuild(entry, remaining);
+            if (stack == null) {
+                return;
+            }
+            int toGive = Math.min(remaining, stack.getMaxStackSize());
+            stack.setAmount(toGive);
+            var overflow = player.getInventory().addItem(stack);
+            if (!overflow.isEmpty()) {
+                for (ItemStack left : overflow.values()) {
+                    player.getWorld().dropItemNaturally(player.getLocation(), left);
+                }
+            }
+            remaining -= toGive;
+        }
+    }
+
+    private void playLimitSound(Player player) {
+        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, SoundCategory.PLAYERS, 1.0f, 1.0f);
     }
 }
 

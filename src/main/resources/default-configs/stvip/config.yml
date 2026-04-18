@@ -3,34 +3,50 @@
 
 # 进服提示（仅对有 VIP 权限的玩家）。默认关闭。
 join-message:
-  enabled: false
-  message: "&7欢迎 &f{display} &7进入服务器"
+  enabled: true
+  message: "&7欢迎 &f{display} &7进入服务器，今日远程提交剩余 &e{remote_remaining}&7 次"
+  remain-days-thresholds: [7, 3, 2, 1]
 
 tiers:
   vip1:
     permission: st.vip.1
-    display-name: "Fatalism"
+    display-name: "&{#9100FF}Fatalism"
     priority: 1
     perks:
       reinforce-cost-multiplier: 1.0
       fish-sell-multiplier: 1.0
       loot-extra-slots: 0
       loot-extra-per-item-max: 0
+      armor-cost-multiplier: 0.95
+      quest-daily-remote-claim-limit: 4
+      quest-daily-free-claim-limit: 0
+      quest-min-difficulty-exclusive: 0
+      bounty-preannounce: false
   vip2:
     permission: st.vip.2
-    display-name: "Aetherion"
+    display-name: "{#7DFFF8>}Aeth{#7DC5FF<>}erion{#7D84FF<}"
     priority: 2
     perks:
       reinforce-cost-multiplier: 1.0
       fish-sell-multiplier: 1.0
-      loot-extra-slots: 0
-      loot-extra-per-item-max: 0
+      loot-extra-slots: 9
+      loot-extra-per-item-max: 128
+      armor-cost-multiplier: 0.9
+      quest-daily-remote-claim-limit: 8
+      quest-daily-free-claim-limit: 0
+      quest-min-difficulty-exclusive: 8
+      bounty-preannounce: false
   vip3:
     permission: st.vip.3
-    display-name: "ἐντελέχεια"
+    display-name: "&{#DFF7D>}ἐντελ{#7DADFF<>}έχεια{#CF7DFF<}"
     priority: 3
     perks:
       reinforce-cost-multiplier: 1.0
       fish-sell-multiplier: 1.0
-      loot-extra-slots: 0
-      loot-extra-per-item-max: 0
+      loot-extra-slots: 18
+      loot-extra-per-item-max: 256
+      armor-cost-multiplier: 0.8
+      quest-daily-remote-claim-limit: 12
+      quest-daily-free-claim-limit: 4
+      quest-min-difficulty-exclusive: 16
+      bounty-preannounce: true

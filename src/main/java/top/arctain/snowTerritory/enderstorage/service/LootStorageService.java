@@ -16,7 +16,7 @@ public interface LootStorageService {
 
     boolean consume(UUID playerId, String itemKey, int amount);
 
-    void add(UUID playerId, String itemKey, int amount, int perItemMax, int slotLimit);
+    int add(UUID playerId, String itemKey, int amount, int perItemMax, int slotLimit);
 
     Map<String, Integer> getAll(UUID playerId);
 

@@ -54,6 +54,17 @@ public class SqliteQuestDatabaseDao implements QuestDatabaseDao {
                     """)) {
                 ps.execute();
             }
+            try (PreparedStatement ps = conn.prepareStatement("""
+                    CREATE TABLE IF NOT EXISTS st_quest_daily_usage (
+                        player_uuid CHAR(36) NOT NULL,
+                        day_key VARCHAR(16) NOT NULL,
+                        remote_claim_used INTEGER NOT NULL DEFAULT 0,
+                        free_claim_used INTEGER NOT NULL DEFAULT 0,
+                        PRIMARY KEY (player_uuid, day_key)
+                    );
+                    """)) {
+                ps.execute();
+            }
         } catch (SQLException e) {
             MessageUtils.logError("初始化任务数据库表失败: " + e.getMessage());
         }
@@ -109,6 +120,44 @@ public class SqliteQuestDatabaseDao implements QuestDatabaseDao {
             ps.executeUpdate();
         } catch (SQLException e) {
             MessageUtils.logError("记录完成任务失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public DailyUsage getDailyUsage(UUID playerId, String dayKey) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT remote_claim_used, free_claim_used FROM st_quest_daily_usage WHERE player_uuid = ? AND day_key = ?")) {
+            ps.setString(1, playerId.toString());
+            ps.setString(2, dayKey);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new DailyUsage(rs.getInt("remote_claim_used"), rs.getInt("free_claim_used"));
+                }
+            }
+        } catch (SQLException e) {
+            MessageUtils.logError("读取每日用量失败: " + e.getMessage());
+        }
+        return new DailyUsage(0, 0);
+    }
+
+    @Override
+    public void saveDailyUsage(UUID playerId, String dayKey, int remoteClaimUsed, int freeClaimUsed) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement("""
+                     INSERT INTO st_quest_daily_usage (player_uuid, day_key, remote_claim_used, free_claim_used)
+                     VALUES (?, ?, ?, ?)
+                     ON CONFLICT(player_uuid, day_key) DO UPDATE SET remote_claim_used = ?, free_claim_used = ?
+                     """)) {
+            ps.setString(1, playerId.toString());
+            ps.setString(2, dayKey);
+            ps.setInt(3, Math.max(0, remoteClaimUsed));
+            ps.setInt(4, Math.max(0, freeClaimUsed));
+            ps.setInt(5, Math.max(0, remoteClaimUsed));
+            ps.setInt(6, Math.max(0, freeClaimUsed));
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            MessageUtils.logError("写入每日用量失败: " + e.getMessage());
         }
     }
 

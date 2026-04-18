@@ -11,6 +11,13 @@ import java.util.UUID;
  * 任务服务接口
  */
 public interface QuestService {
+
+    record CompletionResult(int inventorySubmitted, int storageSubmitted, int completedNormal,
+                            int claimedBounty, int boostedCompletions) {
+        public boolean hasAnySuccess() {
+            return completedNormal > 0 || claimedBounty > 0 || inventorySubmitted > 0 || storageSubmitted > 0;
+        }
+    }
     
     /**
      * 初始化服务
@@ -56,6 +63,11 @@ public interface QuestService {
      * 完成任务并发放奖励
      */
     boolean completeQuest(UUID playerId, UUID questId);
+
+    /**
+     * 完成任务并按倍率发放奖励
+     */
+    boolean completeQuest(UUID playerId, UUID questId, double rewardMultiplier);
     
     /**
      * 获取所有活跃的悬赏任务
@@ -72,6 +84,36 @@ public interface QuestService {
      * @return 领取的任务数量
      */
     int claimCompletedBountyQuests(Player player);
+
+    /**
+     * 自动领取所有已完成的悬赏任务奖励（支持倍率）
+     */
+    int claimCompletedBountyQuests(Player player, double rewardMultiplier);
+
+    /**
+     * 远程提交材料并领取奖励。
+     */
+    CompletionResult completeByCommand(Player player, boolean allowStorageSubmit, boolean freeMode, double rewardMultiplier);
+
+    /**
+     * 获取玩家今日已使用的远程提交次数。
+     */
+    int getDailyRemoteClaimUsed(UUID playerId);
+
+    /**
+     * 获取玩家今日已使用的免材料提交次数。
+     */
+    int getDailyFreeClaimUsed(UUID playerId);
+
+    /**
+     * 增加玩家今日远程提交次数。
+     */
+    void incrementDailyRemoteClaimUsed(UUID playerId);
+
+    /**
+     * 增加玩家今日免材料提交次数。
+     */
+    void incrementDailyFreeClaimUsed(UUID playerId);
     
     /**
      * 开始悬赏任务发布调度

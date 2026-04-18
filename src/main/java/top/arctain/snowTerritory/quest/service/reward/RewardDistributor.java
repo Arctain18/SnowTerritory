@@ -16,5 +16,10 @@ public interface RewardDistributor {
      * @param quest 已完成的任务
      */
     void distribute(Player player, Quest quest);
+
+    /**
+     * 按倍率发放奖励（例如 VIP3 免材料领取 0.6 倍）。
+     */
+    void distribute(Player player, Quest quest, double rewardMultiplier);
 }
 

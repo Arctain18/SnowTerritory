@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /** 加载 plugins/SnowTerritory/stvip/config.yml。 */
 public class StvipConfigManager {
@@ -25,6 +26,7 @@ public class StvipConfigManager {
     private List<StvipTier> tiers = new ArrayList<>();
     private boolean joinMessageEnabled;
     private String joinMessage = "";
+    private List<Integer> remainDaysThresholds = List.of(7, 3, 2, 1);
 
     public StvipConfigManager(Main plugin) {
         this.plugin = plugin;
@@ -43,9 +45,16 @@ public class StvipConfigManager {
         if (join != null) {
             joinMessageEnabled = join.getBoolean("enabled", false);
             joinMessage = join.getString("message", "");
+            List<Integer> loaded = join.getIntegerList("remain-days-thresholds");
+            if (loaded == null || loaded.isEmpty()) {
+                remainDaysThresholds = List.of(7, 3, 2, 1);
+            } else {
+                remainDaysThresholds = loaded.stream().filter(v -> v > 0).distinct().sorted().collect(Collectors.toList());
+            }
         } else {
             joinMessageEnabled = false;
             joinMessage = "";
+            remainDaysThresholds = List.of(7, 3, 2, 1);
         }
     }
 
@@ -72,13 +81,24 @@ public class StvipConfigManager {
             double fMult = 1.0;
             int extraSlots = 0;
             int extraPerMax = 0;
+            double armorMult = 1.0;
+            int remoteClaimLimit = 0;
+            int freeClaimLimit = 0;
+            int minDifficultyExclusive = 0;
+            boolean bountyPreannounce = false;
             if (perks != null) {
                 rMult = perks.getDouble("reinforce-cost-multiplier", 1.0);
                 fMult = perks.getDouble("fish-sell-multiplier", 1.0);
                 extraSlots = perks.getInt("loot-extra-slots", 0);
                 extraPerMax = perks.getInt("loot-extra-per-item-max", 0);
+                armorMult = perks.getDouble("armor-cost-multiplier", 1.0);
+                remoteClaimLimit = perks.getInt("quest-daily-remote-claim-limit", 0);
+                freeClaimLimit = perks.getInt("quest-daily-free-claim-limit", 0);
+                minDifficultyExclusive = perks.getInt("quest-min-difficulty-exclusive", 0);
+                bountyPreannounce = perks.getBoolean("bounty-preannounce", false);
             }
-            tiers.add(new StvipTier(key, perm, display, priority, rMult, fMult, extraSlots, extraPerMax));
+            tiers.add(new StvipTier(key, perm, display, priority, rMult, fMult, extraSlots, extraPerMax,
+                    armorMult, remoteClaimLimit, freeClaimLimit, minDifficultyExclusive, bountyPreannounce));
         }
         tiers.sort(Comparator.comparingInt(StvipTier::getPriority));
     }
@@ -90,12 +110,25 @@ public class StvipConfigManager {
                 .max(Comparator.comparingInt(StvipTier::getPriority));
     }
 
+    public Optional<StvipTier> getTierById(String tierId) {
+        if (tierId == null || tierId.isBlank()) {
+            return Optional.empty();
+        }
+        return tiers.stream()
+                .filter(t -> t.getId().equalsIgnoreCase(tierId.trim()))
+                .findFirst();
+    }
+
     public boolean isJoinMessageEnabled() {
         return joinMessageEnabled;
     }
 
     public String getJoinMessage() {
         return joinMessage != null ? joinMessage : "";
+    }
+
+    public List<Integer> getRemainDaysThresholds() {
+        return remainDaysThresholds;
     }
 
     public File getBaseDir() {

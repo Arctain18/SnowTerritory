@@ -79,7 +79,7 @@ public class EnderStorageModule {
 
     private void registerListeners() {
         PluginManager pm = plugin.getServer().getPluginManager();
-        this.mythicDropListener = new MythicDropListener(configManager, lootStorageService);
+        this.mythicDropListener = new MythicDropListener(plugin, configManager, lootStorageService);
         pm.registerEvents(mythicDropListener, plugin);
         
         if (lootStorageGUI != null) {

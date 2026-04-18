@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.Main;
+import top.arctain.snowTerritory.enderstorage.service.LootStorageService;
 import top.arctain.snowTerritory.quest.config.QuestConfigManager;
 import top.arctain.snowTerritory.quest.data.Quest;
 import top.arctain.snowTerritory.quest.data.QuestDatabaseDao;
@@ -17,8 +18,12 @@ import top.arctain.snowTerritory.quest.service.reward.DefaultRewardDistributor;
 import top.arctain.snowTerritory.quest.service.reward.RewardDistributor;
 import top.arctain.snowTerritory.quest.service.scheduler.BountyScheduler;
 import top.arctain.snowTerritory.quest.service.scheduler.DefaultBountyScheduler;
+import top.arctain.snowTerritory.stvip.service.StvipService;
+import top.arctain.snowTerritory.utils.Utils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -31,7 +36,6 @@ import java.util.stream.Collectors;
  */
 public class QuestServiceImpl implements QuestService {
     
-    private final Main plugin;
     private final QuestConfigManager configManager;
     private final QuestDatabaseDao databaseDao;
     
@@ -39,20 +43,27 @@ public class QuestServiceImpl implements QuestService {
     private final Map<QuestType, QuestGenerator> generators;
     private final RewardDistributor rewardDistributor;
     private final BountyScheduler bountyScheduler;
+    private final LootStorageService lootStorageService;
+    private final StvipService stvipService;
+    private final ZoneId zoneId = ZoneId.systemDefault();
     
     // 数据存储
     private final Map<UUID, List<Quest>> playerQuests = new ConcurrentHashMap<>();
     private final List<Quest> bountyQuests = Collections.synchronizedList(new ArrayList<>());
+    private volatile Quest pendingBountyPreview;
+    private final ThreadLocal<Double> progressRewardMultiplier = ThreadLocal.withInitial(() -> 1.0);
     
     public QuestServiceImpl(Main plugin, QuestConfigManager configManager, QuestDatabaseDao databaseDao) {
-        this.plugin = plugin;
         this.configManager = configManager;
         this.databaseDao = databaseDao;
         
         // 初始化组件
         this.generators = initializeGenerators();
         this.rewardDistributor = new DefaultRewardDistributor(configManager);
-        this.bountyScheduler = new DefaultBountyScheduler(plugin, configManager, this::publishBountyQuest);
+        this.bountyScheduler = new DefaultBountyScheduler(plugin, configManager, this::previewBountyQuest, this::publishBountyQuest);
+        this.lootStorageService = plugin != null && plugin.getEnderStorageModule() != null
+                ? plugin.getEnderStorageModule().getLootStorageService() : null;
+        this.stvipService = plugin != null ? plugin.getStvipService() : null;
     }
     
     /**
@@ -62,12 +73,14 @@ public class QuestServiceImpl implements QuestService {
                      Map<QuestType, QuestGenerator> generators,
                      RewardDistributor rewardDistributor,
                      BountyScheduler bountyScheduler) {
-        this.plugin = plugin;
         this.configManager = configManager;
         this.databaseDao = databaseDao;
         this.generators = generators;
         this.rewardDistributor = rewardDistributor;
         this.bountyScheduler = bountyScheduler;
+        this.lootStorageService = plugin != null && plugin.getEnderStorageModule() != null
+                ? plugin.getEnderStorageModule().getLootStorageService() : null;
+        this.stvipService = plugin != null ? plugin.getStvipService() : null;
     }
     
     private Map<QuestType, QuestGenerator> initializeGenerators() {
@@ -115,6 +128,13 @@ public class QuestServiceImpl implements QuestService {
         Quest quest = generateQuest(playerId, type, QuestReleaseMethod.NORMAL);
         if (quest == null) {
             return null;
+        }
+        int minDifficultyExclusive = resolveMinDifficultyExclusive(player);
+        if (minDifficultyExclusive > 0 && quest.getDifficulty() <= minDifficultyExclusive) {
+            quest = regenerateQuestWithDifficultyFloor(playerId, type, minDifficultyExclusive);
+            if (quest == null) {
+                return null;
+            }
         }
         
         playerQuests.computeIfAbsent(playerId, k -> new ArrayList<>()).add(quest);
@@ -182,7 +202,7 @@ public class QuestServiceImpl implements QuestService {
             quests.set(i, updated);
             
             if (updated.isCompleted()) {
-                completeQuest(playerId, updated.getQuestId());
+                completeQuest(playerId, updated.getQuestId(), progressRewardMultiplier.get());
             }
             return true;
         }
@@ -225,6 +245,11 @@ public class QuestServiceImpl implements QuestService {
     
     @Override
     public boolean completeQuest(UUID playerId, UUID questId) {
+        return completeQuest(playerId, questId, 1.0);
+    }
+
+    @Override
+    public boolean completeQuest(UUID playerId, UUID questId, double rewardMultiplier) {
         Objects.requireNonNull(playerId, "playerId不能为null");
         Objects.requireNonNull(questId, "questId不能为null");
         
@@ -245,7 +270,7 @@ public class QuestServiceImpl implements QuestService {
         
         Player player = Bukkit.getPlayer(playerId);
         if (player != null) {
-            rewardDistributor.distribute(player, quest);
+            rewardDistributor.distribute(player, quest, rewardMultiplier);
         }
         return true;
     }
@@ -287,6 +312,11 @@ public class QuestServiceImpl implements QuestService {
     
     @Override
     public int claimCompletedBountyQuests(Player player) {
+        return claimCompletedBountyQuests(player, 1.0);
+    }
+
+    @Override
+    public int claimCompletedBountyQuests(Player player, double rewardMultiplier) {
         Objects.requireNonNull(player, "player不能为null");
         
         int claimed = 0;
@@ -295,7 +325,7 @@ public class QuestServiceImpl implements QuestService {
                 if (isBountyQuestCompleted(quest)) {
                     // 记录完成任务到数据库
                     databaseDao.recordCompletedQuest(player.getUniqueId(), quest);
-                    rewardDistributor.distribute(player, quest);
+                    rewardDistributor.distribute(player, quest, rewardMultiplier);
                     claimed++;
                 }
             }
@@ -315,6 +345,209 @@ public class QuestServiceImpl implements QuestService {
                     .orElse(null);
         }
     }
+
+    @Override
+    public CompletionResult completeByCommand(Player player, boolean allowStorageSubmit, boolean freeMode, double rewardMultiplier) {
+        Objects.requireNonNull(player, "player不能为null");
+        int inventorySubmitted = 0;
+        int storageSubmitted = 0;
+        int completedNormal = 0;
+        int boostedCompletions = 0;
+        UUID playerId = player.getUniqueId();
+        double prevMultiplier = progressRewardMultiplier.get();
+        progressRewardMultiplier.set(rewardMultiplier);
+        try {
+            List<Quest> normalSnapshot = new ArrayList<>(getActiveQuests(playerId));
+            for (Quest quest : normalSnapshot) {
+                if (quest.getType() != QuestType.MATERIAL || !isActiveAndNotExpired(quest)) {
+                    continue;
+                }
+                int before = quest.getCurrentAmount();
+                int submittedInv = freeMode ? 0 : submitFromInventory(player, quest);
+                int submittedStorage = freeMode ? 0 : submitFromStorage(playerId, quest, allowStorageSubmit);
+                int submittedFree = freeMode ? submitFree(quest) : 0;
+                inventorySubmitted += submittedInv;
+                storageSubmitted += submittedStorage;
+                Quest updated = getQuestById(playerId, quest.getQuestId());
+                if (updated != null && updated.getStatus() == QuestStatus.COMPLETED) {
+                    completedNormal++;
+                    if (submittedFree > 0 || (freeMode && updated.getRequiredAmount() > before)) {
+                        boostedCompletions++;
+                    }
+                }
+            }
+
+            if (!freeMode) {
+                for (Quest bounty : getActiveBountyQuests()) {
+                    if (bounty.getType() != QuestType.MATERIAL || !isActiveAndNotExpired(bounty)) {
+                        continue;
+                    }
+                    submitFromInventory(player, bounty);
+                    submitFromStorage(playerId, bounty, allowStorageSubmit);
+                    Quest updated = findBountyQuestById(bounty.getQuestId());
+                    if (updated != null && updated.isCompleted()) {
+                        updated.setStatus(QuestStatus.COMPLETED);
+                    }
+                }
+            } else {
+                for (Quest bounty : getActiveBountyQuests()) {
+                    if (bounty.getType() != QuestType.MATERIAL || !isActiveAndNotExpired(bounty)) {
+                        continue;
+                    }
+                    submitFree(bounty);
+                    Quest updated = findBountyQuestById(bounty.getQuestId());
+                    if (updated != null && updated.isCompleted()) {
+                        updated.setStatus(QuestStatus.COMPLETED);
+                        boostedCompletions++;
+                    }
+                }
+            }
+        } finally {
+            progressRewardMultiplier.set(prevMultiplier);
+        }
+
+        int claimedBounty = claimCompletedBountyQuests(player, rewardMultiplier);
+        return new CompletionResult(inventorySubmitted, storageSubmitted, completedNormal, claimedBounty, boostedCompletions);
+    }
+
+    @Override
+    public int getDailyRemoteClaimUsed(UUID playerId) {
+        return databaseDao.getDailyUsage(playerId, currentDayKey()).remoteClaimUsed();
+    }
+
+    @Override
+    public int getDailyFreeClaimUsed(UUID playerId) {
+        return databaseDao.getDailyUsage(playerId, currentDayKey()).freeClaimUsed();
+    }
+
+    @Override
+    public void incrementDailyRemoteClaimUsed(UUID playerId) {
+        String day = currentDayKey();
+        QuestDatabaseDao.DailyUsage usage = databaseDao.getDailyUsage(playerId, day);
+        databaseDao.saveDailyUsage(playerId, day, usage.remoteClaimUsed() + 1, usage.freeClaimUsed());
+    }
+
+    @Override
+    public void incrementDailyFreeClaimUsed(UUID playerId) {
+        String day = currentDayKey();
+        QuestDatabaseDao.DailyUsage usage = databaseDao.getDailyUsage(playerId, day);
+        databaseDao.saveDailyUsage(playerId, day, usage.remoteClaimUsed(), usage.freeClaimUsed() + 1);
+    }
+
+    private Quest getQuestById(UUID playerId, UUID questId) {
+        List<Quest> quests = playerQuests.get(playerId);
+        if (quests == null) {
+            return null;
+        }
+        for (Quest quest : quests) {
+            if (quest.getQuestId().equals(questId)) {
+                return quest;
+            }
+        }
+        return null;
+    }
+
+    private int submitFromInventory(Player player, Quest quest) {
+        int need = quest.getRequiredAmount() - quest.getCurrentAmount();
+        if (need <= 0) {
+            return 0;
+        }
+        int available = countInventoryByKey(player, quest.getMaterialKey());
+        int toSubmit = Math.min(need, available);
+        if (toSubmit <= 0) {
+            return 0;
+        }
+        removeInventoryByKey(player, quest.getMaterialKey(), toSubmit);
+        updateQuestProgress(player.getUniqueId(), quest.getMaterialKey(), toSubmit);
+        return toSubmit;
+    }
+
+    private int submitFromStorage(UUID playerId, Quest quest, boolean allowStorageSubmit) {
+        if (!allowStorageSubmit || lootStorageService == null) {
+            return 0;
+        }
+        int latestCurrent = resolveCurrentAmount(playerId, quest);
+        int need = quest.getRequiredAmount() - latestCurrent;
+        if (need <= 0) {
+            return 0;
+        }
+        int available = lootStorageService.getAmount(playerId, quest.getMaterialKey());
+        int toSubmit = Math.min(need, available);
+        if (toSubmit <= 0) {
+            return 0;
+        }
+        if (!lootStorageService.consume(playerId, quest.getMaterialKey(), toSubmit)) {
+            return 0;
+        }
+        updateQuestProgress(playerId, quest.getMaterialKey(), toSubmit);
+        return toSubmit;
+    }
+
+    private int submitFree(Quest quest) {
+        int need = quest.getRequiredAmount() - quest.getCurrentAmount();
+        if (need <= 0) {
+            return 0;
+        }
+        updateQuestProgress(quest.getPlayerId(), quest.getMaterialKey(), need);
+        return need;
+    }
+
+    private int resolveCurrentAmount(UUID playerId, Quest quest) {
+        if (quest.getReleaseMethod() == QuestReleaseMethod.BOUNTY) {
+            Quest bounty = findBountyQuestById(quest.getQuestId());
+            return bounty != null ? bounty.getCurrentAmount() : quest.getCurrentAmount();
+        }
+        Quest latest = getQuestById(playerId, quest.getQuestId());
+        return latest != null ? latest.getCurrentAmount() : quest.getCurrentAmount();
+    }
+
+    private int countInventoryByKey(Player player, String materialKey) {
+        int total = 0;
+        for (org.bukkit.inventory.ItemStack stack : player.getInventory().getContents()) {
+            if (stack == null || stack.getType().isAir()) {
+                continue;
+            }
+            if (!Utils.isMMOItem(stack)) {
+                continue;
+            }
+            String key = top.arctain.snowTerritory.quest.utils.QuestUtils.getMMOItemKey(stack);
+            if (materialKey.equals(key)) {
+                total += stack.getAmount();
+            }
+        }
+        return total;
+    }
+
+    private void removeInventoryByKey(Player player, String materialKey, int amount) {
+        int remaining = amount;
+        org.bukkit.inventory.ItemStack[] contents = player.getInventory().getContents();
+        for (int slot = 0; slot < contents.length && remaining > 0; slot++) {
+            org.bukkit.inventory.ItemStack stack = contents[slot];
+            if (stack == null || stack.getType().isAir()) {
+                continue;
+            }
+            if (!Utils.isMMOItem(stack)) {
+                continue;
+            }
+            String key = top.arctain.snowTerritory.quest.utils.QuestUtils.getMMOItemKey(stack);
+            if (!materialKey.equals(key)) {
+                continue;
+            }
+            int take = Math.min(remaining, stack.getAmount());
+            remaining -= take;
+            int left = stack.getAmount() - take;
+            if (left <= 0) {
+                player.getInventory().setItem(slot, null);
+            } else {
+                stack.setAmount(left);
+                player.getInventory().setItem(slot, stack);
+            }
+        }
+    }
+
+    private String currentDayKey() {
+        return LocalDate.now(zoneId).toString();
+    }
     
     // ==================== 悬赏调度 ====================
     
@@ -329,6 +562,33 @@ public class QuestServiceImpl implements QuestService {
     }
     
     /**
+     * 悬赏预告（刷新前 5 分钟）
+     */
+    private void previewBountyQuest() {
+        FileConfiguration bountyConfig = configManager.getBountyConfig();
+        if (bountyConfig == null) {
+            return;
+        }
+        QuestType type = determineBountyQuestType(bountyConfig);
+        if (type == null) {
+            return;
+        }
+        Quest preview = generateQuest(null, type, QuestReleaseMethod.BOUNTY);
+        if (preview == null) {
+            return;
+        }
+        pendingBountyPreview = preview;
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (stvipService == null || !stvipService.canReceiveBountyPreannounce(online)) {
+                continue;
+            }
+            MessageUtils.sendRaw(online, MessageUtils.colorize(
+                    "&3✦ &f悬赏预告：&e" + preview.getMaterialName() + " &7x&e" + preview.getRequiredAmount() + " &8(5分钟后刷新)"
+            ));
+        }
+    }
+
+    /**
      * 发布悬赏任务（由调度器回调）
      */
     private void publishBountyQuest() {
@@ -342,7 +602,11 @@ public class QuestServiceImpl implements QuestService {
             return;
         }
         
-        Quest bounty = generateQuest(null, type, QuestReleaseMethod.BOUNTY);
+        Quest bounty = pendingBountyPreview;
+        pendingBountyPreview = null;
+        if (bounty == null || bounty.getType() != type) {
+            bounty = generateQuest(null, type, QuestReleaseMethod.BOUNTY);
+        }
         if (bounty == null) {
             return;
         }
@@ -408,5 +672,27 @@ public class QuestServiceImpl implements QuestService {
             return null;
         }
         return generator.generate(playerId, type, releaseMethod);
+    }
+
+    private int resolveMinDifficultyExclusive(Player player) {
+        if (stvipService == null || player == null) {
+            return 0;
+        }
+        return Math.max(0, stvipService.getQuestMinDifficultyExclusive(player));
+    }
+
+    private Quest regenerateQuestWithDifficultyFloor(UUID playerId, QuestType type, int floorExclusive) {
+        Quest fallback = null;
+        for (int i = 0; i < 24; i++) {
+            Quest generated = generateQuest(playerId, type, QuestReleaseMethod.NORMAL);
+            if (generated == null) {
+                continue;
+            }
+            fallback = generated;
+            if (generated.getDifficulty() > floorExclusive) {
+                return generated;
+            }
+        }
+        return fallback != null && fallback.getDifficulty() > floorExclusive ? fallback : null;
     }
 }

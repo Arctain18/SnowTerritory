@@ -134,15 +134,28 @@ public class LootStorageServiceImpl implements LootStorageService {
     }
 
     @Override
-    public void add(UUID playerId, String itemKey, int amount, int perItemMax, int slotLimit) {
+    public int add(UUID playerId, String itemKey, int amount, int perItemMax, int slotLimit) {
+        if (amount <= 0) {
+            return 0;
+        }
         Map<String, Integer> data = getPlayerData(playerId);
+        if (!data.containsKey(itemKey) && slotLimit > 0 && data.size() >= slotLimit) {
+            MessageUtils.logWarning("玩家 " + playerId + " 超出仓库槽位限制，物品未存入。");
+            return 0;
+        }
         int current = data.getOrDefault(itemKey, 0);
-        int newValue = Math.min(current + amount, perItemMax);
+        int canStore = Math.max(0, perItemMax - current);
+        int stored = Math.min(amount, canStore);
+        if (stored <= 0) {
+            return 0;
+        }
+        int newValue = current + stored;
         data.put(itemKey, newValue);
-        if (data.size() > slotLimit) {
+        if (slotLimit > 0 && data.size() > slotLimit) {
             MessageUtils.logWarning("玩家 " + playerId + " 超出仓库槽位限制，部分物品未存入。");
         }
         dao.save(playerId, data);
+        return stored;
     }
 
     @Override
@@ -202,9 +215,10 @@ public class LootStorageServiceImpl implements LootStorageService {
         int configured = Optional.ofNullable(whitelist.get(itemKey))
                 .map(WhitelistEntry::getDefaultMax)
                 .orElse(256);
-        int base = Math.max(configured, resolver.resolvePerItemMax(player));
+        int base = Math.min(configured, resolver.resolvePerItemMax(player));
         var vip = plugin.getStvipService();
-        return base + (vip != null ? vip.getLootExtraPerItemMax(player) : 0);
+        int withVip = base + (vip != null ? vip.getLootExtraPerItemMax(player) : 0);
+        return Math.min(configured, withVip);
     }
 
     private Map<String, Integer> getPlayerData(UUID playerId) {

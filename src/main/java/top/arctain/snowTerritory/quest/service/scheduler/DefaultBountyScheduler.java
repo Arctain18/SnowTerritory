@@ -19,14 +19,17 @@ public class DefaultBountyScheduler implements BountyScheduler {
     
     private final Plugin plugin;
     private final QuestConfigManager configManager;
+    private final Runnable onPreview;
     private final Runnable onPublish;
     private final Random random;
     
     private int taskId = -1;
+    private int previewTaskId = -1;
     
-    public DefaultBountyScheduler(Plugin plugin, QuestConfigManager configManager, Runnable onPublish) {
+    public DefaultBountyScheduler(Plugin plugin, QuestConfigManager configManager, Runnable onPreview, Runnable onPublish) {
         this.plugin = plugin;
         this.configManager = configManager;
+        this.onPreview = onPreview;
         this.onPublish = onPublish;
         this.random = new Random();
     }
@@ -57,6 +60,10 @@ public class DefaultBountyScheduler implements BountyScheduler {
             Bukkit.getScheduler().cancelTask(taskId);
             taskId = -1;
         }
+        if (previewTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(previewTaskId);
+            previewTaskId = -1;
+        }
     }
     
     @Override
@@ -66,8 +73,15 @@ public class DefaultBountyScheduler implements BountyScheduler {
     
     private void scheduleNext(int minInterval, int maxInterval) {
         int delay = minInterval + random.nextInt(maxInterval - minInterval + 1);
+        int previewTicks = 5 * SECONDS_PER_MINUTE * TICKS_PER_SECOND;
+        if (delay > previewTicks) {
+            previewTaskId = Bukkit.getScheduler().runTaskLater(plugin, onPreview, delay - previewTicks).getTaskId();
+        } else {
+            previewTaskId = -1;
+        }
         
         taskId = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            previewTaskId = -1;
             onPublish.run();
             scheduleNext(minInterval, maxInterval);
         }, delay).getTaskId();

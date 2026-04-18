@@ -6,6 +6,9 @@ import java.util.UUID;
  * 任务数据库访问接口
  */
 public interface QuestDatabaseDao {
+
+    record DailyUsage(int remoteClaimUsed, int freeClaimUsed) {
+    }
     
     /**
      * 初始化数据库表结构
@@ -32,6 +35,16 @@ public interface QuestDatabaseDao {
      * @param quest 完成的任务
      */
     void recordCompletedQuest(UUID playerId, Quest quest);
+
+    /**
+     * 读取指定日期的每日用量。
+     */
+    DailyUsage getDailyUsage(UUID playerId, String dayKey);
+
+    /**
+     * 覆盖写入指定日期的每日用量。
+     */
+    void saveDailyUsage(UUID playerId, String dayKey, int remoteClaimUsed, int freeClaimUsed);
     
     /**
      * 关闭数据库连接

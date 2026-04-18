@@ -10,6 +10,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.inventory.ItemStack;
 import top.arctain.snowTerritory.armor.config.ArmorConfigManager;
 import top.arctain.snowTerritory.armor.data.ArmorSetDefinition;
@@ -143,6 +145,7 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
         }
         ArmorCostService.CostPreview latest = costService.buildPreview(player, setDef, pending.profile());
         if (!latest.enough()) {
+            playArmorUiSound(player, Sound.ENTITY_VILLAGER_NO);
             MessageUtils.sendConfigMessage(player, "armor.confirm-insufficient",
                     "&c✗ &f货币不足，无法生成。SL 缺少: &e{sl} &7| QP 缺少: &e{qp}",
                     "sl", num(latest.slShortage()), "qp", num(latest.qpShortage()));
@@ -168,6 +171,7 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
         }
         boolean cancelled = confirmSessionService.cancel(args[2], player);
         if (cancelled) {
+            playArmorUiSound(player, Sound.UI_BUTTON_CLICK);
             MessageUtils.sendConfigMessage(player, "armor.confirm-cancelled",
                     "&e⚠ &f已取消本次防具生成");
         } else {
@@ -244,6 +248,7 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
                 }
             });
         }
+        playArmorUiSound(target, Sound.ITEM_ARMOR_EQUIP_GENERIC);
         var setDef = configManager.getSet(setId);
         String display = setDef != null && setDef.getDisplayName() != null && !setDef.getDisplayName().isBlank()
                 ? setDef.getDisplayName()
@@ -347,6 +352,11 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
             return String.valueOf((long) Math.rint(v));
         }
         return String.format(java.util.Locale.ROOT, "%.1f", v);
+    }
+
+    /** 防具确认流程中的界面音效（佩戴感 / 点击 / 拒绝等）。 */
+    private static void playArmorUiSound(Player player, Sound sound) {
+        player.playSound(player.getLocation(), sound, SoundCategory.PLAYERS, 1.0f, 1.0f);
     }
 
     private static String formatProfileDisplay(String profile) {

@@ -4,13 +4,17 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import top.arctain.snowTerritory.Main;
+import top.arctain.snowTerritory.enderstorage.service.LootStorageService;
 import top.arctain.snowTerritory.quest.config.QuestConfigManager;
 import top.arctain.snowTerritory.quest.data.Quest;
 import top.arctain.snowTerritory.quest.data.QuestDatabaseDao;
 import top.arctain.snowTerritory.quest.data.QuestStatus;
 import top.arctain.snowTerritory.quest.data.QuestType;
 import top.arctain.snowTerritory.quest.service.QuestService;
+import top.arctain.snowTerritory.stvip.service.StvipService;
 import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.DisplayUtils;
 import top.arctain.snowTerritory.quest.utils.QuestUtils;
@@ -27,14 +31,24 @@ import java.util.UUID;
  */
 public class QuestCommand implements CommandExecutor, TabCompleter {
 
+    private static final double VIP3_FREE_CLAIM_REWARD_MULTIPLIER = 0.6;
+
+    private final Main plugin;
     private final QuestService service;
     private final QuestConfigManager configManager;
     private final QuestDatabaseDao databaseDao;
+    private final StvipService stvipService;
+    private final LootStorageService lootStorageService;
 
     public QuestCommand(org.bukkit.plugin.Plugin plugin, QuestConfigManager configManager, QuestService service, QuestDatabaseDao databaseDao) {
+        this.plugin = plugin instanceof Main m ? m : null;
         this.service = service;
         this.configManager = configManager;
         this.databaseDao = databaseDao;
+        this.stvipService = this.plugin != null ? this.plugin.getStvipService() : null;
+        this.lootStorageService = this.plugin != null && this.plugin.getEnderStorageModule() != null
+                ? this.plugin.getEnderStorageModule().getLootStorageService()
+                : null;
     }
 
     @Override
@@ -101,10 +115,15 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        Quest quest = service.acceptNormalQuest(player, type);
-        if (quest == null) {
+        if (service.getActiveQuest(player.getUniqueId(), type) != null) {
             MessageUtils.sendConfigMessage(player, "quest.already-active",
                     "&c✗ &f你已有进行中的任务");
+            return true;
+        }
+        Quest quest = service.acceptNormalQuest(player, type);
+        if (quest == null) {
+            MessageUtils.sendConfigMessage(player, "quest.accept-failed",
+                    "&c✗ &f当前没有符合你档位难度要求的任务，请稍后重试");
             return true;
         }
 
@@ -165,13 +184,24 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
 
     private void displayQuestProgress(Player player, Quest quest) {
 
-        String progressBar = DisplayUtils.progressBar(DisplayUtils.BarStyle.BARS, 
-            "&c", "&e", "&a", 
-            quest.getCurrentAmount(), quest.getRequiredAmount(), 50)
-            + "&7 (&e" + Integer.toString(quest.getCurrentAmount()) + "&7/&e" + Integer.toString(quest.getRequiredAmount()) + "&7)";
+        String progressBar = DisplayUtils.progressBar(DisplayUtils.BarStyle.BARS,
+                "&c", "&e", "&a",
+                quest.getCurrentAmount(), quest.getRequiredAmount(), 50)
+                + "&7 (&e" + Integer.toString(quest.getCurrentAmount()) + "&7/&e" + Integer.toString(quest.getRequiredAmount()) + "&7)";
+        String finalProgressBar = progressBar;
+        if (quest.getType() == QuestType.MATERIAL && lootStorageService != null && playerCanUseStoragePreview(player)) {
+            int esAmount = lootStorageService.getAmount(player.getUniqueId(), quest.getMaterialKey());
+            if (esAmount > 0) {
+                int virtualCurrent = Math.min(quest.getRequiredAmount(), quest.getCurrentAmount() + esAmount);
+                String previewBar = DisplayUtils.progressBar(DisplayUtils.BarStyle.BARS, "&8", "&3", "&b",
+                        virtualCurrent, quest.getRequiredAmount(), 50);
+                finalProgressBar = progressBar + " &8| &b预提交: " + previewBar
+                        + "&7 (&b" + virtualCurrent + "&7/&e" + quest.getRequiredAmount() + "&7)";
+            }
+        }
         MessageUtils.sendConfigMessage(player, "quest.list-progress",
                 "&7  &l·&r 进度: &e{progressBar}",
-                "progressBar", progressBar);
+                "progressBar", finalProgressBar);
         
         String currentRating = QuestUtils.getTimeRatingDisplay(quest.getElapsedTime(), configManager.getBonusTimeBonus())
         + "&7 (&e" + DisplayUtils.formatTime(quest.getElapsedTime()) + "&7)";
@@ -200,24 +230,127 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
      * 处理完成任务（自动领取所有已完成的悬赏任务）
      */
     private boolean handleComplete(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player player)) {
-            MessageUtils.sendConfigMessage(sender, "quest.player-only",
-                    "&c✗ &f此命令仅限玩家使用");
+        if (sender instanceof ConsoleCommandSender) {
+            if (args.length < 2) {
+                MessageUtils.sendConfigMessage(sender, "quest.complete-usage-console",
+                        "&e用法: /sn q complete <player>");
+                return true;
+            }
+            Player target = Bukkit.getPlayerExact(args[1]);
+            if (target == null) {
+                MessageUtils.sendConfigMessage(sender, "quest.complete-target-not-found",
+                        "&c✗ &f未找到在线玩家: {name}", "name", args[1]);
+                return true;
+            }
+            executeCompleteFor(sender, target, false, true, false);
+            return true;
+        }
+        if (!(sender instanceof Player actor)) {
+            MessageUtils.sendConfigMessage(sender, "quest.player-only", "&c✗ &f此命令仅限玩家使用");
             return true;
         }
 
-        int claimed = service.claimCompletedBountyQuests(player);
-        
-        if (claimed == 0) {
-            MessageUtils.sendConfigMessage(player, "quest.no-completed-bounty",
-                    "&c✗ &f没有已完成的悬赏任务可领取");
-        } else {
-            MessageUtils.sendConfigMessage(player, "quest.bounty-claimed",
-                    "&a✓ &f已领取 {count} 个悬赏任务奖励",
-                    "count", String.valueOf(claimed));
+        boolean opBypass = actor.isOp();
+        boolean hasVip = stvipService != null && stvipService.hasAnyVip(actor);
+        if (!opBypass && !hasVip) {
+            MessageUtils.sendConfigMessage(actor, "quest.complete-no-permission",
+                    "&c✗ &f你不是 VIP，无法使用远程提交");
+            return true;
         }
 
+        boolean freeMode = args.length >= 2 && "free".equalsIgnoreCase(args[1]);
+        Player target = actor;
+        if (args.length >= 2 && !freeMode) {
+            if (!opBypass) {
+                MessageUtils.sendConfigMessage(actor, "quest.complete-target-denied",
+                        "&c✗ &f仅 OP 可指定其他玩家");
+                return true;
+            }
+            Player resolved = Bukkit.getPlayerExact(args[1]);
+            if (resolved == null) {
+                MessageUtils.sendConfigMessage(actor, "quest.complete-target-not-found",
+                        "&c✗ &f未找到在线玩家: {name}", "name", args[1]);
+                return true;
+            }
+            target = resolved;
+        }
+
+        if (freeMode && !isVip3(actor)) {
+            MessageUtils.sendConfigMessage(actor, "quest.complete-free-only-vip3",
+                    "&c✗ &f仅 VIP3 可使用免材料领奖");
+            return true;
+        }
+
+        executeCompleteFor(actor, target, freeMode, false, opBypass);
         return true;
+    }
+
+    private void executeCompleteFor(CommandSender feedback, Player target, boolean freeMode, boolean bypassQuota, boolean opBypass) {
+        Player actor = feedback instanceof Player p ? p : null;
+        if (actor != null && !opBypass && !bypassQuota) {
+            int remoteLimit = stvipService != null ? stvipService.getQuestDailyRemoteClaimLimit(actor) : 0;
+            int remoteUsed = service.getDailyRemoteClaimUsed(actor.getUniqueId());
+            if (remoteUsed >= remoteLimit) {
+                MessageUtils.sendConfigMessage(actor, "quest.complete-remote-limit",
+                        "&c✗ &f今日远程提交次数已用尽: {used}/{limit}",
+                        "used", String.valueOf(remoteUsed), "limit", String.valueOf(remoteLimit));
+                return;
+            }
+            if (freeMode) {
+                int freeLimit = stvipService != null ? stvipService.getQuestDailyFreeClaimLimit(actor) : 0;
+                int freeUsed = service.getDailyFreeClaimUsed(actor.getUniqueId());
+                if (freeUsed >= freeLimit) {
+                    MessageUtils.sendConfigMessage(actor, "quest.complete-free-limit",
+                            "&c✗ &f今日免材料次数已用尽: {used}/{limit}",
+                            "used", String.valueOf(freeUsed), "limit", String.valueOf(freeLimit));
+                    return;
+                }
+            }
+        }
+
+        boolean allowStorage = isVip2OrAbove(target);
+        double rewardMultiplier = freeMode ? VIP3_FREE_CLAIM_REWARD_MULTIPLIER : 1.0;
+        QuestService.CompletionResult result = service.completeByCommand(target, allowStorage, freeMode, rewardMultiplier);
+        if (!result.hasAnySuccess()) {
+            MessageUtils.sendConfigMessage(feedback, "quest.no-completed-bounty",
+                    "&c✗ &f没有可提交或可领取的任务");
+            return;
+        }
+        if (actor != null && !opBypass && !bypassQuota) {
+            service.incrementDailyRemoteClaimUsed(actor.getUniqueId());
+            if (freeMode) {
+                service.incrementDailyFreeClaimUsed(actor.getUniqueId());
+            }
+        }
+
+        MessageUtils.sendConfigMessage(feedback, "quest.complete-summary",
+                "&a✓ &f提交完成: 背包提交 &e{inv}&f，ES 提交 &e{es}&f，完成普通任务 &e{normal}&f，领取悬赏 &e{bounty}",
+                "inv", String.valueOf(result.inventorySubmitted()),
+                "es", String.valueOf(result.storageSubmitted()),
+                "normal", String.valueOf(result.completedNormal()),
+                "bounty", String.valueOf(result.claimedBounty()));
+        if (freeMode) {
+            MessageUtils.sendConfigMessage(feedback, "quest.complete-free-mode-applied",
+                    "&d✦ &f本次免材料模式已生效，奖励倍率: &e0.6x");
+        }
+    }
+
+    private boolean playerCanUseStoragePreview(Player player) {
+        return isVip2OrAbove(player) || player.isOp();
+    }
+
+    private boolean isVip2OrAbove(Player player) {
+        if (stvipService == null) {
+            return false;
+        }
+        return stvipService.resolveTier(player).map(t -> t.getPriority() >= 2).orElse(false);
+    }
+
+    private boolean isVip3(Player player) {
+        if (stvipService == null) {
+            return false;
+        }
+        return stvipService.resolveTier(player).map(t -> t.getPriority() >= 3).orElse(false);
     }
 
     /**
@@ -320,6 +453,22 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         } else if (args.length == 2 && args[0].equalsIgnoreCase("accept")) {
             list.add("material");
             list.add("kill");
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("complete")) {
+            if (sender instanceof Player player) {
+                if (player.isOp()) {
+                    String input = args[1].toLowerCase();
+                    if ("free".startsWith(input)) {
+                        list.add("free");
+                    }
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        if (p.getName().toLowerCase().startsWith(input)) {
+                            list.add(p.getName());
+                        }
+                    }
+                } else if (isVip3(player) && "free".startsWith(args[1].toLowerCase())) {
+                    list.add("free");
+                }
+            }
         } else if (args.length == 2 && args[0].equalsIgnoreCase("setlevel")) {
             String input = args[1].toLowerCase();
             for (Integer l : configManager.getValidMaterialLevels()) {

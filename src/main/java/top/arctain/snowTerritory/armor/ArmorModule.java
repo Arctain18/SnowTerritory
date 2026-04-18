@@ -22,7 +22,7 @@ public class ArmorModule {
         this.configManager = new ArmorConfigManager(plugin);
         this.randomService = new ArmorRandomService(configManager);
         this.generateService = new ArmorGenerateService(configManager, randomService);
-        this.costService = new ArmorCostService(configManager);
+        this.costService = new ArmorCostService(plugin, configManager);
         this.confirmSessionService = new ArmorConfirmSessionService();
         this.armorCommand = new ArmorCommand(generateService, configManager, costService, confirmSessionService);
     }

@@ -1,6 +1,7 @@
 package top.arctain.snowTerritory.armor.service;
 
 import org.bukkit.entity.Player;
+import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.armor.data.ArmorGenerationCost;
 import top.arctain.snowTerritory.armor.data.ArmorProfileBaseCost;
 import top.arctain.snowTerritory.armor.data.ArmorSetDefinition;
@@ -17,8 +18,10 @@ public class ArmorCostService {
     private final EconomyService economyService;
     private final String qpCurrencyId;
     private final ArmorConfigManager configManager;
+    private final Main plugin;
 
-    public ArmorCostService(ArmorConfigManager configManager) {
+    public ArmorCostService(Main plugin, ArmorConfigManager configManager) {
+        this.plugin = plugin;
         this.configManager = configManager;
         this.mmocoreService = new MMOCoreService();
         this.economyService = new EconomyService();
@@ -92,15 +95,12 @@ public class ArmorCostService {
         return Math.max(0.0, base + perLevel * levelDelta);
     }
 
-    private static VipDiscount resolveVipDiscount(Player player) {
-        if (player.hasPermission("st.vip.3")) {
-            return new VipDiscount("ἐντελέχεια", 0.75);
-        }
-        if (player.hasPermission("st.vip.2")) {
-            return new VipDiscount("Aetherion", 0.90);
-        }
-        if (player.hasPermission("st.vip.1")) {
-            return new VipDiscount("Fatalism", 0.95);
+    private VipDiscount resolveVipDiscount(Player player) {
+        if (plugin.getStvipService() != null) {
+            var tier = plugin.getStvipService().resolveTier(player);
+            if (tier.isPresent()) {
+                return new VipDiscount(tier.get().getDisplayName(), plugin.getStvipService().getArmorCostMultiplier(player));
+            }
         }
         return new VipDiscount("", 1.0);
     }

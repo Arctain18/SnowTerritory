@@ -11,10 +11,17 @@ public final class StvipTier {
     private final double fishSellMultiplier;
     private final int lootExtraSlots;
     private final int lootExtraPerItemMax;
+    private final double armorCostMultiplier;
+    private final int questDailyRemoteClaimLimit;
+    private final int questDailyFreeClaimLimit;
+    private final int questMinDifficultyExclusive;
+    private final boolean bountyPreannounce;
 
     public StvipTier(String id, String permission, String displayName, int priority,
                      double reinforceCostMultiplier, double fishSellMultiplier,
-                     int lootExtraSlots, int lootExtraPerItemMax) {
+                     int lootExtraSlots, int lootExtraPerItemMax, double armorCostMultiplier,
+                     int questDailyRemoteClaimLimit, int questDailyFreeClaimLimit, int questMinDifficultyExclusive,
+                     boolean bountyPreannounce) {
         this.id = id;
         this.permission = permission;
         this.displayName = displayName;
@@ -23,6 +30,11 @@ public final class StvipTier {
         this.fishSellMultiplier = fishSellMultiplier;
         this.lootExtraSlots = lootExtraSlots;
         this.lootExtraPerItemMax = lootExtraPerItemMax;
+        this.armorCostMultiplier = armorCostMultiplier;
+        this.questDailyRemoteClaimLimit = questDailyRemoteClaimLimit;
+        this.questDailyFreeClaimLimit = questDailyFreeClaimLimit;
+        this.questMinDifficultyExclusive = questMinDifficultyExclusive;
+        this.bountyPreannounce = bountyPreannounce;
     }
 
     public String getId() {
@@ -55,5 +67,25 @@ public final class StvipTier {
 
     public int getLootExtraPerItemMax() {
         return lootExtraPerItemMax;
+    }
+
+    public double getArmorCostMultiplier() {
+        return armorCostMultiplier;
+    }
+
+    public int getQuestDailyRemoteClaimLimit() {
+        return questDailyRemoteClaimLimit;
+    }
+
+    public int getQuestDailyFreeClaimLimit() {
+        return questDailyFreeClaimLimit;
+    }
+
+    public int getQuestMinDifficultyExclusive() {
+        return questMinDifficultyExclusive;
+    }
+
+    public boolean isBountyPreannounce() {
+        return bountyPreannounce;
     }
 }

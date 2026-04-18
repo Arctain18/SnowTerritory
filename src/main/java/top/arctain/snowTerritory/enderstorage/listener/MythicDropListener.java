@@ -1,12 +1,15 @@
 package top.arctain.snowTerritory.enderstorage.listener;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
+import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.enderstorage.config.EnderStorageConfigManager;
 import top.arctain.snowTerritory.enderstorage.service.LootStorageService;
 import top.arctain.snowTerritory.utils.MessageUtils;
@@ -21,11 +24,13 @@ import top.arctain.snowTerritory.utils.Utils;
  */
 public class MythicDropListener implements Listener {
 
+    private final Main plugin;
     private final EnderStorageConfigManager configManager;
     private final LootStorageService service;
     private final boolean mythicMobsEnabled;
 
-    public MythicDropListener(EnderStorageConfigManager configManager, LootStorageService service) {
+    public MythicDropListener(Main plugin, EnderStorageConfigManager configManager, LootStorageService service) {
+        this.plugin = plugin;
         this.configManager = configManager;
         this.service = service;
         this.mythicMobsEnabled = Bukkit.getPluginManager().getPlugin("MythicMobs") != null;
@@ -50,7 +55,7 @@ public class MythicDropListener implements Listener {
                 (io.lumine.mythic.bukkit.events.MythicMobDeathEvent) event;
             
             Player killer = mythicEvent.getKiller();
-            if (killer == null || !killer.hasPermission("st.loot.auto")) {
+            if (killer == null || !canAutoStore(killer)) {
                 return;
             }
 
@@ -105,7 +110,7 @@ public class MythicDropListener implements Listener {
         if (event.getEntity().getKiller() == null) {
             return;
         }
-        if (!event.getEntity().getKiller().hasPermission("st.loot.auto")) {
+        if (!canAutoStore(event.getEntity().getKiller())) {
             return;
         }
 
@@ -131,12 +136,38 @@ public class MythicDropListener implements Listener {
         if (key == null) {
             return false;
         }
+        var entry = service.getWhitelistEntry(key);
+        String display = entry != null ? entry.getDisplay() : key;
         int perItemMax = service.resolvePerItemMax(player, key);
-        service.add(player.getUniqueId(), key, itemStack.getAmount(), perItemMax, slotLimit);
-        MessageUtils.sendConfigMessage(player, "enderstorage.loot-gained",
-                "&a+{amount}x {item} 已存入战利品仓库",
-                "amount", String.valueOf(itemStack.getAmount()), "item", key);
+        int stored = service.add(player.getUniqueId(), key, itemStack.getAmount(), perItemMax, slotLimit);
+        if (stored > 0) {
+            MessageUtils.sendConfigMessage(player, "enderstorage.loot-gained",
+                    "&a+{amount}x {item} 已存入战利品仓库",
+                    "amount", String.valueOf(stored), "item", display);
+        }
+        int refund = itemStack.getAmount() - stored;
+        if (refund > 0) {
+            ItemStack refundStack = itemStack.clone();
+            refundStack.setAmount(refund);
+            var overflow = player.getInventory().addItem(refundStack);
+            if (!overflow.isEmpty()) {
+                for (ItemStack left : overflow.values()) {
+                    player.getWorld().dropItemNaturally(player.getLocation(), left);
+                }
+            }
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, SoundCategory.PLAYERS, 1.0f, 1.0f);
+            MessageUtils.sendConfigMessage(player, "enderstorage.exceed-limit-refund",
+                    "&c✗ &f仓库已达到该物品上限，已退还 {amount}x {item}",
+                    "amount", String.valueOf(refund), "item", display);
+        }
         return configManager.getMainConfig().getBoolean("features.cancel-entity-drop", true);
+    }
+
+    private boolean canAutoStore(Player player) {
+        if (player.hasPermission("st.loot.auto")) {
+            return true;
+        }
+        return plugin.getStvipService() != null && plugin.getStvipService().hasAnyVip(player);
     }
 }
 

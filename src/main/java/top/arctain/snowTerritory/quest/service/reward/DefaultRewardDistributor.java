@@ -28,14 +28,19 @@ public class DefaultRewardDistributor implements RewardDistributor {
     
     @Override
     public void distribute(Player player, Quest quest) {
+        distribute(player, quest, 1.0);
+    }
+
+    @Override
+    public void distribute(Player player, Quest quest, double rewardMultiplier) {
         if (player == null || !player.isOnline()) {
             return;
         }
-        
+        double normalizedMultiplier = Math.max(0.0, rewardMultiplier);
         QuestUtils.RewardCalculation calc = calculateReward(quest);
-        giveQuestPoints(player, calc);
-        giveCurrency(player, calc);
-        sendCompletionMessage(player, quest, calc);
+        giveQuestPoints(player, calc, normalizedMultiplier);
+        giveCurrency(player, calc, normalizedMultiplier);
+        sendCompletionMessage(player, quest, calc, normalizedMultiplier);
     }
     
     private QuestUtils.RewardCalculation calculateReward(Quest quest) {
@@ -48,8 +53,8 @@ public class DefaultRewardDistributor implements RewardDistributor {
         );
     }
     
-    private void giveQuestPoints(Player player, QuestUtils.RewardCalculation calc) {
-        int questPoints = calc.getQuestPoint();
+    private void giveQuestPoints(Player player, QuestUtils.RewardCalculation calc, double rewardMultiplier) {
+        int questPoints = (int) Math.round(calc.getQuestPoint() * rewardMultiplier);
         if (questPoints <= 0) {
             return;
         }
@@ -58,10 +63,10 @@ public class DefaultRewardDistributor implements RewardDistributor {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
     }
     
-    private void giveCurrency(Player player, QuestUtils.RewardCalculation calc) {
+    private void giveCurrency(Player player, QuestUtils.RewardCalculation calc, double rewardMultiplier) {
         FileConfiguration rewardsDefault = configManager.getRewardsDefault();
         int baseCurrency = rewardsDefault.getInt("default.currency.amount", 1);
-        double multiplier = calc.getLevelBonus() * calc.getBountyBonus() * calc.getTimeBonus();
+        double multiplier = calc.getLevelBonus() * calc.getBountyBonus() * calc.getTimeBonus() * rewardMultiplier;
         int totalCurrency = (int) Math.round(baseCurrency * multiplier);
         
         if (totalCurrency <= 0) {
@@ -111,12 +116,12 @@ public class DefaultRewardDistributor implements RewardDistributor {
         }
     }
     
-    private void sendCompletionMessage(Player player, Quest quest, QuestUtils.RewardCalculation calc) {
+    private void sendCompletionMessage(Player player, Quest quest, QuestUtils.RewardCalculation calc, double rewardMultiplier) {
         FileConfiguration timeBonus = configManager.getBonusTimeBonus();
         FileConfiguration rewardsDefault = configManager.getRewardsDefault();
         
         String rating = QuestUtils.getTimeRatingDisplay(quest.getElapsedTime(), timeBonus);
-        double multiplier = calc.getLevelBonus() * calc.getBountyBonus() * calc.getTimeBonus();
+        double multiplier = calc.getLevelBonus() * calc.getBountyBonus() * calc.getTimeBonus() * rewardMultiplier;
         
         int totalQuestPoint = (int) Math.round(rewardsDefault.getInt("default.questpoint", 12) * multiplier);
         int totalCurrency = (int) Math.round(rewardsDefault.getInt("default.currency.amount", 1) * multiplier);
