@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.enderstorage.service.LootStorageService;
 import top.arctain.snowTerritory.quest.config.QuestConfigManager;
+import top.arctain.snowTerritory.quest.config.QuestListProgressConfig;
 import top.arctain.snowTerritory.quest.data.Quest;
 import top.arctain.snowTerritory.quest.data.QuestDatabaseDao;
 import top.arctain.snowTerritory.quest.data.QuestStatus;
@@ -182,26 +183,64 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    private void displayQuestProgress(Player player, Quest quest) {
+    /** VIP 在进度行尾追加 ES 总库存；非 VIP 或无法解析档位时返回空串。 */
+    private String buildListProgressVipStorageSuffix(Player player, Quest quest) {
+        if (stvipService == null) {
+            return "";
+        }
+        return stvipService.resolveTier(player).map(tier -> {
+            int esTotal = lootStorageService != null
+                    ? lootStorageService.getAmount(player.getUniqueId(), quest.getMaterialKey()) : 0;
+            String vipLabel = tier.getDisplayName() != null ? tier.getDisplayName() : tier.getId();
+            return MessageUtils.getConfigMessage("quest.list-progress-vip-suffix",
+                    " {vip} &{#6dc97f}ES &7库存: &3{amount}", "vip", vipLabel, "amount", String.valueOf(esTotal));
+        }).orElse("");
+    }
 
-        String progressBar = DisplayUtils.progressBar(DisplayUtils.BarStyle.BARS,
-                "&c", "&e", "&a",
-                quest.getCurrentAmount(), quest.getRequiredAmount(), 50)
-                + "&7 (&e" + Integer.toString(quest.getCurrentAmount()) + "&7/&e" + Integer.toString(quest.getRequiredAmount()) + "&7)";
-        String finalProgressBar = progressBar;
-        if (quest.getType() == QuestType.MATERIAL && lootStorageService != null && playerCanUseStoragePreview(player)) {
-            int esAmount = lootStorageService.getAmount(player.getUniqueId(), quest.getMaterialKey());
-            if (esAmount > 0) {
-                int virtualCurrent = Math.min(quest.getRequiredAmount(), quest.getCurrentAmount() + esAmount);
-                String previewBar = DisplayUtils.progressBar(DisplayUtils.BarStyle.BARS, "&8", "&3", "&b",
-                        virtualCurrent, quest.getRequiredAmount(), 50);
-                finalProgressBar = progressBar + " &8| &b预提交: " + previewBar
-                        + "&7 (&b" + virtualCurrent + "&7/&e" + quest.getRequiredAmount() + "&7)";
+    private void displayQuestProgress(Player player, Quest quest) {
+        int req = quest.getRequiredAmount();
+        int cur = quest.getCurrentAmount();
+        String curStr = String.valueOf(cur);
+        String reqStr = String.valueOf(req);
+        QuestListProgressConfig cfg = configManager.getListProgressConfig();
+        String fraction = MessageUtils.getConfigMessage("quest.list-fraction",
+                "&7 (&e{current}&7/&e{required}&7)",
+                "current", curStr, "required", reqStr);
+
+        String bar = "";
+        if (cfg.isBarEnabled()) {
+            if (quest.getType() == QuestType.MATERIAL
+                    && cfg.isShowEsSegment()
+                    && lootStorageService != null
+                    && playerCanUseStoragePreview(player)) {
+                int esAmount = lootStorageService.getAmount(player.getUniqueId(), quest.getMaterialKey());
+                int need = Math.max(0, req - cur);
+                int esUsable = Math.max(0, Math.min(esAmount, need));
+                if (esUsable > 0) {
+                    bar = DisplayUtils.progressBarWithEsStorage(
+                            cfg.getStyle(),
+                            cfg.getLowColor(), cfg.getMidColor(), cfg.getHighColor(),
+                            cfg.getEsColor(),
+                            cur, esUsable, req, cfg.getLength(), cfg.getEmptySlotColor());
+                } else {
+                    bar = DisplayUtils.progressBar(
+                            cfg.getStyle(),
+                            cfg.getLowColor(), cfg.getMidColor(), cfg.getHighColor(),
+                            cur, req, cfg.getLength(), cfg.getEmptySlotColor());
+                }
+            } else {
+                bar = DisplayUtils.progressBar(
+                        cfg.getStyle(),
+                        cfg.getLowColor(), cfg.getMidColor(), cfg.getHighColor(),
+                        cur, req, cfg.getLength(), cfg.getEmptySlotColor());
             }
         }
+        String vipStorage = buildListProgressVipStorageSuffix(player, quest);
+        String progressText = bar + fraction + vipStorage;
         MessageUtils.sendConfigMessage(player, "quest.list-progress",
-                "&7  &l·&r 进度: &e{progressBar}",
-                "progressBar", finalProgressBar);
+                "&7  &l·&r 进度: {bar}{fraction}{vipStorage}",
+                "bar", bar, "fraction", fraction, "progressText", progressText,
+                "current", curStr, "required", reqStr, "vipStorage", vipStorage);
         
         String currentRating = QuestUtils.getTimeRatingDisplay(quest.getElapsedTime(), configManager.getBonusTimeBonus())
         + "&7 (&e" + DisplayUtils.formatTime(quest.getElapsedTime()) + "&7)";

@@ -94,11 +94,11 @@ public class StvipService {
     public boolean grantTemporaryVip(CommandSender sender, OfflinePlayer target, String tierId, String duration) {
         Optional<StvipTier> tierOpt = configManager.getTierById(tierId);
         if (tierOpt.isEmpty()) {
-            MessageUtils.sendRaw(sender, MessageUtils.colorize("&c✗ &f未知 VIP 档位: &e" + tierId));
+            MessageUtils.sendConfigMessage(sender, "stvip.give-unknown-tier", "&c✗ &f未知 VIP 档位: &e{tier}", "tier", tierId);
             return false;
         }
         if (duration == null || duration.isBlank()) {
-            MessageUtils.sendRaw(sender, MessageUtils.colorize("&c✗ &f时长不能为空，例如: &e7d"));
+            MessageUtils.sendConfigMessage(sender, "stvip.give-duration-empty", "&c✗ &f时长不能为空，例如: &e7d");
             return false;
         }
         String identity = target.getName() != null && !target.getName().isBlank()
@@ -107,10 +107,10 @@ public class StvipService {
         String command = "lp user " + identity + " permission settemp " + tierOpt.get().getPermission() + " true " + duration;
         boolean success = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
         if (success) {
-            MessageUtils.sendRaw(sender, MessageUtils.colorize("&a✓ &f已发放 " + tierOpt.get().getDisplayName()
-                    + " &f给 &e" + identity + " &f时长: &e" + duration));
+            MessageUtils.sendConfigMessage(sender, "stvip.give-success", "&a✓ &f已发放 {display} &f给 &e{player} &f时长: &e{duration}",
+                    "display", tierOpt.get().getDisplayName(), "player", identity, "duration", duration);
         } else {
-            MessageUtils.sendRaw(sender, MessageUtils.colorize("&c✗ &fLuckPerms 执行失败，请检查命令与插件状态"));
+            MessageUtils.sendConfigMessage(sender, "stvip.give-lp-failed", "&c✗ &fLuckPerms 执行失败，请检查命令与插件状态");
         }
         return success;
     }
@@ -122,24 +122,31 @@ public class StvipService {
         }
         StvipTier tier = tierOpt.get();
         List<String> lines = new ArrayList<>();
-        lines.add("&7- &a自动入库");
-        lines.add("&7- &b任务远程提交: &f" + remoteRemaining + "&7/&f" + tier.getQuestDailyRemoteClaimLimit());
-        lines.add("&7- &dArmor 折扣: &f" + percentOff(tier.getArmorCostMultiplier()) + "%");
+        lines.add(MessageUtils.getConfigMessage("stvip.join-line-loot-auto", "&7- &a自动入库"));
+        lines.add(MessageUtils.getConfigMessage("stvip.join-line-quest-remote", "&7- &b任务远程提交: &f{remote_remaining}&7/&f{remote_limit}",
+                "remote_remaining", String.valueOf(remoteRemaining), "remote_limit", String.valueOf(tier.getQuestDailyRemoteClaimLimit())));
+        lines.add(MessageUtils.getConfigMessage("stvip.join-line-armor", "&7- &dArmor 折扣: &f{percent_off}%",
+                "percent_off", String.valueOf(percentOff(tier.getArmorCostMultiplier()))));
         if (tier.getPriority() >= 2) {
-            lines.add("&7- &3任务进度预提交显示（ES 库存）");
-            lines.add("&7- &3远程提交时可自动消耗 ES 补足缺口");
+            lines.add(MessageUtils.getConfigMessage("stvip.join-line-quest-precommit", "&7- &3任务进度预提交显示（ES 库存）"));
+            lines.add(MessageUtils.getConfigMessage("stvip.join-line-quest-es", "&7- &3远程提交时可自动消耗 ES 补足缺口"));
         }
         if (tier.getLootExtraSlots() > 0 || tier.getLootExtraPerItemMax() > 0) {
-            lines.add("&7- &6ES 扩容: &f+" + tier.getLootExtraSlots() + " 槽位 &7| &f+" + tier.getLootExtraPerItemMax() + " 单物品上限");
+            lines.add(MessageUtils.getConfigMessage("stvip.join-line-loot-expand",
+                    "&7- &6ES 扩容: &f+{slots} 槽位 &7| &f+{per_item_max} 单物品上限",
+                    "slots", String.valueOf(tier.getLootExtraSlots()), "per_item_max", String.valueOf(tier.getLootExtraPerItemMax())));
         }
         if (tier.getQuestMinDifficultyExclusive() > 0) {
-            lines.add("&7- &e手动任务过滤: &f难度 > " + tier.getQuestMinDifficultyExclusive());
+            lines.add(MessageUtils.getConfigMessage("stvip.join-line-difficulty", "&7- &e手动任务过滤: &f难度 > {min_exclusive}",
+                    "min_exclusive", String.valueOf(tier.getQuestMinDifficultyExclusive())));
         }
         if (tier.getQuestDailyFreeClaimLimit() > 0) {
-            lines.add("&7- &c免材料领奖: &f" + freeRemaining + "&7/&f" + tier.getQuestDailyFreeClaimLimit() + " &7(0.6 倍奖励)");
+            lines.add(MessageUtils.getConfigMessage("stvip.join-line-free-claim",
+                    "&7- &c免材料领奖: &f{free_remaining}&7/&f{free_limit} &7(0.6 倍奖励)",
+                    "free_remaining", String.valueOf(freeRemaining), "free_limit", String.valueOf(tier.getQuestDailyFreeClaimLimit())));
         }
         if (tier.isBountyPreannounce()) {
-            lines.add("&7- &3悬赏预告: &f刷新前 5 分钟");
+            lines.add(MessageUtils.getConfigMessage("stvip.join-line-bounty", "&7- &3悬赏预告: &f刷新前 5 分钟"));
         }
         return lines;
     }

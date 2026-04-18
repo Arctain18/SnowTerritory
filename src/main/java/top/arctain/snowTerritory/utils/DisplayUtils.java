@@ -45,6 +45,13 @@ public final class DisplayUtils {
                                      String lowColor, String midColor, String highColor,
                                      int current, int total,
                                      int length) {
+        return progressBar(style, lowColor, midColor, highColor, current, total, length, "&7");
+    }
+
+    public static String progressBar(BarStyle style,
+                                     String lowColor, String midColor, String highColor,
+                                     int current, int total,
+                                     int length, String emptySlotColor) {
         if (length <= 0) throw new IllegalArgumentException("length must be > 0");
         if (total <= 0) total = 1;
         current = Math.max(0, Math.min(current, total));
@@ -54,13 +61,59 @@ public final class DisplayUtils {
         filled = Math.max(0, Math.min(filled, length));
 
         String color = pickColor(p, lowColor, midColor, highColor);
+        String empty = emptySlotColor == null || emptySlotColor.isEmpty() ? "&7" : emptySlotColor;
 
         StringBuilder sb = new StringBuilder();
         sb.append(ColorUtils.colorize(color));
         sb.append(repeat(style.full, filled));
-        sb.append(ColorUtils.colorize("&7")); // 空白部分默认灰色（可按需改成参数）
+        sb.append(ColorUtils.colorize(empty));
         sb.append(repeat(style.empty, length - filled));
         sb.append(ColorUtils.colorize("&r")); // reset
+        return sb.toString();
+    }
+
+    /**
+     * 单条进度条内两段：已提交（与 {@link #progressBar} 同色阶）+ ES 可补部分（独立颜色），其余为空。
+     *
+     * @param current  已提交数量
+     * @param esUsable 仓库中可用于本任务补满缺口的数量（已在外层 clamp 为 min(ES, need)）
+     */
+    public static String progressBarWithEsStorage(BarStyle style,
+            String lowColor, String midColor, String highColor, String esColor,
+            int current, int esUsable, int total, int length) {
+        return progressBarWithEsStorage(style, lowColor, midColor, highColor, esColor,
+                current, esUsable, total, length, "&7");
+    }
+
+    public static String progressBarWithEsStorage(BarStyle style,
+            String lowColor, String midColor, String highColor, String esColor,
+            int current, int esUsable, int total, int length, String emptySlotColor) {
+        if (length <= 0) {
+            throw new IllegalArgumentException("length must be > 0");
+        }
+        if (total <= 0) {
+            total = 1;
+        }
+        int safeCurrent = Math.max(0, Math.min(current, total));
+        int need = Math.max(0, total - safeCurrent);
+        int safeEs = Math.max(0, Math.min(esUsable, need));
+
+        int wSubmit = (int) Math.round(safeCurrent / (double) total * length);
+        int wEs = (int) Math.round(safeEs / (double) total * length);
+        wSubmit = Math.max(0, Math.min(wSubmit, length));
+        wEs = Math.max(0, Math.min(wEs, length - wSubmit));
+        int wEmpty = length - wSubmit - wEs;
+
+        String empty = emptySlotColor == null || emptySlotColor.isEmpty() ? "&7" : emptySlotColor;
+        String submitColor = pickColor(safeCurrent / (double) total, lowColor, midColor, highColor);
+        StringBuilder sb = new StringBuilder();
+        sb.append(ColorUtils.colorize(submitColor));
+        sb.append(repeat(style.full, wSubmit));
+        sb.append(ColorUtils.colorize(esColor));
+        sb.append(repeat(style.full, wEs));
+        sb.append(ColorUtils.colorize(empty));
+        sb.append(repeat(style.empty, wEmpty));
+        sb.append(ColorUtils.colorize("&r"));
         return sb.toString();
     }
 

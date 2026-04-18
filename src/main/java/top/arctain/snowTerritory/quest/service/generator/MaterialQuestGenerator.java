@@ -41,8 +41,8 @@ public class MaterialQuestGenerator implements QuestGenerator {
     }
     
     @Override
-    public Quest generate(UUID playerId, QuestType type, QuestReleaseMethod releaseMethod) {
-        if (!supports(type)) {
+    public Quest generate(UUID playerId, QuestType type, QuestReleaseMethod releaseMethod, QuestGenerationContext context) {
+        if (!supports(type) || context == null) {
             return null;
         }
         
@@ -57,31 +57,47 @@ public class MaterialQuestGenerator implements QuestGenerator {
             return null;
         }
         
-        int maxMaterialLevel = 1;
-        if (playerId != null && releaseMethod == QuestReleaseMethod.NORMAL) {
-            maxMaterialLevel = databaseDao.getMaxMaterialLevel(playerId);
-        }
+        final int maxMaterialLevel = (playerId != null && releaseMethod == QuestReleaseMethod.NORMAL)
+                ? databaseDao.getMaxMaterialLevel(playerId) : 1;
         
         List<MaterialEntry> materials = collectMaterials(materialsSection);
         if (materials.isEmpty()) {
             return null;
         }
 
-        int requiredAmount = 0;
+        if (releaseMethod == QuestReleaseMethod.NORMAL) {
+            materials.removeIf(material -> material.materialLevel > maxMaterialLevel);
+            if (materials.isEmpty()) {
+                return null;
+            }
+        }
+
         MaterialEntry selected = materials.get(random.nextInt(materials.size()));
 
-        if (releaseMethod == QuestReleaseMethod.NORMAL) {
-            selected = removeMaterialsOutOfRange(maxMaterialLevel, materials);
-        }
-        
-        int difficulty = 1;
-        requiredAmount = calculateRequiredAmount(selected);
-        difficulty = QuestUtils.calculateDifficulty(requiredAmount, selected.min, selected.max);
-
+        int requiredAmount;
+        int difficulty;
         if (releaseMethod == QuestReleaseMethod.BOUNTY) {
             difficulty = BOUNTY_FIXED_DIFFICULTY;
             requiredAmount = QuestUtils.calculateRequiredAmount(difficulty, selected.min, selected.max);
-        } 
+        } else {
+            int dMin = clampDifficulty(context.getMinDifficultyInclusive());
+            int dMax = clampDifficulty(context.getMaxDifficultyInclusive());
+            if (dMin > dMax) {
+                int t = dMin;
+                dMin = dMax;
+                dMax = t;
+            }
+            if (dMin < 1) dMin = 1;
+            if (dMax > QuestGenerationContext.MAX_DIFFICULTY) {
+                dMax = QuestGenerationContext.MAX_DIFFICULTY;
+            }
+            if (dMin > dMax) {
+                return null;
+            }
+            int d = dMin + (dMax > dMin ? random.nextInt(dMax - dMin + 1) : 0);
+            difficulty = d;
+            requiredAmount = QuestUtils.calculateRequiredAmount(d, selected.min, selected.max);
+        }
         
         // 任务等级 = 材料等级（从配置读取）
         int level = selected.materialLevel;
@@ -108,17 +124,16 @@ public class MaterialQuestGenerator implements QuestGenerator {
         );
     }
 
-    private int calculateRequiredAmount(MaterialEntry selected) {
-        return (int) (selected.min + random.nextInt(selected.max - selected.min + 1) * 0.5 + 0.5);
+    private static int clampDifficulty(int d) {
+        if (d < 1) {
+            return 1;
+        }
+        if (d > QuestGenerationContext.MAX_DIFFICULTY) {
+            return QuestGenerationContext.MAX_DIFFICULTY;
+        }
+        return d;
     }
 
-    private MaterialEntry removeMaterialsOutOfRange(int maxMaterialLevel, List<MaterialEntry> materials) {
-        MaterialEntry selected;
-        materials.removeIf(material -> material.materialLevel > maxMaterialLevel);
-        selected = materials.get(random.nextInt(materials.size()));
-        return selected;
-    }
-    
     @Override
     public boolean supports(QuestType type) {
         return type == QuestType.MATERIAL;

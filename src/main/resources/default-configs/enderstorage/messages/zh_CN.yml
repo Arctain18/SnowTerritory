@@ -1,3 +1,4 @@
+# 末影存储/战利品仓库 玩家端提示（键与 Java 中 enderstorage.* 一致）
 loot-gained: "&a+{amount}x {item} 已存入战利品仓库"
 no-permission: "&c✗ &f没有权限"
 not-whitelisted: "&c✗ &f该物品无法存入战利品仓库"

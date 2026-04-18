@@ -13,6 +13,7 @@ import top.arctain.snowTerritory.quest.data.QuestStatus;
 import top.arctain.snowTerritory.quest.data.QuestType;
 import top.arctain.snowTerritory.quest.service.generator.CollectQuestGenerator;
 import top.arctain.snowTerritory.quest.service.generator.MaterialQuestGenerator;
+import top.arctain.snowTerritory.quest.service.generator.QuestGenerationContext;
 import top.arctain.snowTerritory.quest.service.generator.QuestGenerator;
 import top.arctain.snowTerritory.quest.service.reward.DefaultRewardDistributor;
 import top.arctain.snowTerritory.quest.service.reward.RewardDistributor;
@@ -125,16 +126,11 @@ public class QuestServiceImpl implements QuestService {
             return null;
         }
         
-        Quest quest = generateQuest(playerId, type, QuestReleaseMethod.NORMAL);
+        QuestGenerationContext ctx = QuestGenerationContext.forVipMinDifficultyExclusive(
+                resolveMinDifficultyExclusive(player));
+        Quest quest = generateQuest(playerId, type, QuestReleaseMethod.NORMAL, ctx);
         if (quest == null) {
             return null;
-        }
-        int minDifficultyExclusive = resolveMinDifficultyExclusive(player);
-        if (minDifficultyExclusive > 0 && quest.getDifficulty() <= minDifficultyExclusive) {
-            quest = regenerateQuestWithDifficultyFloor(playerId, type, minDifficultyExclusive);
-            if (quest == null) {
-                return null;
-            }
         }
         
         playerQuests.computeIfAbsent(playerId, k -> new ArrayList<>()).add(quest);
@@ -573,7 +569,7 @@ public class QuestServiceImpl implements QuestService {
         if (type == null) {
             return;
         }
-        Quest preview = generateQuest(null, type, QuestReleaseMethod.BOUNTY);
+        Quest preview = generateQuest(null, type, QuestReleaseMethod.BOUNTY, QuestGenerationContext.unconstrained());
         if (preview == null) {
             return;
         }
@@ -582,9 +578,9 @@ public class QuestServiceImpl implements QuestService {
             if (stvipService == null || !stvipService.canReceiveBountyPreannounce(online)) {
                 continue;
             }
-            MessageUtils.sendRaw(online, MessageUtils.colorize(
-                    "&3✦ &f悬赏预告：&e" + preview.getMaterialName() + " &7x&e" + preview.getRequiredAmount() + " &8(5分钟后刷新)"
-            ));
+            MessageUtils.sendConfigRaw(online, "quest.bounty-vip3-preview",
+                    "&3✦ &f悬赏预告：&e{material} &7x&e{amount} &8(5分钟后刷新)",
+                    "material", preview.getMaterialName(), "amount", String.valueOf(preview.getRequiredAmount()));
         }
     }
 
@@ -605,7 +601,7 @@ public class QuestServiceImpl implements QuestService {
         Quest bounty = pendingBountyPreview;
         pendingBountyPreview = null;
         if (bounty == null || bounty.getType() != type) {
-            bounty = generateQuest(null, type, QuestReleaseMethod.BOUNTY);
+            bounty = generateQuest(null, type, QuestReleaseMethod.BOUNTY, QuestGenerationContext.unconstrained());
         }
         if (bounty == null) {
             return;
@@ -665,13 +661,17 @@ public class QuestServiceImpl implements QuestService {
     
     // ==================== 任务生成 ====================
     
-    private Quest generateQuest(UUID playerId, QuestType type, QuestReleaseMethod releaseMethod) {
+    private Quest generateQuest(UUID playerId, QuestType type, QuestReleaseMethod releaseMethod,
+            QuestGenerationContext context) {
         QuestGenerator generator = generators.get(type);
         if (generator == null) {
             MessageUtils.logWarning("未找到任务类型的生成器: " + type);
             return null;
         }
-        return generator.generate(playerId, type, releaseMethod);
+        if (context == null) {
+            context = QuestGenerationContext.unconstrained();
+        }
+        return generator.generate(playerId, type, releaseMethod, context);
     }
 
     private int resolveMinDifficultyExclusive(Player player) {
@@ -679,20 +679,5 @@ public class QuestServiceImpl implements QuestService {
             return 0;
         }
         return Math.max(0, stvipService.getQuestMinDifficultyExclusive(player));
-    }
-
-    private Quest regenerateQuestWithDifficultyFloor(UUID playerId, QuestType type, int floorExclusive) {
-        Quest fallback = null;
-        for (int i = 0; i < 24; i++) {
-            Quest generated = generateQuest(playerId, type, QuestReleaseMethod.NORMAL);
-            if (generated == null) {
-                continue;
-            }
-            fallback = generated;
-            if (generated.getDifficulty() > floorExclusive) {
-                return generated;
-            }
-        }
-        return fallback != null && fallback.getDifficulty() > floorExclusive ? fallback : null;
     }
 }

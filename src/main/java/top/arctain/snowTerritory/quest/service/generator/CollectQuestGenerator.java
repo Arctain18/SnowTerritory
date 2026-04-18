@@ -41,8 +41,8 @@ public class CollectQuestGenerator implements QuestGenerator {
     }
 
     @Override
-    public Quest generate(UUID playerId, QuestType type, QuestReleaseMethod releaseMethod) {
-        if (!supports(type)) {
+    public Quest generate(UUID playerId, QuestType type, QuestReleaseMethod releaseMethod, QuestGenerationContext context) {
+        if (!supports(type) || context == null) {
             return null;
         }
 
@@ -78,11 +78,29 @@ public class CollectQuestGenerator implements QuestGenerator {
             selected = crops.get(random.nextInt(crops.size()));
         }
 
-        int requiredAmount = calculateRequiredAmount(selected);
-        int difficulty = QuestUtils.calculateDifficulty(requiredAmount, selected.min, selected.max);
+        int requiredAmount;
+        int difficulty;
         if (releaseMethod == QuestReleaseMethod.BOUNTY) {
             difficulty = BOUNTY_FIXED_DIFFICULTY;
             requiredAmount = QuestUtils.calculateRequiredAmount(difficulty, selected.min, selected.max);
+        } else {
+            int dMin = clampDifficulty(context.getMinDifficultyInclusive());
+            int dMax = clampDifficulty(context.getMaxDifficultyInclusive());
+            if (dMin > dMax) {
+                int t = dMin;
+                dMin = dMax;
+                dMax = t;
+            }
+            if (dMin < 1) dMin = 1;
+            if (dMax > QuestGenerationContext.MAX_DIFFICULTY) {
+                dMax = QuestGenerationContext.MAX_DIFFICULTY;
+            }
+            if (dMin > dMax) {
+                return null;
+            }
+            int d = dMin + (dMax > dMin ? random.nextInt(dMax - dMin + 1) : 0);
+            difficulty = d;
+            requiredAmount = QuestUtils.calculateRequiredAmount(d, selected.min, selected.max);
         }
 
         int level = selected.cropLevel;
@@ -110,8 +128,14 @@ public class CollectQuestGenerator implements QuestGenerator {
         );
     }
 
-    private int calculateRequiredAmount(CropEntry selected) {
-        return (int) (selected.min + random.nextInt(selected.max - selected.min + 1) * 0.5 + 0.5);
+    private static int clampDifficulty(int d) {
+        if (d < 1) {
+            return 1;
+        }
+        if (d > QuestGenerationContext.MAX_DIFFICULTY) {
+            return QuestGenerationContext.MAX_DIFFICULTY;
+        }
+        return d;
     }
 
     @Override

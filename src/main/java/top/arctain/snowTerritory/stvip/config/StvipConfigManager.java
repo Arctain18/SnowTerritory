@@ -13,10 +13,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/** 加载 plugins/SnowTerritory/stvip/config.yml。 */
+/** 加载 plugins/SnowTerritory/stvip 下 config.yml 与 messages/zh_CN.yml。 */
 public class StvipConfigManager {
 
     private final Main plugin;
@@ -37,6 +38,12 @@ public class StvipConfigManager {
         if (!baseDir.exists() && !baseDir.mkdirs()) {
             MessageUtils.logWarning("创建 stvip 目录失败: " + baseDir.getAbsolutePath());
         }
+        File msgDir = new File(baseDir, "messages");
+        if (!msgDir.exists() && !msgDir.mkdirs()) {
+            MessageUtils.logWarning("创建 stvip/messages 目录失败: " + msgDir.getAbsolutePath());
+        }
+        File messagePack = new File(msgDir, "zh_CN.yml");
+        ConfigUtils.copyResourceIfMissing(plugin, "stvip/messages/zh_CN.yml", messagePack);
         this.configFile = new File(baseDir, "config.yml");
         ConfigUtils.copyResourceIfMissing(plugin, "stvip/config.yml", configFile);
         this.config = YamlConfiguration.loadConfiguration(configFile);
@@ -137,5 +144,13 @@ public class StvipConfigManager {
 
     public FileConfiguration getConfig() {
         return config;
+    }
+
+    public Map<String, String> getMessagesForMerge() {
+        File messagePack = new File(baseDir, "messages/zh_CN.yml");
+        if (!messagePack.exists()) {
+            return Map.of();
+        }
+        return ConfigUtils.loadMessagesRecursive("messages.stvip", YamlConfiguration.loadConfiguration(messagePack));
     }
 }

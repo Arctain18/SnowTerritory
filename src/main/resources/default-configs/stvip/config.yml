@@ -1,5 +1,6 @@
 # ST VIP — 权限分档，取玩家拥有的最高 priority 档
 # 路径: plugins/SnowTerritory/stvip/config.yml
+# 材料/采集接取：perks.quest-min-difficulty-exclusive = N 时，任务难度在 (N, 32] 内随机；0 表示 1-32
 
 # 进服提示（仅对有 VIP 权限的玩家）。默认关闭。
 join-message:
@@ -38,7 +39,7 @@ tiers:
       bounty-preannounce: false
   vip3:
     permission: st.vip.3
-    display-name: "&{#DFF7D>}ἐντελ{#7DADFF<>}έχεια{#CF7DFF<}"
+    display-name: "{#ADFF7D>}ἐντελ{#7DADFF<>}έχεια{#CF7DFF<}"
     priority: 3
     perks:
       reinforce-cost-multiplier: 1.0

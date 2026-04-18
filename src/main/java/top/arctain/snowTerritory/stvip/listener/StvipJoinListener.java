@@ -66,8 +66,10 @@ public class StvipJoinListener implements Listener {
                     }
                 }
                 if (needRemainAlert) {
-                    player.sendMessage(MessageUtils.colorize("&e⚠ &f你的 VIP 剩余 &e" + remainingDays.getAsInt() + " &f天，请及时续费"));
-                    player.sendMessage(MessageUtils.colorize("&7续费提示: &f联系服主可续时长或升级档位"));
+                    player.sendMessage(MessageUtils.colorize(MessageUtils.getConfigMessage("stvip.join-expire-warn",
+                            "&e⚠ &f你的 VIP 剩余 &e{days} &f天，请及时续费", "days", String.valueOf(remainingDays.getAsInt()))));
+                    player.sendMessage(MessageUtils.colorize(MessageUtils.getConfigMessage("stvip.join-expire-hint",
+                            "&7续费提示: &f联系服主可续时长或升级档位")));
                 }
             }
         }, 20L);

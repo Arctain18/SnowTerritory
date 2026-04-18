@@ -13,14 +13,17 @@ import java.util.UUID;
 public interface QuestGenerator {
     
     /**
-     * 生成任务
-     * 
-     * @param playerId 玩家ID（悬赏任务可为null）
-     * @param type 任务类型
-     * @param releaseMethod 发布方式
+     * 生成任务（不限制难度范围时等价于全 1–32 档）
+     */
+    default Quest generate(UUID playerId, QuestType type, QuestReleaseMethod releaseMethod) {
+        return generate(playerId, type, releaseMethod, QuestGenerationContext.unconstrained());
+    }
+
+    /**
+     * @param context 接取普通任务时按 ST VIP 档位限制难度范围；悬赏任务在生成器内会忽略
      * @return 生成的任务，失败返回null
      */
-    Quest generate(UUID playerId, QuestType type, QuestReleaseMethod releaseMethod);
+    Quest generate(UUID playerId, QuestType type, QuestReleaseMethod releaseMethod, QuestGenerationContext context);
     
     /**
      * 是否支持指定任务类型

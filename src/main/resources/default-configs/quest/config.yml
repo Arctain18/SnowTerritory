@@ -1,3 +1,23 @@
 features:
   debug: false
   default-language: zh_CN
+
+# 任务列表（/sn q list）中的进度条显示
+list-progress:
+  # 是否绘制进度条；为 false 时只显示下方 fraction 文本
+  bar-enabled: true
+  # 总格数
+  length: 50
+  # 字符样式: BARS | BLOCKS | SQUARES | DOTS
+  style: BARS
+  # 已提交区段三档色
+  low-color: "&c"
+  mid-color: "&e"
+  high-color: "&a"
+  # 战利品仓库可补区段
+  es-color: "&{#FFAB5E}"
+  # 未填充槽位（空段）颜色
+  empty-slot-color: "&7"
+  # VIP2+ 且材料任务时，是否显示 ES 区段
+  show-es-segment: true
+# 整行文字与行尾数字见 quest/messages/zh_CN.yml 中 list-progress、list-fraction

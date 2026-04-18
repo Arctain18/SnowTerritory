@@ -26,12 +26,14 @@ public class StvipModule {
 
     public void enable() {
         configManager.loadAll();
+        MessageUtils.registerModuleMessages("stvip", configManager.getMessagesForMerge());
         registerJoinListener();
         registerPlaceholderApi();
         MessageUtils.logSuccess("ST VIP 模块已启用");
     }
 
     public void disable() {
+        MessageUtils.unregisterModuleMessages("stvip");
         if (joinListener != null) {
             HandlerList.unregisterAll(joinListener);
             joinListener = null;
@@ -41,6 +43,7 @@ public class StvipModule {
 
     public void reload() {
         configManager.loadAll();
+        MessageUtils.registerModuleMessages("stvip", configManager.getMessagesForMerge());
         MessageUtils.logSuccess("ST VIP 配置已重载");
     }
 

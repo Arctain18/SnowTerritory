@@ -1,5 +1,7 @@
 # 任务模块消息（唯一来源，主 config 不重复）
 bounty-announcement: "&6✦ &e[悬赏任务] &f{quest} &8| &7完成任务可获得丰厚奖励"
+# VIP3 悬赏刷新前 5 分钟预告；{material} {amount}
+bounty-vip3-preview: "&3✦ &f悬赏预告：&e{material} &7x&e{amount} &8(5分钟后刷新)"
 bounty-hover-area: "&8━━━━━━━━━━━━━━━━━━\n&6◆ 任务区域\n&7{area}\n&8━━━━━━━━━━━━━━━━━━"
 accepted: "&a✓ &f已接取任务: &e{quest}"
 accept-failed: "&c✗ &f当前没有符合你档位难度要求的任务，请稍后重试"
@@ -13,7 +15,12 @@ reward-currency: "&a+{amount}x {currency}"
 material-submitted: "&a✓ &f已提交 &e{amount}x {item} &7(进度: {current}/{required})"
 list-header: "&6&m━━━ &f&l你的任务列表 &6&m━━━"
 list-item: "&7▸ &e{quest} &8| {status}"
-list-progress: "&7  &l·&r 进度: &e{progressBar}"
+# 任务一行进度；{vipStorage} 仅 VIP 有值（见 list-progress-vip-suffix）；{progressText} = {bar}{fraction}{vipStorage}
+list-progress: "&7  &l·&r 进度: {bar}{fraction}{vipStorage}"
+# VIP 时行尾；{vip}=档位 display-name，{amount}=本任务材料在战利品仓库总数量
+list-progress-vip-suffix: " {vip} &{#6dc97f}ES &7库存: &3{amount}"
+# 条后数字/括号，可与 list-progress 拆开改
+list-fraction: "&7 (&e{current}&7/&e{required}&7)"
 list-rating: "&7  &l·&r 评级: &e{currentRating}"
 list-empty: "&7暂无进行中的任务"
 bounty-completed: "&a✓ &f悬赏任务完成！使用 &e/sn q complete &f领取奖励"

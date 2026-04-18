@@ -32,6 +32,7 @@ public class QuestConfigManager {
     private FileConfiguration tasksMaterial;
     private FileConfiguration tasksCollect;
     private FileConfiguration tasksKill;
+    private QuestListProgressConfig listProgressConfig = QuestListProgressConfig.defaults();
 
     public QuestConfigManager(Main plugin) {
         this.plugin = plugin;
@@ -69,6 +70,7 @@ public class QuestConfigManager {
 
     private void loadMainConfig() {
         this.mainConfig = YamlConfiguration.loadConfiguration(new File(baseDir, "config.yml"));
+        this.listProgressConfig = QuestListProgressConfig.fromMainConfig(this.mainConfig);
     }
 
     private void loadMessages() {
@@ -114,6 +116,10 @@ public class QuestConfigManager {
 
     public FileConfiguration getMainConfig() {
         return mainConfig;
+    }
+
+    public QuestListProgressConfig getListProgressConfig() {
+        return listProgressConfig;
     }
 
     public Map<String, FileConfiguration> getMessagePacks() {
