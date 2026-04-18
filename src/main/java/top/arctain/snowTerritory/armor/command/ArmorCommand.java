@@ -184,23 +184,24 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
                 player, setDef.getId(), setDisplay, profile, weights, preview
         );
 
-        MessageUtils.sendConfigMessage(player, "armor.confirm-header",
-                "&b✦ &f即将为你生成制式防具：&e{set} &7(profile: &f{profile}&7)",
-                "set", setDisplay, "profile", profile);
-        MessageUtils.sendConfigRaw(player, "armor.confirm-player-info",
-                "&7玩家: &f{name} &8| &7等级: &f{level} &8| &7职业: &f{class}",
-                "name", preview.playerName(), "level", String.valueOf(preview.level()), "class", preview.className());
-
         String vipSuffix = preview.vip().active()
                 ? " &9| " + preview.vip().name() + " &a-" + preview.vip().percentOff() + "%"
                 : "";
-        MessageUtils.sendConfigRaw(player, "armor.confirm-cost-preview",
-                "&7本次消耗: Sl &8{rawSl} &7-> &a{finalSl} &7QP &8{rawQp} &7-> &a{finalQp}{vip}",
+        String previewText = MessageUtils.getConfigMessage("armor.confirm-preview",
+                "&b✦ &f即将为你生成制式防具：&e{set} &7(profile: &f{profile}&7)\n" +
+                        "&7玩家: &f{name} &8| &7等级: &f{level} &8| &7职业: &f{class}\n" +
+                        "&7本次消耗: Sl &8{rawSl} &7-> &a{finalSl} &7QP &8{rawQp} &7-> &a{finalQp}{vip}",
+                "set", setDisplay,
+                "profile", profile,
+                "name", preview.playerName(),
+                "level", String.valueOf(preview.level()),
+                "class", preview.className(),
                 "rawSl", num(preview.rawSl()),
                 "finalSl", num(preview.finalSl()),
                 "rawQp", num(preview.rawQp()),
                 "finalQp", num(preview.finalQp()),
                 "vip", vipSuffix);
+        MessageUtils.sendRaw(player, previewText);
 
         String confirmCmd = "/sn armor confirm " + pending.token();
         String cancelCmd = "/sn armor cancel " + pending.token();

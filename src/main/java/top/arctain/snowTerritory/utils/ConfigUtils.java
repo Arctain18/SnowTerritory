@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /** 配置工具：默认文件从资源复制、消息递归加载。资源路径相对于 default-configs/ */
 public final class ConfigUtils {
@@ -45,6 +46,9 @@ public final class ConfigUtils {
             String fullPath = path + "." + key;
             if (section.isConfigurationSection(key)) {
                 result.putAll(loadMessagesRecursive(fullPath, section.getConfigurationSection(key)));
+            } else if (section.isList(key)) {
+                String joined = section.getStringList(key).stream().collect(Collectors.joining("\n"));
+                result.put(fullPath, joined);
             } else {
                 result.put(fullPath, section.getString(key));
             }
