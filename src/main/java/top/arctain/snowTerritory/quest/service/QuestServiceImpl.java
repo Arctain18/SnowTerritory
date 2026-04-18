@@ -586,27 +586,25 @@ public class QuestServiceImpl implements QuestService {
 
     /**
      * 发布悬赏任务（由调度器回调）
+     * 优先使用 5 分钟前预告缓存的 {@link #pendingBountyPreview}，避免与预告分两次随机任务类型导致不一致。
      */
     private void publishBountyQuest() {
         FileConfiguration bountyConfig = configManager.getBountyConfig();
         if (bountyConfig == null) {
             return;
         }
-        
-        QuestType type = determineBountyQuestType(bountyConfig);
-        if (type == null) {
-            return;
-        }
-        
         Quest bounty = pendingBountyPreview;
         pendingBountyPreview = null;
-        if (bounty == null || bounty.getType() != type) {
+        if (bounty == null) {
+            QuestType type = determineBountyQuestType(bountyConfig);
+            if (type == null) {
+                return;
+            }
             bounty = generateQuest(null, type, QuestReleaseMethod.BOUNTY, QuestGenerationContext.unconstrained());
         }
         if (bounty == null) {
             return;
         }
-        
         addBountyQuest(bounty);
         broadcastBountyQuest(bounty);
     }
