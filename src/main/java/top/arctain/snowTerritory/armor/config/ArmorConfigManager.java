@@ -10,6 +10,7 @@ import top.arctain.snowTerritory.armor.data.ArmorSlot;
 import top.arctain.snowTerritory.armor.data.ArmorStatRange;
 import top.arctain.snowTerritory.armor.data.ArmorBaseDefinition;
 import top.arctain.snowTerritory.armor.data.ArmorGenerationCost;
+import top.arctain.snowTerritory.armor.data.ArmorProfileBaseCost;
 import top.arctain.snowTerritory.utils.ConfigUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
@@ -37,6 +38,7 @@ public class ArmorConfigManager {
     private Map<String, String> statMapping = new HashMap<>();
     private Map<String, ArmorSetDefinition> sets = new HashMap<>();
     private Map<String, int[]> generationProfiles = new HashMap<>();
+    private Map<String, ArmorProfileBaseCost> generationProfileBaseCosts = new HashMap<>();
     private ArmorGenerationCost defaultGenerationCost = new ArmorGenerationCost(
             2000, 168, 20, 25, 2, ArmorGenerationCost.Mode.ADDITIVE
     );
@@ -124,6 +126,7 @@ public class ArmorConfigManager {
         }
 
         loadGenerationProfiles(armor);
+        loadGenerationProfileBaseCosts(armor);
         loadDefaultGenerationCost(armor);
         loadQpProvider(armor);
     }
@@ -232,6 +235,27 @@ public class ArmorConfigManager {
     private void loadDefaultGenerationCost(ConfigurationSection armor) {
         ConfigurationSection sec = armor.getConfigurationSection("generation-cost");
         defaultGenerationCost = parseGenerationCost(sec, defaultGenerationCost);
+    }
+
+    private void loadGenerationProfileBaseCosts(ConfigurationSection armor) {
+        generationProfileBaseCosts.clear();
+        ConfigurationSection section = armor.getConfigurationSection("generation-profile-base-costs");
+        if (section == null) {
+            return;
+        }
+        for (String profile : section.getKeys(false)) {
+            ConfigurationSection node = section.getConfigurationSection(profile);
+            if (node == null) {
+                continue;
+            }
+            double slBase = node.getDouble("sl-base", Double.NaN);
+            double qpBase = node.getDouble("qp-base", Double.NaN);
+            if (Double.isNaN(slBase) || Double.isNaN(qpBase)) {
+                MessageUtils.logWarning("armor.generation-profile-base-costs." + profile + " 缺少 sl-base/qp-base，已忽略");
+                continue;
+            }
+            generationProfileBaseCosts.put(profile.toLowerCase(), new ArmorProfileBaseCost(slBase, qpBase));
+        }
     }
 
     private ArmorGenerationCost parseGenerationCost(ConfigurationSection section, ArmorGenerationCost fallback) {
@@ -396,6 +420,13 @@ public class ArmorConfigManager {
 
     public String getQpCurrencyId() {
         return qpCurrencyId;
+    }
+
+    public ArmorProfileBaseCost getGenerationProfileBaseCost(String profile) {
+        if (profile == null) {
+            return null;
+        }
+        return generationProfileBaseCosts.get(profile.toLowerCase());
     }
 }
 

@@ -141,7 +141,7 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
                     "&c✗ &f未找到套装: &e{set}", "set", pending.setId());
             return true;
         }
-        ArmorCostService.CostPreview latest = costService.buildPreview(player, setDef);
+        ArmorCostService.CostPreview latest = costService.buildPreview(player, setDef, pending.profile());
         if (!latest.enough()) {
             MessageUtils.sendConfigMessage(player, "armor.confirm-insufficient",
                     "&c✗ &f货币不足，无法生成。SL 缺少: &e{sl} &7| QP 缺少: &e{qp}",
@@ -178,7 +178,7 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
     }
 
     private void openConfirmPrompt(Player player, ArmorSetDefinition setDef, String profile, int[] weights) {
-        ArmorCostService.CostPreview preview = costService.buildPreview(player, setDef);
+        ArmorCostService.CostPreview preview = costService.buildPreview(player, setDef, profile);
         String setDisplay = setDef.getDisplayName() != null && !setDef.getDisplayName().isBlank() ? setDef.getDisplayName() : setDef.getId();
         ArmorConfirmSessionService.PendingGenerate pending = confirmSessionService.create(
                 player, setDef.getId(), setDisplay, profile, weights, preview
@@ -187,12 +187,13 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
         String vipSuffix = preview.vip().active()
                 ? " &9| " + preview.vip().name() + " &a-" + preview.vip().percentOff() + "%"
                 : "";
+        String profileDisplay = formatProfileDisplay(profile);
         String previewText = MessageUtils.getConfigMessage("armor.confirm-preview",
                 "&b✦ &f即将为你生成制式防具：&e{set} &7(profile: &f{profile}&7)\n" +
                         "&7玩家: &f{name} &8| &7等级: &f{level} &8| &7职业: &f{class}\n" +
                         "&7本次消耗: Sl &8{rawSl} &7-> &a{finalSl} &7QP &8{rawQp} &7-> &a{finalQp}{vip}",
                 "set", setDisplay,
-                "profile", profile,
+                "profile", profileDisplay,
                 "name", preview.playerName(),
                 "level", String.valueOf(preview.level()),
                 "class", preview.className(),
@@ -346,5 +347,16 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
             return String.valueOf((long) Math.rint(v));
         }
         return String.format(java.util.Locale.ROOT, "%.1f", v);
+    }
+
+    private static String formatProfileDisplay(String profile) {
+        if (profile == null) {
+            return "";
+        }
+        return switch (profile.toLowerCase(java.util.Locale.ROOT)) {
+            case "ex" -> "&{#009C00}Ex";
+            case "common" -> "&8Common";
+            default -> profile;
+        };
     }
 }

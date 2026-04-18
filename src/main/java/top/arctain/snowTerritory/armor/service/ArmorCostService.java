@@ -2,6 +2,7 @@ package top.arctain.snowTerritory.armor.service;
 
 import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.armor.data.ArmorGenerationCost;
+import top.arctain.snowTerritory.armor.data.ArmorProfileBaseCost;
 import top.arctain.snowTerritory.armor.data.ArmorSetDefinition;
 import top.arctain.snowTerritory.armor.config.ArmorConfigManager;
 import top.arctain.snowTerritory.reinforce.service.EconomyService;
@@ -15,8 +16,10 @@ public class ArmorCostService {
     private final MMOCoreService mmocoreService;
     private final EconomyService economyService;
     private final String qpCurrencyId;
+    private final ArmorConfigManager configManager;
 
     public ArmorCostService(ArmorConfigManager configManager) {
+        this.configManager = configManager;
         this.mmocoreService = new MMOCoreService();
         this.economyService = new EconomyService();
         this.qpCurrencyId = configManager.getQpCurrencyId();
@@ -25,14 +28,17 @@ public class ArmorCostService {
         }
     }
 
-    public CostPreview buildPreview(Player player, ArmorSetDefinition set) {
+    public CostPreview buildPreview(Player player, ArmorSetDefinition set, String profile) {
         int level = mmocoreService.getPlayerLevel(player);
         String className = mmocoreService.getClassName(player);
         ArmorGenerationCost rule = set.getGenerationCost();
         int levelDelta = Math.max(0, level - rule.getLevelThreshold());
+        ArmorProfileBaseCost baseOverride = configManager.getGenerationProfileBaseCost(profile);
+        double slBase = baseOverride != null ? baseOverride.slBase() : rule.getSlBase();
+        double qpBase = baseOverride != null ? baseOverride.qpBase() : rule.getQpBase();
 
-        double rawSl = calcRaw(rule.getSlBase(), rule.getSlPerLevel(), levelDelta, rule.getMode());
-        double rawQp = calcRaw(rule.getQpBase(), rule.getQpPerLevel(), levelDelta, rule.getMode());
+        double rawSl = calcRaw(slBase, rule.getSlPerLevel(), levelDelta, rule.getMode());
+        double rawQp = calcRaw(qpBase, rule.getQpPerLevel(), levelDelta, rule.getMode());
 
         VipDiscount vip = resolveVipDiscount(player);
         double finalSl = rawSl * vip.multiplier();
