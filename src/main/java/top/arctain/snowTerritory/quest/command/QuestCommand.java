@@ -148,12 +148,12 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         List<Quest> bountyQuests = service.getActiveBountyQuests();
 
         if (allQuests.isEmpty() && bountyQuests.isEmpty()) {
-            MessageUtils.sendConfigMessage(player, "quest.list-empty",
+            MessageUtils.sendConfigRaw(player, "quest.list-empty",
                     "&7暂无任务");
             return true;
         }
 
-        MessageUtils.sendConfigMessage(player, "quest.list-header",
+        MessageUtils.sendConfigRaw(player, "quest.list-header",
                 "     &7========= &f进行中的任务 &7=========");
 
         displayQuests(player, bountyQuests);
@@ -173,7 +173,7 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         String questDesc = quest.getDescription();
         String statusText = getStatusText(quest.getStatus(), quest);
         
-        MessageUtils.sendConfigMessage(player, "quest.list-item",
+        MessageUtils.sendConfigRaw(player, "quest.list-item",
                 "&7&l·&r {quest} &7{status}",
                 "quest", questDesc,
                 "status", statusText);
@@ -237,14 +237,14 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         }
         String vipStorage = buildListProgressVipStorageSuffix(player, quest);
         String progressText = bar + fraction + vipStorage;
-        MessageUtils.sendConfigMessage(player, "quest.list-progress",
+        MessageUtils.sendConfigRaw(player, "quest.list-progress",
                 "&7  &l·&r 进度: {bar}{fraction}{vipStorage}",
                 "bar", bar, "fraction", fraction, "progressText", progressText,
                 "current", curStr, "required", reqStr, "vipStorage", vipStorage);
         
         String currentRating = QuestUtils.getTimeRatingDisplay(quest.getElapsedTime(), configManager.getBonusTimeBonus())
         + "&7 (&e" + DisplayUtils.formatTime(quest.getElapsedTime()) + "&7)";
-        MessageUtils.sendConfigMessage(player, "quest.list-rating",
+        MessageUtils.sendConfigRaw(player, "quest.list-rating",
                 "&7  &l·&r 评级: &e{currentRating}",
                 "currentRating", currentRating);
     }
