@@ -36,7 +36,7 @@ public final class QuestListProgressConfig {
     public static QuestListProgressConfig defaults() {
         return new QuestListProgressConfig(
                 true, DEFAULT_LENGTH, DisplayUtils.BarStyle.BARS,
-                "&c", "&e", "&a", "&{#FFAB5E}", "&7", true
+                "&c", "&e", "&a", "&3", "&7", true
         );
     }
 
@@ -55,7 +55,7 @@ public final class QuestListProgressConfig {
                 sec.getString("low-color", "&c") != null ? sec.getString("low-color", "&c") : "&c",
                 sec.getString("mid-color", "&e") != null ? sec.getString("mid-color", "&e") : "&e",
                 sec.getString("high-color", "&a") != null ? sec.getString("high-color", "&a") : "&a",
-                sec.getString("es-color", "&{#FFAB5E}") != null ? sec.getString("es-color", "&{#FFAB5E}") : "&{#FFAB5E}",
+                sec.getString("es-color", "&3") != null ? sec.getString("es-color", "&3") : "&3",
                 sec.getString("empty-slot-color", "&7") != null ? sec.getString("empty-slot-color", "&7") : "&7",
                 sec.getBoolean("show-es-segment", true)
         );

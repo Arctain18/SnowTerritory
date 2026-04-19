@@ -15,7 +15,7 @@ list-progress:
   mid-color: "&e"
   high-color: "&a"
   # 战利品仓库可补区段
-  es-color: "&{#FFAB5E}"
+  es-color: "&3"
   # 未填充槽位（空段）颜色
   empty-slot-color: "&7"
   # VIP2+ 且材料任务时，是否显示 ES 区段
