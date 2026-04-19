@@ -144,7 +144,9 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        List<Quest> allQuests = service.getAllQuests(player.getUniqueId());
+        List<Quest> allQuests = service.getAllQuests(player.getUniqueId()).stream()
+                .filter(q -> q.getStatus() != QuestStatus.COMPLETED)
+                .toList();
         List<Quest> bountyQuests = service.getActiveBountyQuests();
 
         if (allQuests.isEmpty() && bountyQuests.isEmpty()) {

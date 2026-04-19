@@ -13,7 +13,7 @@ already-active: "&c✗ &f你已有进行中的任务"
 reward-questpoint: "&a+{amount} 成就点数"
 reward-currency: "&a+{amount}x {currency}"
 material-submitted: "&a✓ &f已提交 &e{amount}x {item} &7(进度: {current}/{required})"
-list-header: "&7------------- &f&l任务列表 &7------------- "
+list-header: "&7------------- &{#FFD700}&l任务列表 &7------------- "
 list-item: "    &7▸ &e{quest} &8| {status}"
 # 任务一行进度；{vipStorage} 仅 VIP 有值（见 list-progress-vip-suffix）；{progressText} = {bar}{fraction}{vipStorage}
 list-progress: "&7      &l▸&r 进度: {bar}{fraction}{vipStorage}"
