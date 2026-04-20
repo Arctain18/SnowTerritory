@@ -12,6 +12,7 @@ import top.arctain.snowTerritory.armor.ArmorModule;
 import top.arctain.snowTerritory.reinforce.ReinforceModule;
 import top.arctain.snowTerritory.stfish.StfishModule;
 import top.arctain.snowTerritory.stocks.StocksModule;
+import top.arctain.snowTerritory.qol.QolModule;
 import top.arctain.snowTerritory.stvip.StvipModule;
 import top.arctain.snowTerritory.stvip.service.StvipService;
 import top.arctain.snowTerritory.utils.MessageUtils;
@@ -27,6 +28,7 @@ public class Main extends JavaPlugin {
     private StocksModule stocksModule;
     private StfishModule stfishModule;
     private ArmorModule armorModule;
+    private QolModule qolModule;
     private StvipModule stvipModule;
 
     @Override
@@ -108,6 +110,13 @@ public class Main extends JavaPlugin {
             MessageUtils.logInfo("Armor 模块已禁用（配置文件中 modules.armor = false）");
         }
 
+        if (pluginConfig.isModuleEnabled("qol")) {
+            this.qolModule = new QolModule(this);
+            this.qolModule.enable();
+        } else {
+            MessageUtils.logInfo("QOL 模块已禁用（配置文件中 modules.qol = false）");
+        }
+
         DebugResetConfirmHandler debugResetHandler = new DebugResetConfirmHandler(this);
         getServer().getPluginManager().registerEvents(new DebugResetConfirmListener(debugResetHandler), this);
 
@@ -150,6 +159,9 @@ public class Main extends JavaPlugin {
         }
         if (armorModule != null) {
             armorModule.disable();
+        }
+        if (qolModule != null) {
+            qolModule.disable();
         }
         MessageUtils.sendShutdownBanner(this);
     }
@@ -211,6 +223,10 @@ public class Main extends JavaPlugin {
 
     public ArmorModule getArmorModule() {
         return armorModule;
+    }
+
+    public QolModule getQolModule() {
+        return qolModule;
     }
 
     public StvipModule getStvipModule() {

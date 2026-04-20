@@ -13,6 +13,7 @@ modules:
   stocks: false
   stfish: true
   armor: true
+  qol: true
 
 # ============================================
 # 消息配置（全局，供 MessageUtils 使用）
@@ -105,6 +106,6 @@ messages:
   debug:
     usage: "&e用法: /sn debug resetconfig [模块] &7(不指定则删除整个配置目录，保留数据库)"
     confirm-prompt: "&e⚠ &f确定要删除 {module} 的配置并重载吗？&c输入 yes 确认&f，30秒内有效"
-    invalid-module: "&c✗ &f未知模块: {module}，可选: stvip, reinforce, enderstorage, quest, stocks, stfish, armor, all"
+    invalid-module: "&c✗ &f未知模块: {module}，可选: stvip, reinforce, enderstorage, quest, stocks, stfish, armor, qol, all"
     resetconfig-success: "&a✓ &f已删除 {module} {count} 个配置文件并重载（数据库已保留）"
 

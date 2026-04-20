@@ -1,0 +1,9 @@
+# QOL 体验优化模块
+# 路径: plugins/SnowTerritory/qol/config.yml
+
+qol:
+  # 禁止任意实体踩踏使耕地变为泥土
+  prevent-farmland-trample: true
+
+  # --- 以下为占位，后续功能可在此扩展 ---
+  # example-feature: false

@@ -139,6 +139,9 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         if (plugin.getArmorModule() != null) {
             plugin.getArmorModule().reload();
         }
+        if (plugin.getQolModule() != null) {
+            plugin.getQolModule().reload();
+        }
         MessageUtils.sendSuccess(sender, "command.reload-success", "&a✓ &f插件配置已重载！");
         return true;
     }
@@ -276,9 +279,9 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             String m = args[2].toLowerCase();
             if ("all".equals(m) || "全部".equals(m)) {
                 modules = null; // null 表示删除整个目录
-            } else if (!java.util.Set.of("stvip", "reinforce", "enderstorage", "es", "quest", "stocks", "stfish", "armor").contains(m)) {
+            } else if (!java.util.Set.of("stvip", "reinforce", "enderstorage", "es", "quest", "stocks", "stfish", "armor", "qol").contains(m)) {
                 MessageUtils.sendConfigMessage(sender, "debug.invalid-module",
-                        "&c✗ &f未知模块: {module}，可选: stvip, reinforce, enderstorage, quest, stocks, stfish, armor, all", "module", m);
+                        "&c✗ &f未知模块: {module}，可选: stvip, reinforce, enderstorage, quest, stocks, stfish, armor, qol, all", "module", m);
                 return true;
             } else {
                 modules = "es".equals(m) ? java.util.List.of("enderstorage") : java.util.List.of(m);
@@ -337,6 +340,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         if (stocksModule != null) stocksModule.reload();
         if (stfishModule != null) stfishModule.reload();
         if (armorModule != null) armorModule.reload();
+        if (plugin.getQolModule() != null) plugin.getQolModule().reload();
         return count;
     }
 
@@ -353,6 +357,8 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
                 case "stocks" -> stocksModule != null ? doResetModule(stocksModule.getConfigManager().getBaseDir(), () -> stocksModule.reload()) : 0;
                 case "stfish" -> stfishModule != null ? doResetModule(stfishModule.getConfigManager().getBaseDir(), () -> stfishModule.reload()) : 0;
                 case "armor" -> armorModule != null ? doResetModule(armorModule.getConfigManager().getBaseDir(), () -> armorModule.reload()) : 0;
+                case "qol" -> plugin.getQolModule() != null
+                        ? doResetModule(plugin.getQolModule().getConfigManager().getBaseDir(), () -> plugin.getQolModule().reload()) : 0;
                 default -> 0;
             };
         }
@@ -435,6 +441,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             if ("stocks".startsWith(input)) modules.add("stocks");
             if ("stfish".startsWith(input)) modules.add("stfish");
             if ("armor".startsWith(input)) modules.add("armor");
+            if ("qol".startsWith(input)) modules.add("qol");
             if ("all".startsWith(input) || "全部".startsWith(input)) modules.add("all");
             return modules;
         }
