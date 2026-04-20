@@ -191,21 +191,29 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
         String vipSuffix = preview.vip().active()
                 ? " &9| " + preview.vip().name() + " &a-" + preview.vip().percentOff() + "%"
                 : "";
+        String costLine = preview.vip().active()
+                ? MessageUtils.getConfigMessage("armor.confirm-preview-cost-vip",
+                        "    &7本次消耗: &{#75ddff}Sl &8{rawSl} &7→ &a{finalSl} &8| &{#ffd500}QP &8{rawQp} &7→ &a{finalQp}{vip}",
+                        "rawSl", num(preview.rawSl()),
+                        "finalSl", num(preview.finalSl()),
+                        "rawQp", num(preview.rawQp()),
+                        "finalQp", num(preview.finalQp()),
+                        "vip", vipSuffix)
+                : MessageUtils.getConfigMessage("armor.confirm-preview-cost-normal",
+                        "    &7本次消耗: &{#75ddff}Sl &a{finalSl} &8| &{#ffd500}QP &a{finalQp}",
+                        "finalSl", num(preview.finalSl()),
+                        "finalQp", num(preview.finalQp()));
         String profileDisplay = formatProfileDisplay(profile);
         String previewText = MessageUtils.getConfigMessage("armor.confirm-preview",
                 "&b✦ &f即将为你生成制式防具：&e{set} &7(profile: &f{profile}&7)\n" +
                         "&7玩家: &f{name} &8| &7等级: &f{level} &8| &7职业: &f{class}\n" +
-                        "&7本次消耗: Sl &8{rawSl} &7-> &a{finalSl} &7QP &8{rawQp} &7-> &a{finalQp}{vip}",
+                        "{costLine}",
                 "set", setDisplay,
                 "profile", profileDisplay,
                 "name", preview.playerName(),
                 "level", String.valueOf(preview.level()),
                 "class", preview.className(),
-                "rawSl", num(preview.rawSl()),
-                "finalSl", num(preview.finalSl()),
-                "rawQp", num(preview.rawQp()),
-                "finalQp", num(preview.finalQp()),
-                "vip", vipSuffix);
+                "costLine", costLine);
         MessageUtils.sendRaw(player, previewText);
 
         String confirmCmd = "/sn armor confirm " + pending.token();

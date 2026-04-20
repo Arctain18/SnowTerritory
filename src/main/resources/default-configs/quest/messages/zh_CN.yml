@@ -1,4 +1,5 @@
 # 任务模块消息（唯一来源，主 config 不重复）
+# 每条消息可为单行字符串，或为字符串列表；列表将按行依次显示在聊天栏（多行）。
 bounty-announcement: "&6✦ &e[悬赏任务] &f{quest} &8| &7完成任务可获得丰厚奖励"
 # VIP3 悬赏刷新前 5 分钟预告；{material} {amount}
 bounty-vip3-preview: "&3✦ &f悬赏预告：&e{material} &7x&e{amount} &8(5分钟后刷新)"

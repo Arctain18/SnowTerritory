@@ -167,11 +167,7 @@ public class MessageUtils {
      */
     public static void sendConfigMessage(CommandSender sender, String key, String defaultValue, String... placeholders) {
         String message = getMessage(key, defaultValue, placeholders);
-        String prefix = getPrefix(key);
-        if (sender != null) {
-            String text = parsePapi(sender, prefix + message);
-            sender.sendMessage(colorize(text));
-        }
+        sendChatLines(sender, key, message, true);
     }
     
     /**
@@ -179,7 +175,29 @@ public class MessageUtils {
      */
     public static void sendConfigRaw(CommandSender sender, String key, String defaultValue, String... placeholders) {
         String message = getMessage(key, defaultValue, placeholders);
-        sendRaw(sender, message);
+        sendChatLines(sender, null, message, false);
+    }
+
+    /**
+     * 将消息按换行拆成多条聊天（YAML 中可用字符串列表，加载为 \\n 拼接）。
+     * 带前缀时仅首条非空行前加模块前缀。
+     */
+    private static void sendChatLines(CommandSender sender, String prefixKey, String message, boolean withModulePrefix) {
+        if (sender == null || message == null || message.isEmpty()) {
+            return;
+        }
+        String normalized = message.replace("\r\n", "\n");
+        String prefix = withModulePrefix ? getPrefix(prefixKey) : "";
+        boolean firstNonEmpty = true;
+        for (String line : normalized.split("\n", -1)) {
+            if (line.isEmpty()) {
+                continue;
+            }
+            String combined = withModulePrefix && firstNonEmpty ? prefix + line : line;
+            String text = parsePapi(sender, combined);
+            sender.sendMessage(colorize(text));
+            firstNonEmpty = false;
+        }
     }
 
     /**
@@ -214,21 +232,14 @@ public class MessageUtils {
      * 发送普通消息给玩家（带默认前缀）
      */
     public static void sendMessage(CommandSender sender, String message) {
-        if (sender != null) {
-            String prefix = getPrefix(null);
-            String text = parsePapi(sender, prefix + message);
-            sender.sendMessage(colorize(text));
-        }
+        sendChatLines(sender, null, message, true);
     }
 
     /**
      * 发送不带前缀的消息
      */
     public static void sendRaw(CommandSender sender, String message) {
-        if (sender != null) {
-            String text = parsePapi(sender, message);
-            sender.sendMessage(colorize(text));
-        }
+        sendChatLines(sender, null, message, false);
     }
 
     /**

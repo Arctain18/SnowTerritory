@@ -18,9 +18,14 @@ confirm-preview:
   - "        &7正在等待您的供奉...  &e{set} &f{profile}"
   - "          &b{name} {class} &{#FFB8B8}Lv.{level}"
   - " "
-  - "    &7本次消耗: &{#75ddff}Sl &8{rawSl} &7→ &a{finalSl} &8| &{#ffd500}QP &8{rawQp} &7→ &a{finalQp}{vip}"
+  - "{costLine}"
   - "&r"
   - "&7----------------------------------------"
+
+# 确认界面中的消耗行：VIP 显示原价→折后；非 VIP 仅显示一个数值
+confirm-preview-cost-vip: "    &7本次消耗: &{#75ddff}Sl &8{rawSl} &7→ &a{finalSl} &8| &{#ffd500}QP &8{rawQp} &7→ &a{finalQp}{vip}"
+confirm-preview-cost-normal: "    &7本次消耗: &{#75ddff}Sl &7{finalSl} &8| &{#ffd500}QP &7{finalQp}"
+
 confirm-token-missing: "&c✗ &f缺少确认令牌，请重新执行生成命令"
 confirm-expired: "&c✗ &f确认已过期，请重新执行命令"
 confirm-insufficient: "&c✗ &f货币不足，无法生成。SL 缺少: &e{sl} &7| QP 缺少: &e{qp}"
