@@ -217,8 +217,7 @@ public class LootStorageServiceImpl implements LootStorageService {
                 .orElse(256);
         int base = Math.min(configured, resolver.resolvePerItemMax(player));
         var vip = plugin.getStvipService();
-        int withVip = base + (vip != null ? vip.getLootExtraPerItemMax(player) : 0);
-        return Math.min(configured, withVip);
+        return base + (vip != null ? vip.getLootExtraPerItemMax(player) : 0);
     }
 
     private Map<String, Integer> getPlayerData(UUID playerId) {

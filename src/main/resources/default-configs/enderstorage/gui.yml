@@ -28,9 +28,14 @@ gui:
         lore:
           - ""
 
-  # 默认物品 lore 模板，占位符: {amount} {max}
+  # 默认物品 lore 模板，占位符:
+  # {amount} 当前库存
+  # {max}/{max_amount} 非VIP上限（受物品配置和权限上限共同约束）
+  # {vip_max_amount} 含VIP加成后的上限
+  # {vip} VIP彩色称号
+  # {vip_bonus_percent} VIP加成百分比（按基础上限计算）
   default-lore:
-    - "&7数量: &e{amount} / {max}"
+    - "&7数量: &e{amount} / {max_amount}"
     - "&8| &7左键 ▸ 存入 8"
     - "&8| &7SHIFT+左键 ▸ 存入 64"
     - "&8| &7右键 ▸ 取出 8"

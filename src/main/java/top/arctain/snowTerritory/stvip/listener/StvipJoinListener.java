@@ -4,6 +4,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.quest.service.QuestService;
 import top.arctain.snowTerritory.stvip.config.StvipConfigManager;
@@ -12,6 +13,9 @@ import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.util.List;
 import java.util.OptionalInt;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** VIP 进服提示（默认关闭，见 stvip/config.yml）。 */
 public class StvipJoinListener implements Listener {
@@ -19,6 +23,7 @@ public class StvipJoinListener implements Listener {
     private final Main plugin;
     private final StvipConfigManager configManager;
     private final StvipService service;
+    private final Set<UUID> loginAllowedPlayers = ConcurrentHashMap.newKeySet();
 
     public StvipJoinListener(Main plugin, StvipConfigManager configManager, StvipService service) {
         this.plugin = plugin;
@@ -27,8 +32,18 @@ public class StvipJoinListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onLogin(PlayerLoginEvent event) {
+        if (event.getResult() == PlayerLoginEvent.Result.ALLOWED) {
+            loginAllowedPlayers.add(event.getPlayer().getUniqueId());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onJoin(PlayerJoinEvent event) {
         var player = event.getPlayer();
+        if (!loginAllowedPlayers.remove(player.getUniqueId())) {
+            return;
+        }
         var tierOpt = service.resolveTier(player);
         if (tierOpt.isEmpty()) {
             return;

@@ -29,11 +29,13 @@ public class LootStorageGUI {
 
     public static final NamespacedKey KEY_ITEM = new NamespacedKey("snowterritory", "enderstorage_item");
 
+    private final Main plugin;
     private final LootStorageService service;
     private final ModuleMessageProvider messages;
     private final EnderStorageConfigManager configManager;
 
     public LootStorageGUI(Main plugin, EnderStorageConfigManager configManager, LootStorageService service) {
+        this.plugin = plugin;
         this.service = service;
         this.configManager = configManager;
         String lang = configManager.getMainConfig().getString("features.default-language", "zh_CN");
@@ -85,7 +87,8 @@ public class LootStorageGUI {
                 continue;
             }
             int amount = data.getOrDefault(key, 0);
-            ItemStack display = buildDisplayItem(entry, amount);
+            int resolvedMax = service.resolvePerItemMax(player, key);
+            ItemStack display = buildDisplayItem(player, entry, amount, resolvedMax);
 
             // 找到下一个空的物品槽位（不覆盖装饰或翻页）
             while (index < materialSlots.size()) {
@@ -117,7 +120,7 @@ public class LootStorageGUI {
         top.arctain.snowTerritory.utils.GuiSlotUtils.applySlotItems(inv, decorations, true);
     }
 
-    private ItemStack buildDisplayItem(WhitelistEntry entry, int amount) {
+    private ItemStack buildDisplayItem(Player player, WhitelistEntry entry, int amount, int resolvedMax) {
         ItemStack base = buildRealItem(entry);
         ItemMeta meta = base.getItemMeta();
         if (meta != null) {
@@ -128,24 +131,30 @@ public class LootStorageGUI {
                 displayName = entry.getDisplay();
             }
             
+            int vipExtra = plugin.getStvipService() != null ? plugin.getStvipService().getLootExtraPerItemMax(player) : 0;
+            int maxAmount = Math.max(0, resolvedMax - Math.max(0, vipExtra));
+            int vipMaxAmount = resolvedMax;
+            String vipDisplay = plugin.getStvipService() != null
+                    ? plugin.getStvipService().resolveTier(player).map(top.arctain.snowTerritory.stvip.data.StvipTier::getDisplayName).orElse("")
+                    : "";
+            int vipBonusPercent = maxAmount <= 0 ? 0 : (int) Math.round(vipExtra * 100.0 / maxAmount);
+
             // 构建 lore：先添加自定义 lore（如果有），然后添加默认 lore
             List<String> lore = new ArrayList<>();
             
             // 1. 如果有自定义 lore，先添加到上方
             if (entry.getLore() != null && !entry.getLore().isEmpty()) {
                 for (String line : entry.getLore()) {
-                    String processed = line
-                            .replace("{amount}", String.valueOf(amount))
-                            .replace("{max}", String.valueOf(entry.getDefaultMax()));
+                    String processed = processLoreLine(line, amount, entry.getDefaultMax(), maxAmount, vipMaxAmount,
+                            vipDisplay, vipBonusPercent, vipExtra > 0);
                     lore.add(MessageUtils.colorize(processed));
                 }
             }
             
             // 2. 然后添加默认 lore 模板（显示在自定义 lore 下方）
             for (String line : configManager.getDefaultItemLoreTemplate()) {
-                String processed = line
-                        .replace("{amount}", String.valueOf(amount))
-                        .replace("{max}", String.valueOf(entry.getDefaultMax()));
+                String processed = processLoreLine(line, amount, entry.getDefaultMax(), maxAmount, vipMaxAmount,
+                        vipDisplay, vipBonusPercent, vipExtra > 0);
                 lore.add(MessageUtils.colorize(processed));
             }
             
@@ -155,6 +164,25 @@ public class LootStorageGUI {
             base.setItemMeta(meta);
         }
         return base;
+    }
+
+    private String processLoreLine(String raw, int amount, int defaultMax, int maxAmount, int vipMaxAmount,
+                                   String vipDisplay, int vipBonusPercent, boolean hasVipBonus) {
+        String line = raw;
+        if (hasVipBonus && line.contains("{max_amount}") && !line.contains("{vip_max_amount}")) {
+            line = line.replace("{max_amount}", "{vip_max_amount}&8({vip} &a+&f{vip_bonus_percent}%&8)");
+        }
+        if (hasVipBonus && line.contains("{max}") && !line.contains("{vip_max_amount}") && !line.contains("{max_amount}")) {
+            line = line.replace("{max}", "{vip_max_amount}&8({vip} &a+&f{vip_bonus_percent}%&8)");
+        }
+        return line
+                .replace("{amount}", String.valueOf(amount))
+                .replace("{max}", String.valueOf(maxAmount))
+                .replace("{default_max}", String.valueOf(defaultMax))
+                .replace("{max_amount}", String.valueOf(maxAmount))
+                .replace("{vip_max_amount}", String.valueOf(vipMaxAmount))
+                .replace("{vip}", vipDisplay)
+                .replace("{vip_bonus_percent}", String.valueOf(vipBonusPercent));
     }
 
     public ItemStack buildRealItem(WhitelistEntry entry) {
