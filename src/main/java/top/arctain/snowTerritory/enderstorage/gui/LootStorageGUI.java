@@ -145,7 +145,7 @@ public class LootStorageGUI {
             // 1. 如果有自定义 lore，先添加到上方
             if (entry.getLore() != null && !entry.getLore().isEmpty()) {
                 for (String line : entry.getLore()) {
-                    String processed = processLoreLine(line, amount, entry.getDefaultMax(), maxAmount, vipMaxAmount,
+                    String processed = processLoreLine(line, entry, amount, entry.getDefaultMax(), maxAmount, vipMaxAmount,
                             vipDisplay, vipBonusPercent, vipExtra > 0);
                     lore.add(MessageUtils.colorize(processed));
                 }
@@ -153,7 +153,7 @@ public class LootStorageGUI {
             
             // 2. 然后添加默认 lore 模板（显示在自定义 lore 下方）
             for (String line : configManager.getDefaultItemLoreTemplate()) {
-                String processed = processLoreLine(line, amount, entry.getDefaultMax(), maxAmount, vipMaxAmount,
+                String processed = processLoreLine(line, entry, amount, entry.getDefaultMax(), maxAmount, vipMaxAmount,
                         vipDisplay, vipBonusPercent, vipExtra > 0);
                 lore.add(MessageUtils.colorize(processed));
             }
@@ -166,14 +166,15 @@ public class LootStorageGUI {
         return base;
     }
 
-    private String processLoreLine(String raw, int amount, int defaultMax, int maxAmount, int vipMaxAmount,
+    private String processLoreLine(String raw, WhitelistEntry entry, int amount, int defaultMax, int maxAmount, int vipMaxAmount,
                                    String vipDisplay, int vipBonusPercent, boolean hasVipBonus) {
         String line = raw;
+        String vipSuffixFormat = configManager.getVipMaxSuffixFormat();
         if (hasVipBonus && line.contains("{max_amount}") && !line.contains("{vip_max_amount}")) {
-            line = line.replace("{max_amount}", "{vip_max_amount}&8({vip} &a+&f{vip_bonus_percent}%&8)");
+            line = line.replace("{max_amount}", vipSuffixFormat);
         }
         if (hasVipBonus && line.contains("{max}") && !line.contains("{vip_max_amount}") && !line.contains("{max_amount}")) {
-            line = line.replace("{max}", "{vip_max_amount}&8({vip} &a+&f{vip_bonus_percent}%&8)");
+            line = line.replace("{max}", vipSuffixFormat);
         }
         return line
                 .replace("{amount}", String.valueOf(amount))
@@ -181,6 +182,10 @@ public class LootStorageGUI {
                 .replace("{default_max}", String.valueOf(defaultMax))
                 .replace("{max_amount}", String.valueOf(maxAmount))
                 .replace("{vip_max_amount}", String.valueOf(vipMaxAmount))
+                .replace("{task_category}", entry.getTaskCategory())
+                .replace("{task_level}", entry.getTaskLevel())
+                .replace("{task_location}", entry.getTaskLocation())
+                .replace("{item_display}", entry.getDisplay())
                 .replace("{vip}", vipDisplay)
                 .replace("{vip_bonus_percent}", String.valueOf(vipBonusPercent));
     }

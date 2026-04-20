@@ -106,7 +106,7 @@ public class EnderStorageConfigManager {
 
     // ===== GUI 辅助方法 =====
 
-    /** 获取默认物品 lore 模板，占位符: {amount} {max} */
+    /** 获取默认物品 lore 模板，占位符: {amount} {max_amount} {vip_max_amount} {vip} */
     public List<String> getDefaultItemLoreTemplate() {
         List<String> configured;
         if (guiConfig == null) {
@@ -116,14 +116,23 @@ public class EnderStorageConfigManager {
         }
         if (configured == null || configured.isEmpty()) {
             return java.util.Arrays.asList(
-                    "&7数量: &e{amount} / {max}",
                     "&8| &7左键 ▸ 存入 8",
-                    "&8| &7SHIFT+左键 ▸ 存入 64",
+                    "&8| &7SHIFT + 左键 ▸ 存入 64",
                     "&8| &7右键 ▸ 取出 8",
-                    "&8| &7中键 ▸ 取出 64"
+                    "&8| &7SHIFT + 右键 ▸ 取出 64",
+                    "&b||ES &7库存: &b{amount} &8/ &7{max_amount}"
             );
         }
         return configured;
+    }
+
+    /** VIP 存量展示替换模板，默认: {vip_max_amount}({vip} +{vip_bonus_percent}%) */
+    public String getVipMaxSuffixFormat() {
+        if (guiConfig == null) {
+            return "{vip_max_amount}&8({vip} &a+&f{vip_bonus_percent}%&8)";
+        }
+        return guiConfig.getString("gui.vip-max-suffix-format",
+                "{vip_max_amount}&8({vip} &a+&f{vip_bonus_percent}%&8)");
     }
 
     /**

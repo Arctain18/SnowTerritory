@@ -34,12 +34,25 @@ gui:
   # {vip_max_amount} 含VIP加成后的上限
   # {vip} VIP彩色称号
   # {vip_bonus_percent} VIP加成百分比（按基础上限计算）
+  # {task_category} 任务分类（物品可单独配置）
+  # {task_level} 任务等级（物品可单独配置）
+  # {task_location} 任务地点（物品可单独配置）
+  # {item_display} 物品显示名
+  # VIP玩家会把 {max_amount}/{max} 自动替换为 gui.vip-max-suffix-format
+  vip-max-suffix-format: "{vip_max_amount} &8({vip} &a+&f{vip_bonus_percent}%&8)"
   default-lore:
-    - "&7数量: &e{amount} / {max_amount}"
-    - "&8| &7左键 ▸ 存入 8"
-    - "&8| &7SHIFT+左键 ▸ 存入 64"
-    - "&8| &7右键 ▸ 取出 8"
-    - "&8| &7中键 ▸ 取出 64"
+    - "&{#d6fff6}&m-&{#fffad6}&m=&{#FFFFFF}&m-----------------&{#fffad6}&m=&{#d6fff6}&m-"
+    - ""
+    - "  &7{task_category} &8- &7[&fLv.{task_level}&7]"
+    - "  &{#4d99eb}&l◈ &f{task_location}"
+    - ""
+    - "&{#d6fff6}&m-&{#fffad6}&m=&{#FFFFFF}&m-----------------&{#fffad6}&m=&{#d6fff6}&m-"
+    - " &8| &7左键 &8▸ &{#55ff55}存入 &f8 &7个"
+    - " &8| &7SHIFT&8 + &7左键 &8▸ &{#55ff55}存入 &f64 &7个"
+    - " &8| &7右键 &8▸ &{#ff5555}取出 &f8 &7个"
+    - " &8| &7SHIFT&8 + &7右键 &8▸ &{#ff5555}取出 &f64 &7个"
+    - ""
+    - " &b|| &{#3ab835}E&{#6dc97f}S &7库存: &{#42ddeb}{amount} &8/ &7{max_amount}"
 
   # 物品顺序与分组（只展示出现在这里并且在白名单中的物品）
   materials:
@@ -50,12 +63,18 @@ gui:
         max: 256
       狼王獠牙:
         max: 128
+        task-category: "任务材料"
+        task-level: "5"
+        task-location: "&{#b89b98}野狼 &8(3686,3603)"
   # 注意:
   # 1. 如果物品配置为数字（如 "优质狼皮: 256"），等价于 {max: 256}，同样会使用上面的 default-lore
   # 2. 如果某个物品需要单独的提示，可以在该物品下增加 lore 节点覆盖默认值:
   #    示例:
   #      某物品:
   #        max: 64
+  #        task-category: "任务材料"
+  #        task-level: "5"
+  #        task-location: "&f野狼 &8(3686,3603)"
   #        lore:
   #          - "&7自定义第一行"
   #          - "&7自定义第二行"

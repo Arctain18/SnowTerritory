@@ -77,6 +77,9 @@ public class LootStorageServiceImpl implements LootStorageService {
                 Object value = typeSection.get(mmoItemId);
                 int max;
                 java.util.List<String> lore = null;
+                String taskCategory = "任务材料";
+                String taskLevel = "-";
+                String taskLocation = "-";
                 
                 if (value instanceof org.bukkit.configuration.ConfigurationSection) {
                     // 对象格式: "itemName: {max: 256, lore: [...]}"
@@ -86,6 +89,9 @@ public class LootStorageServiceImpl implements LootStorageService {
                         if (itemSection.contains("lore")) {
                             lore = itemSection.getStringList("lore");
                         }
+                        taskCategory = itemSection.getString("task-category", "任务材料");
+                        taskLevel = itemSection.getString("task-level", "-");
+                        taskLocation = itemSection.getString("task-location", "-");
                     } else {
                         max = 256;
                     }
@@ -95,7 +101,8 @@ public class LootStorageServiceImpl implements LootStorageService {
                 }
                 
                 // display 使用 mmoItemId，material 设为 null（MMOItems 物品不需要 material）
-                result.put(key, new WhitelistEntry(key, mmoItemId, mmoType, mmoItemId, null, max, lore));
+                result.put(key, new WhitelistEntry(key, mmoItemId, mmoType, mmoItemId, null, max, lore,
+                        taskCategory, taskLevel, taskLocation));
             }
         }
         return result;
