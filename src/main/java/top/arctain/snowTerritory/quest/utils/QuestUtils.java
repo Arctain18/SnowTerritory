@@ -3,6 +3,7 @@ package top.arctain.snowTerritory.quest.utils;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.item.mmoitem.MMOItem;
 import net.Indyuce.mmoitems.api.Type;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -77,8 +78,8 @@ public class QuestUtils {
     }
 
     /**
-     * 获取物品的展示名称（Display Name）
-     * 优先直接从物品的 ItemMeta 中读取，这通常就是 MMOItems 生成时写入的名字
+     * 获取物品的展示名称（含原版 / MMOItems 写入的颜色与样式）
+     * 优先序列化 ItemMeta 的 Adventure 展示名，与物品栏中显示一致。
      */
     public static String getMMOItemName(ItemStack item) {
         if (!isMMOItem(item)) {
@@ -87,6 +88,15 @@ public class QuestUtils {
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
             return null;
+        }
+        if (meta.hasDisplayName()) {
+            var comp = meta.displayName();
+            if (comp != null) {
+                String legacy = LegacyComponentSerializer.legacySection().serialize(comp);
+                if (legacy != null && !legacy.isEmpty()) {
+                    return legacy;
+                }
+            }
         }
         String displayName = meta.getDisplayName();
         return (displayName == null || displayName.isEmpty()) ? null : displayName;

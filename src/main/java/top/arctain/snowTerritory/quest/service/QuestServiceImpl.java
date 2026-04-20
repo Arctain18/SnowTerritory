@@ -95,14 +95,61 @@ public class QuestServiceImpl implements QuestService {
     
     @Override
     public void initialize() {
+        loadPersistedQuestState();
         bountyScheduler.start();
+    }
+
+    /** 从 SQLite 恢复玩家个人任务与全局悬赏列表。 */
+    private void loadPersistedQuestState() {
+        try {
+            Map<UUID, List<Quest>> loaded = databaseDao.loadPlayerQuestsGrouped();
+            playerQuests.clear();
+            playerQuests.putAll(loaded);
+            List<Quest> bountyLoaded = databaseDao.loadBountyQuests();
+            synchronized (bountyQuests) {
+                bountyQuests.clear();
+                bountyQuests.addAll(bountyLoaded);
+            }
+        } catch (Exception e) {
+            MessageUtils.logWarning("加载持久化任务失败（将使用空列表）: " + e.getMessage());
+        }
     }
     
     @Override
     public void shutdown() {
         bountyScheduler.stop();
+        flushAllQuestsToDatabase();
         playerQuests.clear();
-        bountyQuests.clear();
+        synchronized (bountyQuests) {
+            bountyQuests.clear();
+        }
+    }
+
+    private void persistPlayerQuest(Quest quest) {
+        if (quest == null || quest.getPlayerId() == null) {
+            return;
+        }
+        databaseDao.upsertQuestInstance(quest);
+    }
+
+    private void persistBountyListFull() {
+        synchronized (bountyQuests) {
+            databaseDao.replaceBountyQuestInstances(new ArrayList<>(bountyQuests));
+        }
+    }
+
+    private void flushAllQuestsToDatabase() {
+        for (List<Quest> list : playerQuests.values()) {
+            if (list == null) {
+                continue;
+            }
+            for (Quest q : list) {
+                if (q != null && q.getPlayerId() != null) {
+                    databaseDao.upsertQuestInstance(q);
+                }
+            }
+        }
+        persistBountyListFull();
     }
     
     @Override
@@ -110,6 +157,14 @@ public class QuestServiceImpl implements QuestService {
         bountyScheduler.stop();
         configManager.loadAll();
         bountyScheduler.start();
+    }
+
+    @Override
+    public void persistQuestToDatabase(Quest quest) {
+        if (quest == null) {
+            return;
+        }
+        databaseDao.upsertQuestInstance(quest);
     }
     
     // ==================== 普通任务操作 ====================
@@ -134,6 +189,7 @@ public class QuestServiceImpl implements QuestService {
         }
         
         playerQuests.computeIfAbsent(playerId, k -> new ArrayList<>()).add(quest);
+        persistPlayerQuest(quest);
         return quest;
     }
     
@@ -196,6 +252,7 @@ public class QuestServiceImpl implements QuestService {
             
             Quest updated = applyProgress(quest, amount);
             quests.set(i, updated);
+            persistPlayerQuest(updated);
             
             if (updated.isCompleted()) {
                 completeQuest(playerId, updated.getQuestId(), progressRewardMultiplier.get());
@@ -213,7 +270,9 @@ public class QuestServiceImpl implements QuestService {
                     continue;
                 }
                 
-                bountyQuests.set(i, applyProgress(quest, amount));
+                Quest progressed = applyProgress(quest, amount);
+                bountyQuests.set(i, progressed);
+                databaseDao.upsertQuestInstance(progressed);
                 return true;
             }
         }
@@ -260,6 +319,7 @@ public class QuestServiceImpl implements QuestService {
         }
         
         quest.setStatus(QuestStatus.COMPLETED);
+        persistPlayerQuest(quest);
         
         // 记录完成任务到数据库
         databaseDao.recordCompletedQuest(playerId, quest);
@@ -640,6 +700,7 @@ public class QuestServiceImpl implements QuestService {
             bountyQuests.removeIf(q -> q.getStatus() == QuestStatus.ACTIVE);
             bountyQuests.add(quest);
         }
+        persistBountyListFull();
     }
     
     private void broadcastBountyQuest(Quest quest) {

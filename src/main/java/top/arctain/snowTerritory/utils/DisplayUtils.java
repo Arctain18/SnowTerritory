@@ -123,6 +123,24 @@ public final class DisplayUtils {
         return high;
     }
 
+    /**
+     * 与 {@link #progressBar} 已填充区段同色阶：进度 &lt; 1/3 低档色，&lt; 2/3 中档，否则高档（默认红 / 黄 / 绿）。
+     *
+     * @return 未 colorize 的 &amp; 颜色前缀，可直接拼进消息占位符 {@code {tier}}
+     */
+    public static String progressTierColorCode(int current, int total,
+            String lowColor, String midColor, String highColor) {
+        if (total <= 0) {
+            total = 1;
+        }
+        int safe = Math.max(0, Math.min(current, total));
+        double p = safe / (double) total;
+        String low = (lowColor == null || lowColor.isEmpty()) ? "&c" : lowColor;
+        String mid = (midColor == null || midColor.isEmpty()) ? "&e" : midColor;
+        String high = (highColor == null || highColor.isEmpty()) ? "&a" : highColor;
+        return pickColor(p, low, mid, high);
+    }
+
     private static int[] parseFraction(String s) {
         if (s == null) throw new IllegalArgumentException("fractionText is null");
         Matcher m = FRACTION.matcher(s);

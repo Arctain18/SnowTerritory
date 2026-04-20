@@ -33,6 +33,11 @@ public interface QuestService {
      * 重载配置
      */
     void reload();
+
+    /**
+     * 将任务当前状态写入数据库（监听器等在外部修改 {@link Quest#setStatus} 后调用）。
+     */
+    void persistQuestToDatabase(Quest quest);
     
     /**
      * 玩家接取普通任务

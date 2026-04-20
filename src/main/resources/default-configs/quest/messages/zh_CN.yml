@@ -13,20 +13,30 @@ quest-not-found: "&c✗ &f未找到任务"
 already-active: "&c✗ &f你已有进行中的任务"
 reward-questpoint: "&a+{amount} 成就点数"
 reward-currency: "&a+{amount}x {currency}"
-material-submitted: "&a✓ &f已提交 &e{amount}x {item} &7(进度: {current}/{required})"
+# {tier} 与列表进度条一致：按当前/需求比例分档，颜色同 quest/config.yml → list-progress 的 low/mid/high-color
+material-submitted: "&a✓ &{#5BBFC7}交付 {item} &7x{amount}&8 ({tier}{current}&8/&7{required}&8)"
 list-header: "&7------------- &{#FFD700}&l任务列表 &7------------- "
+# 列表第一行由代码拼装（前缀 + 任务描述 + 分隔 + 状态）；整行悬停显示 list-item-hover
+list-item-prefix: "    &7▸ &e"
+list-item-sep: " &8| "
+# {tierName}=难度档名(已含颜色); {matLetter}=材料等级字母 A-Z; {difficulty}=难度 1-32
+list-item-hover: "&7任务难度: {tierName} {matLetter}{difficulty}"
 list-item: "    &7▸ &e{quest} &8| {status}"
-# 任务一行进度；{vipStorage} 仅 VIP 有值（见 list-progress-vip-suffix）；{progressText} = {bar}{fraction}{vipStorage}
-list-progress: "&7      &l▸&r 进度: {bar}{fraction}{vipStorage}"
-# VIP 时行尾；{vip}=档位 display-name，{amount}=本任务材料在战利品仓库总数量
-list-progress-vip-suffix: " {vip} &{#6dc97f}ES &7库存: &3{amount}"
-# 条后数字/括号，可与 list-progress 拆开改
-list-fraction: "&7 (&e{current}&7/&e{required}&7)"
+# 任务一行进度；VIP 时程序会在行尾追加「ES 库存」片段（带悬停，见 list-progress-es-*）
+list-progress: "&7      &l▸&r 进度: {bar}{fraction}"
+# VIP 进度行尾：可见标签（不含 VIP 名）；悬停文案支持 {vip}；{amount}=本任务材料在 ES 总数量
+list-progress-es-label: " &{#6dc97f}ES &7库存"
+list-progress-es-hover: "&f{vip}&8权限: &7远程&{#3ab835}E&{#6dc97f}S&7访问"
+list-progress-es-tail: "&7: &3{amount}"
+# 条后数字/括号；{tier} 同 material-submitted，与进度条填充色分档一致
+list-fraction: "&8 ({tier}{current}&8/&7{required}&8)"
 list-rating: "&7      &l▸&r 评级: &e{currentRating}"
 list-empty: "&7暂无进行中的任务"
 bounty-completed: "&a✓ &f悬赏任务完成！使用 &e/sn q complete &f领取奖励"
 bounty-claimed: "&a✓ &f已领取 &e{count} &f个悬赏任务奖励"
-completion: "&a✓ &f任务完成！评级: &e{rating} &7(倍数: {multiplier}x) &f获得: &b{questpoint} 成就点 &8+ &e{currency} 货币"
+completion: 
+- "&a✓ &f任务完成！评级: &e{rating} "
+- "        &a+ &7{questpoint} &{#4a8ba1}星尘 &8| &a+ &7{currency} &{#ffd500}成就点 &7(倍数: {multiplier}x)"
 no-completed-bounty: "&c✗ &f没有已完成的悬赏任务可领取"
 complete-no-permission: "&c✗ &f你不是 VIP，无法使用远程提交"
 complete-target-denied: "&c✗ &f仅 OP 可指定其他玩家"

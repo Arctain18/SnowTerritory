@@ -78,6 +78,39 @@
                                         <!-- <exclude>org/sqlite/native/Windows-x86_64/**</exclude> -->
                                     </excludes>
                                 </filter>
+                                <!-- 合并依赖时去掉各 JAR 自带的清单与 JPMS 元数据，避免 shade 报 META-INF/MANIFEST.MF、module-info 重叠（对非模块化插件无影响） -->
+                                <filter>
+                                    <artifact>com.zaxxer:HikariCP</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/versions/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.xerial:sqlite-jdbc</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/versions/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>net.objecthunter:exp4j</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/versions/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.slf4j:slf4j-api</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/versions/**</exclude>
+                                    </excludes>
+                                </filter>
                             </filters>
                         </configuration>
                     </execution>

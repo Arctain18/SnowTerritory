@@ -19,11 +19,15 @@ import top.arctain.snowTerritory.stvip.service.StvipService;
 import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.DisplayUtils;
 import top.arctain.snowTerritory.quest.utils.QuestUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -174,29 +178,92 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
 
         String questDesc = quest.getDescription();
         String statusText = getStatusText(quest.getStatus(), quest);
-        
-        MessageUtils.sendConfigRaw(player, "quest.list-item",
-                "&7&l·&r {quest} &7{status}",
-                "quest", questDesc,
-                "status", statusText);
+
+        String prefixRaw = MessageUtils.getConfigMessage("quest.list-item-prefix",
+                "    &7▸ &e");
+        String sepRaw = MessageUtils.getConfigMessage("quest.list-item-sep",
+                " &8| ");
+        String hoverRaw = MessageUtils.getConfigMessage("quest.list-item-hover",
+                "&7任务难度: {tierName} &7- &f {matLetter}{difficulty}",
+                "tierName", difficultyTierNameLegacy(quest.getDifficulty()),
+                "matLetter", materialLevelLetter(quest.getLevel()),
+                "difficulty", String.valueOf(quest.getDifficulty()));
+        Component hover = LegacyComponentSerializer.legacySection().deserialize(
+                MessageUtils.colorize(MessageUtils.parsePlaceholders(player, hoverRaw)));
+
+        Component prefix = LegacyComponentSerializer.legacySection().deserialize(
+                MessageUtils.colorize(MessageUtils.parsePlaceholders(player, prefixRaw)));
+        Component questPart = LegacyComponentSerializer.legacySection().deserialize(
+                MessageUtils.colorize(MessageUtils.parsePlaceholders(player, questDesc)));
+        Component tail = LegacyComponentSerializer.legacySection().deserialize(
+                MessageUtils.colorize(sepRaw + statusText));
+
+        Component line = Component.empty()
+                .append(prefix)
+                .append(questPart)
+                .append(tail)
+                .hoverEvent(HoverEvent.showText(hover));
+        player.sendMessage(line);
 
         if (service.isActiveAndNotExpired(quest)) {
             displayQuestProgress(player, quest);
         }
     }
 
-    /** VIP 在进度行尾追加 ES 总库存；非 VIP 或无法解析档位时返回空串。 */
-    private String buildListProgressVipStorageSuffix(Player player, Quest quest) {
+    /** 难度 1-8 / 9-16 / 17-24 / 25-32 对应档名（含颜色），与需求一致。 */
+    private static String difficultyTierNameLegacy(int difficulty) {
+        int d = Math.max(1, Math.min(32, difficulty));
+        if (d <= 8) {
+            return "&aEasy";
+        }
+        if (d <= 16) {
+            return "&eNormal";
+        }
+        if (d <= 24) {
+            return "&4Hard";
+        }
+        return "&{#4E0096}Expert";
+    }
+
+    /** 材料等级 1→A … 26→Z；超出范围用数字兜底。 */
+    private static String materialLevelLetter(int materialLevel) {
+        if (materialLevel < 1) {
+            return "?";
+        }
+        if (materialLevel > 26) {
+            return String.valueOf(materialLevel);
+        }
+        return String.valueOf((char) ('A' + materialLevel - 1));
+    }
+
+    /**
+     * VIP：行尾「ES 库存」可见标签（不含 VIP 名），悬停显示 yml（如 list-progress-es-hover）。
+     */
+    private Optional<Component> buildListProgressEsStorageFragment(Player player, Quest quest) {
         if (stvipService == null) {
-            return "";
+            return Optional.empty();
         }
         return stvipService.resolveTier(player).map(tier -> {
             int esTotal = lootStorageService != null
                     ? lootStorageService.getAmount(player.getUniqueId(), quest.getMaterialKey()) : 0;
             String vipLabel = tier.getDisplayName() != null ? tier.getDisplayName() : tier.getId();
-            return MessageUtils.getConfigMessage("quest.list-progress-vip-suffix",
-                    " {vip} &{#6dc97f}ES &7库存: &3{amount}", "vip", vipLabel, "amount", String.valueOf(esTotal));
-        }).orElse("");
+            String labelRaw = MessageUtils.getConfigMessage("quest.list-progress-es-label",
+                    " &{#6dc97f}ES &7库存");
+            String hoverRaw = MessageUtils.getConfigMessage("quest.list-progress-es-hover",
+                    "&f{vip} &7权限",
+                    "vip", vipLabel);
+            String tailRaw = MessageUtils.getConfigMessage("quest.list-progress-es-tail",
+                    "&7: &3{amount}",
+                    "amount", String.valueOf(esTotal));
+            String labelParsed = MessageUtils.colorize(MessageUtils.parsePlaceholders(player, labelRaw));
+            String hoverParsed = MessageUtils.colorize(MessageUtils.parsePlaceholders(player, hoverRaw));
+            String tailParsed = MessageUtils.colorize(MessageUtils.parsePlaceholders(player, tailRaw));
+            Component label = LegacyComponentSerializer.legacySection().deserialize(labelParsed)
+                    .hoverEvent(HoverEvent.showText(
+                            LegacyComponentSerializer.legacySection().deserialize(hoverParsed)));
+            Component tail = LegacyComponentSerializer.legacySection().deserialize(tailParsed);
+            return label.append(tail);
+        });
     }
 
     private void displayQuestProgress(Player player, Quest quest) {
@@ -205,8 +272,11 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         String curStr = String.valueOf(cur);
         String reqStr = String.valueOf(req);
         QuestListProgressConfig cfg = configManager.getListProgressConfig();
+        String tier = DisplayUtils.progressTierColorCode(cur, req,
+                cfg.getLowColor(), cfg.getMidColor(), cfg.getHighColor());
         String fraction = MessageUtils.getConfigMessage("quest.list-fraction",
-                "&7 (&e{current}&7/&e{required}&7)",
+                "&8 ({tier}{current}&8/{tier}{required}&8)",
+                "tier", tier,
                 "current", curStr, "required", reqStr);
 
         String bar = "";
@@ -237,12 +307,19 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
                         cur, req, cfg.getLength(), cfg.getEmptySlotColor());
             }
         }
-        String vipStorage = buildListProgressVipStorageSuffix(player, quest);
-        String progressText = bar + fraction + vipStorage;
-        MessageUtils.sendConfigRaw(player, "quest.list-progress",
-                "&7  &l·&r 进度: {bar}{fraction}{vipStorage}",
-                "bar", bar, "fraction", fraction, "progressText", progressText,
-                "current", curStr, "required", reqStr, "vipStorage", vipStorage);
+        String headRaw = MessageUtils.getConfigMessage("quest.list-progress",
+                "&7      &l▸&r 进度: {bar}{fraction}",
+                "bar", bar, "fraction", fraction);
+        Optional<Component> esFragment = buildListProgressEsStorageFragment(player, quest);
+        if (esFragment.isPresent()) {
+            Component head = LegacyComponentSerializer.legacySection().deserialize(
+                    MessageUtils.colorize(MessageUtils.parsePlaceholders(player, headRaw)));
+            player.sendMessage(head.append(esFragment.get()));
+        } else {
+            MessageUtils.sendConfigRaw(player, "quest.list-progress",
+                    "&7      &l▸&r 进度: {bar}{fraction}",
+                    "bar", bar, "fraction", fraction);
+        }
         
         String currentRating = QuestUtils.getTimeRatingDisplay(quest.getElapsedTime(), configManager.getBonusTimeBonus())
         + "&7 (&e" + DisplayUtils.formatTime(quest.getElapsedTime()) + "&7)";

@@ -168,6 +168,7 @@ public class CollectHarvestListener implements Listener {
         for (Quest quest : questService.getActiveBountyQuests()) {
             if (quest.getType() == QuestType.COLLECT && cropKey.equals(quest.getMaterialKey()) && quest.isCompleted()) {
                 quest.setStatus(QuestStatus.COMPLETED);
+                questService.persistQuestToDatabase(quest);
                 MessageUtils.sendConfigMessage(player, "quest.bounty-completed",
                         "&a✓ &f悬赏任务完成！使用 &e/sn q complete &f领取奖励");
                 return;

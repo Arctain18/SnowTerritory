@@ -8,12 +8,14 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.quest.config.QuestConfigManager;
+import top.arctain.snowTerritory.quest.config.QuestListProgressConfig;
 import top.arctain.snowTerritory.quest.data.Quest;
 import top.arctain.snowTerritory.quest.data.QuestReleaseMethod;
 import top.arctain.snowTerritory.quest.data.QuestStatus;
 import top.arctain.snowTerritory.quest.data.QuestType;
 import top.arctain.snowTerritory.quest.service.QuestService;
 import top.arctain.snowTerritory.quest.utils.QuestUtils;
+import top.arctain.snowTerritory.utils.DisplayUtils;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
 import java.util.List;
@@ -25,12 +27,14 @@ import java.util.List;
 public class QuestListener implements Listener {
 
     private final QuestService questService;
-    
+    private final QuestConfigManager configManager;
+
     // 当前事件处理的上下文（事件处理器在单线程中同步执行，因此可以安全使用）
     private MaterialSubmissionContext currentContext;
 
     public QuestListener(Main plugin, QuestService questService, QuestConfigManager configManager) {
         this.questService = questService;
+        this.configManager = configManager;
     }
 
     /**
@@ -214,14 +218,28 @@ public class QuestListener implements Listener {
         if (isBountyQuestCompleted(updatedQuest)) {
             sendBountyQuestCompletionMessage(updatedQuest);
             updatedQuest.setStatus(QuestStatus.COMPLETED);
+            questService.persistQuestToDatabase(updatedQuest);
         }
     }
 
     private void sendSubmissionMessage(Quest updatedQuest, int toSubmit) {
+        String itemLabel = QuestUtils.getMMOItemName(currentContext.item);
+        if (itemLabel == null) {
+            itemLabel = QuestUtils.getMMOItemDisplayName(currentContext.itemKey);
+        }
+        if (itemLabel == null) {
+            itemLabel = currentContext.materialName;
+        }
+        QuestListProgressConfig listCfg = configManager.getListProgressConfig();
+        String tier = DisplayUtils.progressTierColorCode(
+                updatedQuest.getCurrentAmount(),
+                updatedQuest.getRequiredAmount(),
+                listCfg.getLowColor(), listCfg.getMidColor(), listCfg.getHighColor());
         MessageUtils.sendConfigMessage(currentContext.player, "quest.material-submitted",
-                "&a✓ &f已提交 &e{amount}x {item} &7(进度: {current}/{required})",
+                "&a✓ &{#5BBFC7}交付 {item} &7x{amount}&8 ({tier}{current}&8/{tier}{required}&8)",
                 "amount", String.valueOf(toSubmit),
-                "item", currentContext.materialName,
+                "item", itemLabel,
+                "tier", tier,
                 "current", String.valueOf(updatedQuest.getCurrentAmount()),
                 "required", String.valueOf(updatedQuest.getRequiredAmount()));
     }

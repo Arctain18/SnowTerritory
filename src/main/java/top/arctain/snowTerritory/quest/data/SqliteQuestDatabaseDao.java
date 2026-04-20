@@ -10,6 +10,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -64,6 +70,28 @@ public class SqliteQuestDatabaseDao implements QuestDatabaseDao {
                     );
                     """)) {
                 ps.execute();
+            }
+            try (PreparedStatement ps = conn.prepareStatement("""
+                    CREATE TABLE IF NOT EXISTS st_quest_instances (
+                        quest_uuid TEXT PRIMARY KEY,
+                        owner_player_uuid TEXT,
+                        quest_type TEXT NOT NULL,
+                        release_method TEXT NOT NULL,
+                        material_key TEXT NOT NULL,
+                        material_name TEXT NOT NULL,
+                        required_amount INTEGER NOT NULL,
+                        current_amount INTEGER NOT NULL,
+                        start_time_ms INTEGER NOT NULL,
+                        time_limit_ms INTEGER NOT NULL,
+                        quest_level INTEGER NOT NULL,
+                        difficulty INTEGER NOT NULL,
+                        status TEXT NOT NULL
+                    );
+                    """)) {
+                ps.execute();
+            }
+            try (Statement st = conn.createStatement()) {
+                st.execute("CREATE INDEX IF NOT EXISTS idx_st_quest_instances_owner ON st_quest_instances(owner_player_uuid);");
             }
         } catch (SQLException e) {
             MessageUtils.logError("初始化任务数据库表失败: " + e.getMessage());
@@ -158,6 +186,167 @@ public class SqliteQuestDatabaseDao implements QuestDatabaseDao {
             ps.executeUpdate();
         } catch (SQLException e) {
             MessageUtils.logError("写入每日用量失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void upsertQuestInstance(Quest quest) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement("""
+                     INSERT INTO st_quest_instances (
+                         quest_uuid, owner_player_uuid, quest_type, release_method, material_key, material_name,
+                         required_amount, current_amount, start_time_ms, time_limit_ms, quest_level, difficulty, status
+                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     ON CONFLICT(quest_uuid) DO UPDATE SET
+                         owner_player_uuid = excluded.owner_player_uuid,
+                         quest_type = excluded.quest_type,
+                         release_method = excluded.release_method,
+                         material_key = excluded.material_key,
+                         material_name = excluded.material_name,
+                         required_amount = excluded.required_amount,
+                         current_amount = excluded.current_amount,
+                         start_time_ms = excluded.start_time_ms,
+                         time_limit_ms = excluded.time_limit_ms,
+                         quest_level = excluded.quest_level,
+                         difficulty = excluded.difficulty,
+                         status = excluded.status
+                     """)) {
+            bindQuest(ps, quest);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            MessageUtils.logError("写入任务实例失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteQuestInstance(UUID questId) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement("DELETE FROM st_quest_instances WHERE quest_uuid = ?")) {
+            ps.setString(1, questId.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            MessageUtils.logError("删除任务实例失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void replaceBountyQuestInstances(List<Quest> bountyQuests) {
+        try (Connection conn = dataSource.getConnection()) {
+            boolean ac = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+            try {
+                try (PreparedStatement del = conn.prepareStatement(
+                        "DELETE FROM st_quest_instances WHERE owner_player_uuid IS NULL")) {
+                    del.executeUpdate();
+                }
+                if (bountyQuests != null && !bountyQuests.isEmpty()) {
+                    try (PreparedStatement ps = conn.prepareStatement("""
+                            INSERT INTO st_quest_instances (
+                                quest_uuid, owner_player_uuid, quest_type, release_method, material_key, material_name,
+                                required_amount, current_amount, start_time_ms, time_limit_ms, quest_level, difficulty, status
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            """)) {
+                        for (Quest q : bountyQuests) {
+                            bindQuest(ps, q);
+                            ps.addBatch();
+                        }
+                        ps.executeBatch();
+                    }
+                }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                MessageUtils.logError("同步悬赏任务到数据库失败: " + e.getMessage());
+            } finally {
+                conn.setAutoCommit(ac);
+            }
+        } catch (SQLException e) {
+            MessageUtils.logError("同步悬赏任务到数据库失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Map<UUID, List<Quest>> loadPlayerQuestsGrouped() {
+        Map<UUID, List<Quest>> map = new HashMap<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT * FROM st_quest_instances WHERE owner_player_uuid IS NOT NULL")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Quest q = readQuest(rs);
+                    if (q == null || q.getPlayerId() == null) {
+                        continue;
+                    }
+                    map.computeIfAbsent(q.getPlayerId(), k -> new ArrayList<>()).add(q);
+                }
+            }
+        } catch (SQLException e) {
+            MessageUtils.logError("加载玩家任务失败: " + e.getMessage());
+        }
+        return map;
+    }
+
+    @Override
+    public List<Quest> loadBountyQuests() {
+        List<Quest> list = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT * FROM st_quest_instances WHERE owner_player_uuid IS NULL ORDER BY start_time_ms ASC")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Quest q = readQuest(rs);
+                    if (q != null) {
+                        list.add(q);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            MessageUtils.logError("加载悬赏任务失败: " + e.getMessage());
+        }
+        return list;
+    }
+
+    private static void bindQuest(PreparedStatement ps, Quest quest) throws SQLException {
+        ps.setString(1, quest.getQuestId().toString());
+        if (quest.getPlayerId() == null) {
+            ps.setNull(2, Types.VARCHAR);
+        } else {
+            ps.setString(2, quest.getPlayerId().toString());
+        }
+        ps.setString(3, quest.getType().name());
+        ps.setString(4, quest.getReleaseMethod().name());
+        ps.setString(5, quest.getMaterialKey());
+        ps.setString(6, quest.getMaterialName());
+        ps.setInt(7, quest.getRequiredAmount());
+        ps.setInt(8, quest.getCurrentAmount());
+        ps.setLong(9, quest.getStartTime());
+        ps.setLong(10, quest.getTimeLimit());
+        ps.setInt(11, quest.getLevel());
+        ps.setInt(12, quest.getDifficulty());
+        ps.setString(13, quest.getStatus().name());
+    }
+
+    private static Quest readQuest(ResultSet rs) throws SQLException {
+        try {
+            UUID questId = UUID.fromString(rs.getString("quest_uuid"));
+            String ownerStr = rs.getString("owner_player_uuid");
+            UUID playerId = ownerStr == null || ownerStr.isBlank() ? null : UUID.fromString(ownerStr);
+            QuestType type = QuestType.valueOf(rs.getString("quest_type"));
+            QuestReleaseMethod release = QuestReleaseMethod.valueOf(rs.getString("release_method"));
+            String materialKey = rs.getString("material_key");
+            String materialName = rs.getString("material_name");
+            int required = rs.getInt("required_amount");
+            int current = rs.getInt("current_amount");
+            long start = rs.getLong("start_time_ms");
+            long timeLimit = rs.getLong("time_limit_ms");
+            int level = rs.getInt("quest_level");
+            int difficulty = rs.getInt("difficulty");
+            QuestStatus status = QuestStatus.valueOf(rs.getString("status"));
+            return new Quest(questId, playerId, type, release, materialKey, materialName,
+                    required, current, start, timeLimit, level, difficulty, status);
+        } catch (Exception e) {
+            MessageUtils.logWarning("跳过无效任务行: " + e.getMessage());
+            return null;
         }
     }
 
