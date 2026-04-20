@@ -46,7 +46,8 @@ public class WeatherListener implements Listener {
         if (world == null) return false;
         String name = configManager.getWeatherWorldName();
         if (name.isBlank()) {
-            return world.getEnvironment() == World.Environment.NORMAL;
+            World defaultWorld = Bukkit.getWorlds().isEmpty() ? null : Bukkit.getWorlds().get(0);
+            return defaultWorld != null && world.getUID().equals(defaultWorld.getUID());
         }
         return world.getName().equalsIgnoreCase(name);
     }

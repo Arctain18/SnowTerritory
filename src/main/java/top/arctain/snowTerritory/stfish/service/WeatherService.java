@@ -31,7 +31,6 @@ public class WeatherService {
 
         double cost = configManager.getSummonCost();
         if (economyService.getBalance(player) < cost) return null;
-
         double stormChance = configManager.getStormChance();
         boolean toStorm = ThreadLocalRandom.current().nextDouble() < stormChance;
 
@@ -55,10 +54,7 @@ public class WeatherService {
     private World resolveTargetWorld() {
         String configured = configManager.getWeatherWorldName();
         if (configured.isBlank()) {
-            return Bukkit.getWorlds().stream()
-                    .filter(w -> w.getEnvironment() == World.Environment.NORMAL)
-                    .findFirst()
-                    .orElse(null);
+            return Bukkit.getWorlds().isEmpty() ? null : Bukkit.getWorlds().get(0);
         }
 
         World world = Bukkit.getWorld(configured);
