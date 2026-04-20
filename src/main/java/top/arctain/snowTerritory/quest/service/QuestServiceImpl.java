@@ -1,6 +1,8 @@
 package top.arctain.snowTerritory.quest.service;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.Main;
@@ -327,6 +329,7 @@ public class QuestServiceImpl implements QuestService {
         Player player = Bukkit.getPlayer(playerId);
         if (player != null) {
             rewardDistributor.distribute(player, quest, rewardMultiplier);
+            playQuestCompleteSound(player);
         }
         return true;
     }
@@ -363,6 +366,7 @@ public class QuestServiceImpl implements QuestService {
         databaseDao.recordCompletedQuest(player.getUniqueId(), quest);
         
         rewardDistributor.distribute(player, quest);
+        playQuestCompleteSound(player);
         return true;
     }
     
@@ -386,7 +390,14 @@ public class QuestServiceImpl implements QuestService {
                 }
             }
         }
+        if (claimed > 0) {
+            playQuestCompleteSound(player);
+        }
         return claimed;
+    }
+
+    private void playQuestCompleteSound(Player player) {
+        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1.0f, 1.0f);
     }
 
     private boolean isBountyQuestCompleted(Quest quest) {
