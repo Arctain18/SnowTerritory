@@ -3,6 +3,7 @@ package top.arctain.snowTerritory.qol;
 import org.bukkit.plugin.PluginManager;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.qol.config.QolConfigManager;
+import top.arctain.snowTerritory.qol.listener.BowNoArrowListener;
 import top.arctain.snowTerritory.qol.listener.FarmlandTrampleListener;
 import top.arctain.snowTerritory.utils.MessageUtils;
 
@@ -21,6 +22,7 @@ public class QolModule {
         configManager.loadAll();
         PluginManager pm = plugin.getServer().getPluginManager();
         pm.registerEvents(new FarmlandTrampleListener(configManager), plugin);
+        pm.registerEvents(new BowNoArrowListener(configManager), plugin);
         MessageUtils.logSuccess("QOL 模块已启用，配置目录: plugins/SnowTerritory/qol/");
     }
 

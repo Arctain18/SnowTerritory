@@ -1,0 +1,160 @@
+# 序列武器（铁血）- MMOItems SWORD 配置草案
+# 说明：
+# 1) 该文件延续你设定集的“序列武器”风格：可升级、不可进化、强技能叙事。
+# 2) 以妖刀双系（村雨 / 红樱）构成单线四阶，上下级明确。
+#
+# ---------------------------------------------------------------------------
+# 上下级关系（铁血序列）
+#   Ⅰ 妖刀「村雨」
+#     └─▶ Ⅱ 妖刀「村雨」Spiritus
+#           └─▶ Ⅲ 妖刀「红樱」
+#                 └─▶ Ⅳ 妖刀「红樱」Sp1riτus（顶点）
+# ---------------------------------------------------------------------------
+
+MURASAME:
+  base:
+    material: IRON_SWORD
+    name: "&7&l妖刀「村雨」"
+    tier: EPIC
+    required-level: 100
+    max-durability: 1850
+    disable-crafting: true
+    unbreakable: false
+    enchants:
+      sharpness: 5
+      sweeping: 2
+    hide-enchants: true
+    hide-attributes: true
+    attack-damage: 66.0
+    attack-speed: 1.45
+    critical-strike-chance: 10.0
+    critical-strike-power: 20.0
+    skill-damage: 12.0
+    pve-damage: 9.0
+    custom-model-data: 842001
+    gem-sockets:
+      - Uncolored
+      - Uncolored
+      - Uncolored
+    lore:
+      - "&8序列武器 · 铁血 &7| &eⅠ阶"
+      - "&7下级: &8无 &7· 上级: &f妖刀「村雨」Spiritus"
+      - "&7雨夜锻成，刃鸣如潮。"
+      - "&7第一式出鞘，先断距离，再断呼吸。"
+      - "&8技能: &7次元斩"
+
+MURASAME_SPIRITUS:
+  base:
+    material: IRON_SWORD
+    name: "&f&l妖刀「村雨」 &8Spiritus"
+    tier: DIVINE
+    required-level: 118
+    max-durability: 2180
+    disable-crafting: true
+    unbreakable: false
+    enchants:
+      sharpness: 6
+      sweeping: 2
+      looting: 2
+    hide-enchants: true
+    hide-attributes: true
+    attack-damage: 79.0
+    attack-speed: 1.5
+    critical-strike-chance: 13.0
+    critical-strike-power: 30.0
+    skill-damage: 18.0
+    pve-damage: 13.0
+    cooldown-reduction: 6.0
+    custom-model-data: 842002
+    gem-sockets:
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+    lore:
+      - "&8序列武器 · 铁血 &7| &6Ⅱ阶"
+      - "&7下级: &7妖刀「村雨」 &7· 上级: &c妖刀「红樱」"
+      - "&7灵性附刃，斩痕会在目标影中复写。"
+      - "&7雨声变得锋利，伤口总慢半拍才疼。"
+      - "&8技能: &f次元斩【桜】"
+
+BENIZAKURA:
+  base:
+    material: NETHERITE_SWORD
+    name: "&c&l妖刀「红樱」"
+    tier: CELESTIAL
+    required-level: 132
+    max-durability: 2460
+    disable-crafting: true
+    unbreakable: false
+    enchants:
+      sharpness: 7
+      sweeping: 3
+      fire-aspect: 2
+    hide-enchants: true
+    hide-attributes: true
+    attack-damage: 92.0
+    attack-speed: 1.56
+    critical-strike-chance: 16.0
+    critical-strike-power: 38.0
+    skill-damage: 25.0
+    pve-damage: 17.0
+    cooldown-reduction: 9.0
+    defense-penetration: 10.0
+    custom-model-data: 842003
+    gem-sockets:
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+    lore:
+      - "&8序列武器 · 铁血 &7| &dⅢ阶"
+      - "&7下级: &f妖刀「村雨」Spiritus &7· 上级: &4妖刀「红樱」Sp1riτus"
+      - "&7红樱初绽，刃路如花瓣回旋。"
+      - "&7失血与落樱同速，战场会被染成春末。"
+      - "&8技能: &c绯樱乱舞 &7- &f樱落绯时，刃舞无常"
+
+BENIZAKURA_SP1RITUS:
+  base:
+    material: NETHERITE_SWORD
+    name: "&4&l妖刀「红樱」 &8Sp1riτus"
+    tier: APOCALYPTIC
+    required-level: 148
+    max-durability: 2800
+    disable-crafting: true
+    unbreakable: false
+    enchants:
+      sharpness: 8
+      sweeping: 3
+      fire-aspect: 2
+      looting: 3
+    hide-enchants: true
+    hide-attributes: true
+    attack-damage: 108.0
+    attack-speed: 1.62
+    critical-strike-chance: 20.0
+    critical-strike-power: 48.0
+    skill-damage: 33.0
+    pve-damage: 23.0
+    cooldown-reduction: 12.0
+    defense-penetration: 15.0
+    lifesteal: 8.0
+    custom-model-data: 842004
+    gem-sockets:
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+    lore:
+      - "&8序列武器 · 铁血 &7| &5Ⅳ阶 &8· 顶点"
+      - "&7下级: &c妖刀「红樱」 &7· 上级: &8无"
+      - "&7此刃会记住每一次挥砍的结局。"
+      - "&7当第十日红尽，连胜负都会被它埋葬。"
+      - "&8技能: &4花无十日红"
+      - "&8诗句: &7十日红残终化土，千樱散尽刃成枯"

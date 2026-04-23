@@ -19,6 +19,7 @@ import top.arctain.snowTerritory.armor.service.ArmorConfirmSessionService;
 import top.arctain.snowTerritory.armor.service.ArmorCostService;
 import top.arctain.snowTerritory.armor.service.ArmorGenerateService;
 import top.arctain.snowTerritory.utils.MessageUtils;
+import top.arctain.snowTerritory.utils.NumberFormatUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,7 +149,7 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
             playArmorUiSound(player, Sound.ENTITY_VILLAGER_NO);
             MessageUtils.sendConfigMessage(player, "armor.confirm-insufficient",
                     "&c✗ &f货币不足，无法生成。SL 缺少: &e{sl} &7| QP 缺少: &e{qp}",
-                    "sl", num(latest.slShortage()), "qp", num(latest.qpShortage()));
+                    "sl", compactNum(latest.slShortage()), "qp", num(latest.qpShortage()));
             return true;
         }
         if (!costService.tryCharge(player, latest)) {
@@ -194,14 +195,14 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
         String costLine = preview.vip().active()
                 ? MessageUtils.getConfigMessage("armor.confirm-preview-cost-vip",
                         "    &7本次消耗: &{#75ddff}Sl &8{rawSl} &7→ &a{finalSl} &8| &{#ffd500}QP &8{rawQp} &7→ &a{finalQp}{vip}",
-                        "rawSl", num(preview.rawSl()),
-                        "finalSl", num(preview.finalSl()),
+                        "rawSl", compactNum(preview.rawSl()),
+                        "finalSl", compactNum(preview.finalSl()),
                         "rawQp", num(preview.rawQp()),
                         "finalQp", num(preview.finalQp()),
                         "vip", vipSuffix)
                 : MessageUtils.getConfigMessage("armor.confirm-preview-cost-normal",
                         "    &7本次消耗: &{#75ddff}Sl &a{finalSl} &8| &{#ffd500}QP &a{finalQp}",
-                        "finalSl", num(preview.finalSl()),
+                        "finalSl", compactNum(preview.finalSl()),
                         "finalQp", num(preview.finalQp()));
         String profileDisplay = formatProfileDisplay(profile);
         String previewText = MessageUtils.getConfigMessage("armor.confirm-preview",
@@ -240,7 +241,7 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
         }
         return MessageUtils.colorize(
                 "&c货币不足，无法确认\n" +
-                        "&7SL 当前: &f" + num(preview.slBalance()) + " &8/ 缺少: &c" + num(preview.slShortage()) + "\n" +
+                        "&7SL 当前: &f" + compactNum(preview.slBalance()) + " &8/ 缺少: &c" + compactNum(preview.slShortage()) + "\n" +
                         "&7QP 当前: &f" + num(preview.qpBalance()) + " &8/ 缺少: &c" + num(preview.qpShortage())
         );
     }
@@ -360,6 +361,10 @@ public class ArmorCommand implements CommandExecutor, TabCompleter {
             return String.valueOf((long) Math.rint(v));
         }
         return String.format(java.util.Locale.ROOT, "%.1f", v);
+    }
+
+    private static String compactNum(double v) {
+        return NumberFormatUtils.formatWithUnit(v);
     }
 
     /** 防具确认流程中的界面音效（佩戴感 / 点击 / 拒绝等）。 */

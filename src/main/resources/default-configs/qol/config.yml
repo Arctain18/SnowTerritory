@@ -4,6 +4,8 @@
 qol:
   # 禁止任意实体踩踏使耕地变为泥土
   prevent-farmland-trample: true
+  # 玩家使用弓/弩时无需背包中有箭
+  no-arrow-required: true
 
   # --- 以下为占位，后续功能可在此扩展 ---
   # example-feature: false

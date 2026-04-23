@@ -6,6 +6,7 @@ import top.arctain.snowTerritory.stfish.config.StfishConfigManager;
 import top.arctain.snowTerritory.stfish.data.FishDefinition;
 import top.arctain.snowTerritory.stfish.data.FishTier;
 import top.arctain.snowTerritory.utils.MessageUtils;
+import top.arctain.snowTerritory.utils.NumberFormatUtils;
 
 /** 处理持鱼右键出售逻辑。 */
 public class FishSellService {
@@ -58,7 +59,7 @@ public class FishSellService {
 
         String fishDisplayName = itemFactory.getDisplayNameForBroadcast(def, tier);
         MessageUtils.sendConfigMessage(player, "stfish.sell-success", "&a✓ &7出售 {fish} &7成功，获得 &e{price} &7金币",
-                "price", String.format("%.2f", quote.price()), "fish", fishDisplayName);
+                "price", NumberFormatUtils.formatWithUnit(quote.price()), "fish", fishDisplayName);
         if (quote.priceDecayed()) {
             MessageUtils.sendConfigMessage(player, "stfish.sell-price-decay",
                     "&e&l! &7该品种出售过多，收购价已下降，请稍后再售");

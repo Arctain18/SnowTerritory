@@ -15,6 +15,7 @@ import top.arctain.snowTerritory.stfish.service.EconomyService;
 import top.arctain.snowTerritory.stfish.service.FishItemFactory;
 import top.arctain.snowTerritory.stfish.service.WeatherService;
 import top.arctain.snowTerritory.utils.MessageUtils;
+import top.arctain.snowTerritory.utils.NumberFormatUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -160,7 +161,7 @@ public class StfishCommand implements CommandExecutor, TabCompleter {
         double cost = configManager.getSummonCost();
         if (economyService.getBalance(player) < cost) {
             MessageUtils.sendConfigMessage(sender, "stfish.summon-insufficient-funds",
-                    "&c✗ &f金币不足，需要 &e{cost} &f金币", "cost", String.valueOf((int) cost));
+                    "&c✗ &f金币不足，需要 &e{cost} &f金币", "cost", NumberFormatUtils.formatWithUnit(cost));
             return true;
         }
 
@@ -168,7 +169,7 @@ public class StfishCommand implements CommandExecutor, TabCompleter {
         if (weatherName != null) {
             MessageUtils.sendConfigMessage(sender, "stfish.summon-success",
                     "&a✓ &f已消耗 &e{cost} &f金币召唤 &e{weather} &7天气",
-                    "cost", String.valueOf((int) cost), "weather", weatherName);
+                    "cost", NumberFormatUtils.formatWithUnit(cost), "weather", weatherName);
         } else {
             String worldName = configManager.getWeatherWorldName();
             MessageUtils.sendConfigMessage(sender, "stfish.summon-world-not-found",

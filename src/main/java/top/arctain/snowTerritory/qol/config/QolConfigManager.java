@@ -15,6 +15,7 @@ public class QolConfigManager {
     private final Main plugin;
     private final File baseDir;
     private boolean preventFarmlandTrample = true;
+    private boolean noArrowRequired = true;
 
     public QolConfigManager(Main plugin) {
         this.plugin = plugin;
@@ -39,13 +40,19 @@ public class QolConfigManager {
         ConfigurationSection qol = mainConfig.getConfigurationSection("qol");
         if (qol == null) {
             preventFarmlandTrample = true;
+            noArrowRequired = true;
             return;
         }
         this.preventFarmlandTrample = qol.getBoolean("prevent-farmland-trample", true);
+        this.noArrowRequired = qol.getBoolean("no-arrow-required", true);
     }
 
     public boolean isPreventFarmlandTrample() {
         return preventFarmlandTrample;
+    }
+
+    public boolean isNoArrowRequired() {
+        return noArrowRequired;
     }
 
     public File getBaseDir() {

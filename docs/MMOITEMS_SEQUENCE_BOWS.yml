@@ -1,0 +1,162 @@
+# 序列武器（苍灵）- MMOItems BOW 配置草案
+# 说明：
+# 1) 该文件为通用 MMOItems 配置写法，具体字段名请按你服当前 MMOItems 版本微调。
+# 2) 设计遵循设定集：序列武器可升级、不可进化、具特殊技能倾向。
+#
+# ---------------------------------------------------------------------------
+# 上下级关系（一条线进阶，仅能通过序列任务 / 消耗材料从上一级合成或晋升）
+#   Ⅰ 空间切线
+#     └─▶ Ⅱ 空间切线 Disorder
+#           └─▶ Ⅲ 命运切线
+#                 └─▶ Ⅳ 命运切线 D1sφrder（顶点）
+# ---------------------------------------------------------------------------
+
+SPACE_TANGENT:
+  base:
+    material: BOW
+    name: "&b&l空间切线"
+    tier: EPIC
+    required-level: 95
+    max-durability: 1680
+    unbreakable: false
+    disable-interaction: false
+    disable-crafting: true
+    enchants:
+      power: 5
+      infinity: 1
+    hide-enchants: true
+    hide-attributes: true
+    gem-sockets:
+      - Uncolored
+      - Uncolored
+      - Uncolored
+    projectile-damage: 38.0
+    projectile-velocity: 1.35
+    critical-strike-chance: 11.0
+    critical-strike-power: 22.0
+    skill-damage: 12.0
+    pve-damage: 8.0
+    custom-model-data: 841001
+    lore:
+      - "&8序列武器 · 苍灵 &7| &eⅠ阶"
+      - "&7下级: &8无 &7· 上级: &b空间切线 Disorder"
+      - "&7以地脉星髓为弦，切开空间褶皱。"
+      - "&7每一次开弓，都像在世界上留下直线伤口。"
+      - "&8技能倾向: &b次元斩"
+
+SPACE_TANGENT_DISORDER:
+  base:
+    material: BOW
+    name: "&3&l空间切线 &8D&7i&8s&7o&8r&7d&8e&7r"
+    tier: DIVINE
+    required-level: 115
+    max-durability: 2100
+    unbreakable: false
+    disable-interaction: false
+    disable-crafting: true
+    enchants:
+      power: 6
+      infinity: 1
+      punch: 2
+    hide-enchants: true
+    hide-attributes: true
+    gem-sockets:
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+    projectile-damage: 50.0
+    projectile-velocity: 1.48
+    critical-strike-chance: 15.0
+    critical-strike-power: 32.0
+    skill-damage: 18.0
+    pve-damage: 12.0
+    defense-penetration: 8.0
+    custom-model-data: 841002
+    lore:
+      - "&8序列武器 · 苍灵 &7| &6Ⅱ阶"
+      - "&7下级: &b空间切线 &7· 上级: &d命运切线"
+      - "&7空间坐标在弦上崩塌，箭迹化作裂隙。"
+      - "&7命中的刹那，目标被推向错误的维度。"
+      - "&8技能倾向: &3ex次元斩"
+
+FATE_TANGENT:
+  base:
+    material: BOW
+    name: "&d&l命运切线"
+    tier: CELESTIAL
+    required-level: 128
+    max-durability: 2200
+    unbreakable: false
+    disable-interaction: false
+    disable-crafting: true
+    enchants:
+      power: 6
+      infinity: 1
+      punch: 1
+    hide-enchants: true
+    hide-attributes: true
+    gem-sockets:
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+    projectile-damage: 58.0
+    projectile-velocity: 1.54
+    critical-strike-chance: 16.5
+    critical-strike-power: 36.0
+    skill-damage: 22.0
+    pve-damage: 15.0
+    cooldown-reduction: 8.0
+    defense-penetration: 10.0
+    custom-model-data: 841003
+    lore:
+      - "&8序列武器 · 苍灵 &7| &dⅢ阶"
+      - "&7下级: &3空间切线 Disorder &7· 上级: &5命运切线 D1sφrder"
+      - "&7传闻此弓记录了每一次抉择的分歧。"
+      - "&7箭矢飞行时，未来会短暂显影。"
+      - "&8技能倾向: &d命轨折返"
+
+FATE_TANGENT_D1SPHRDER:
+  base:
+    material: BOW
+    name: "&5&l命运切线 &8D1sφrder"
+    tier: APOCALYPTIC
+    required-level: 145
+    max-durability: 2500
+    unbreakable: false
+    disable-interaction: false
+    disable-crafting: true
+    enchants:
+      power: 7
+      infinity: 1
+      punch: 2
+      flame: 1
+    hide-enchants: true
+    hide-attributes: true
+    gem-sockets:
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+    projectile-damage: 68.0
+    projectile-velocity: 1.62
+    critical-strike-chance: 19.0
+    critical-strike-power: 44.0
+    skill-damage: 28.0
+    pve-damage: 20.0
+    defense-penetration: 14.0
+    cooldown-reduction: 12.0
+    custom-model-data: 841004
+    lore:
+      - "&8序列武器 · 苍灵 &7| &5Ⅳ阶 &8· 顶点"
+      - "&7下级: &d命运切线 &7· 上级: &8无"
+      - "&7当命运本身被切开，因果只剩噪声。"
+      - "&7弓弦回响中，过去与未来互为残响。"
+      - "&8技能倾向: &5终焉命轨"
