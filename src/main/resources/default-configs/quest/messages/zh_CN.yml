@@ -1,8 +1,8 @@
 # 任务模块消息（唯一来源，主 config 不重复）
 # 每条消息可为单行字符串，或为字符串列表；列表将按行依次显示在聊天栏（多行）。
 bounty-announcement: "&6✦ &e[悬赏任务] &f{quest} &8| &7完成任务可获得丰厚奖励"
-# VIP3 悬赏刷新前 5 分钟预告；{material} {amount}
-bounty-vip3-preview: "&3✦ &f悬赏预告：&e{material} &7x&e{amount} &8(5分钟后刷新)"
+# VIP3 悬赏刷新前 5 分钟预告；{vip} {material}
+bounty-vip3-preview: "&8*{vip}&7：你夜观天象，冥冥中似乎传来了 &e{material} &7的感应。"
 bounty-hover-area: "&8━━━━━━━━━━━━━━━━━━\n&6◆ 任务区域\n&7{area}\n&8━━━━━━━━━━━━━━━━━━"
 accepted: "&a✓ &f已接取任务: &e{quest}"
 accept-failed: "&c✗ &f当前没有符合你档位难度要求的任务，请稍后重试"

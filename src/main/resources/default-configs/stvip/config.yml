@@ -9,7 +9,7 @@ join-message:
   remain-days-thresholds: [7, 3, 2, 1]
 
 tiers:
-  vip1:
+  1:
     permission: st.vip.1
     display-name: "&{#9100FF}Fatalism"
     priority: 1
@@ -23,7 +23,7 @@ tiers:
       quest-daily-free-claim-limit: 0
       quest-min-difficulty-exclusive: 0
       bounty-preannounce: false
-  vip2:
+  2:
     permission: st.vip.2
     display-name: "{#7DFFF8>}Aeth{#7DC5FF<>}erion{#7D84FF<}"
     priority: 2
@@ -37,7 +37,7 @@ tiers:
       quest-daily-free-claim-limit: 0
       quest-min-difficulty-exclusive: 8
       bounty-preannounce: false
-  vip3:
+  3:
     permission: st.vip.3
     display-name: "{#ADFF7D>}ἐντελ{#7DADFF<>}έχεια{#CF7DFF<}"
     priority: 3

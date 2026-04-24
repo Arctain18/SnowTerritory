@@ -312,19 +312,45 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             MessageUtils.sendError(sender, "command.no-permission", "&c✗ &f您没有权限使用此命令！");
             return true;
         }
-        if (args.length < 5 || !"give".equalsIgnoreCase(args[1])) {
+        if (args.length < 2) {
             MessageUtils.sendConfigMessage(sender, "stvip.command-usage",
-                    "&e用法: /sn vip give <player> <vip1|vip2|vip3> <时长, 例如 7d>");
+                    "&e用法: /sn vip give <player> <1|2|3> <时长, 例如 7d> 或 /sn vip remove <player>");
             return true;
         }
-        String playerName = args[2];
-        org.bukkit.OfflinePlayer target = plugin.getServer().getOfflinePlayer(playerName);
-        if (target == null || target.getUniqueId() == null) {
-            MessageUtils.sendConfigMessage(sender, "stvip.command-player-not-found",
-                    "&c✗ &f未找到玩家: {name}", "name", playerName);
+        if ("give".equalsIgnoreCase(args[1])) {
+            if (args.length < 5) {
+                MessageUtils.sendConfigMessage(sender, "stvip.command-usage",
+                        "&e用法: /sn vip give <player> <1|2|3> <时长, 例如 7d>");
+                return true;
+            }
+            String playerName = args[2];
+            org.bukkit.OfflinePlayer target = plugin.getServer().getOfflinePlayer(playerName);
+            if (target == null || target.getUniqueId() == null) {
+                MessageUtils.sendConfigMessage(sender, "stvip.command-player-not-found",
+                        "&c✗ &f未找到玩家: {name}", "name", playerName);
+                return true;
+            }
+            plugin.getStvipService().grantTemporaryVip(sender, target, args[3], args[4]);
             return true;
         }
-        plugin.getStvipService().grantTemporaryVip(sender, target, args[3], args[4]);
+        if ("remove".equalsIgnoreCase(args[1])) {
+            if (args.length < 3) {
+                MessageUtils.sendConfigMessage(sender, "stvip.command-usage",
+                        "&e用法: /sn vip remove <player>");
+                return true;
+            }
+            String playerName = args[2];
+            org.bukkit.OfflinePlayer target = plugin.getServer().getOfflinePlayer(playerName);
+            if (target == null || target.getUniqueId() == null) {
+                MessageUtils.sendConfigMessage(sender, "stvip.command-player-not-found",
+                        "&c✗ &f未找到玩家: {name}", "name", playerName);
+                return true;
+            }
+            plugin.getStvipService().revokeVip(sender, target);
+            return true;
+        }
+        MessageUtils.sendConfigMessage(sender, "stvip.command-usage",
+                "&e用法: /sn vip give <player> <1|2|3> <时长, 例如 7d> 或 /sn vip remove <player>");
         return true;
     }
 
@@ -446,9 +472,11 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             return modules;
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("vip")) {
-            if ("give".startsWith(args[1].toLowerCase())) {
-                return List.of("give");
-            }
+            List<String> subs = new ArrayList<>();
+            String input = args[1].toLowerCase();
+            if ("give".startsWith(input)) subs.add("give");
+            if ("remove".startsWith(input)) subs.add("remove");
+            return subs;
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("vip") && args[1].equalsIgnoreCase("give")) {
             List<String> playerNames = new ArrayList<>();
@@ -463,13 +491,23 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         if (args.length == 4 && args[0].equalsIgnoreCase("vip") && args[1].equalsIgnoreCase("give")) {
             List<String> tiers = new ArrayList<>();
             String input = args[3].toLowerCase();
-            if ("vip1".startsWith(input)) tiers.add("vip1");
-            if ("vip2".startsWith(input)) tiers.add("vip2");
-            if ("vip3".startsWith(input)) tiers.add("vip3");
+            if ("1".startsWith(input)) tiers.add("1");
+            if ("2".startsWith(input)) tiers.add("2");
+            if ("3".startsWith(input)) tiers.add("3");
             return tiers;
         }
         if (args.length == 5 && args[0].equalsIgnoreCase("vip") && args[1].equalsIgnoreCase("give")) {
             return List.of("7d", "30d", "90d");
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("vip") && args[1].equalsIgnoreCase("remove")) {
+            List<String> playerNames = new ArrayList<>();
+            String input = args[2].toLowerCase();
+            for (Player player : plugin.getServer().getOnlinePlayers()) {
+                if (player.getName().toLowerCase().startsWith(input)) {
+                    playerNames.add(player.getName());
+                }
+            }
+            return playerNames;
         }
 
         // /sn es 子命令补全

@@ -1,0 +1,153 @@
+# 序列武器（弦鸣）- MMOItems STAFF 配置草案
+# 说明：
+# 1) 延续设定集风格：序列武器可升级、不可进化、具叙事型技能主题。
+# 2) 以“失乐园 / 新伊甸”构成四阶单线进阶。
+#
+# ---------------------------------------------------------------------------
+# 上下级关系（弦鸣序列）
+#   Ⅰ 失乐园
+#     └─▶ Ⅱ 失乐园 Revolt
+#           └─▶ Ⅲ 新伊甸
+#                 └─▶ Ⅳ 新伊甸 Sublimity（顶点）
+# ---------------------------------------------------------------------------
+
+PARADISE_LOST:
+  base:
+    material: BLAZE_ROD
+    name: "&7&l失乐园"
+    tier: EPIC
+    required-level: 98
+    max-durability: 1720
+    disable-crafting: true
+    unbreakable: false
+    hide-attributes: true
+    hide-enchants: true
+    ability-damage: 62.0
+    magic-damage: 18.0
+    skill-damage: 12.0
+    cooldown-reduction: 7.0
+    mana: 70.0
+    mana-regeneration: 4.0
+    critical-strike-chance: 9.0
+    critical-strike-power: 18.0
+    pve-damage: 8.0
+    custom-model-data: 843001
+    gem-sockets:
+      - Uncolored
+      - Uncolored
+      - Uncolored
+    lore:
+      - "&8序列武器 · 弦鸣 &7| &eⅠ阶"
+      - "&7下级: &8无 &7· 上级: &f失乐园 Revolt"
+      - "&7第一道弦音奏响时，乐土便开始坍塌。"
+      - "&7你听见的不是祷词，而是裂隙的和声。"
+      - "&8主题: &7乐园失坠 · 断章咏叹"
+
+PARADISE_LOST_REVOLT:
+  base:
+    material: BLAZE_ROD
+    name: "&f&l失乐园 &8Revolt"
+    tier: DIVINE
+    required-level: 116
+    max-durability: 2050
+    disable-crafting: true
+    unbreakable: false
+    hide-attributes: true
+    hide-enchants: true
+    ability-damage: 78.0
+    magic-damage: 24.0
+    skill-damage: 18.0
+    cooldown-reduction: 10.0
+    mana: 95.0
+    mana-regeneration: 6.0
+    critical-strike-chance: 12.0
+    critical-strike-power: 27.0
+    pve-damage: 12.0
+    defense-penetration: 8.0
+    custom-model-data: 843002
+    gem-sockets:
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+    lore:
+      - "&8序列武器 · 弦鸣 &7| &6Ⅱ阶"
+      - "&7下级: &7失乐园 &7· 上级: &b新伊甸"
+      - "&7Revolt 并非反叛者的名字，而是第二乐章。"
+      - "&7当弦振越界，秩序会先于现实崩裂。"
+      - "&8主题: &f逆奏反叛 · 失序共鸣"
+
+NEW_EDEN:
+  base:
+    material: END_ROD
+    name: "&b&l新伊甸"
+    tier: CELESTIAL
+    required-level: 131
+    max-durability: 2360
+    disable-crafting: true
+    unbreakable: false
+    hide-attributes: true
+    hide-enchants: true
+    ability-damage: 94.0
+    magic-damage: 30.0
+    skill-damage: 24.0
+    cooldown-reduction: 13.0
+    mana: 125.0
+    mana-regeneration: 8.0
+    critical-strike-chance: 15.0
+    critical-strike-power: 34.0
+    pve-damage: 16.0
+    defense-penetration: 11.0
+    custom-model-data: 843003
+    gem-sockets:
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+    lore:
+      - "&8序列武器 · 弦鸣 &7| &dⅢ阶"
+      - "&7下级: &f失乐园 Revolt &7· 上级: &3新伊甸 Sublimity"
+      - "&7废墟之上，新伊甸以纯白和弦重建天空。"
+      - "&7每一道法术都像播种，结果却总是审判。"
+      - "&8主题: &b重构福音 · 星髓新约"
+
+NEW_EDEN_SUBLIMITY:
+  base:
+    material: END_ROD
+    name: "&3&l新伊甸 &8Sublimity"
+    tier: APOCALYPTIC
+    required-level: 146
+    max-durability: 2700
+    disable-crafting: true
+    unbreakable: false
+    hide-attributes: true
+    hide-enchants: true
+    ability-damage: 112.0
+    magic-damage: 38.0
+    skill-damage: 32.0
+    cooldown-reduction: 16.0
+    mana: 160.0
+    mana-regeneration: 10.0
+    critical-strike-chance: 19.0
+    critical-strike-power: 46.0
+    pve-damage: 22.0
+    defense-penetration: 15.0
+    lifesteal: 6.0
+    custom-model-data: 843004
+    gem-sockets:
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+      - Uncolored
+    lore:
+      - "&8序列武器 · 弦鸣 &7| &5Ⅳ阶 &8· 顶点"
+      - "&7下级: &b新伊甸 &7· 上级: &8无"
+      - "&7是超越，不是终点。"
+      - "&7当最后一节弦鸣落下，乐园与深渊同音。"
+      - "&8主题: &3至高升华 · 因果归弦"

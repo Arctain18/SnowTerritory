@@ -126,6 +126,10 @@ public class StvipConfigManager {
                 .findFirst();
     }
 
+    public List<StvipTier> getTiers() {
+        return List.copyOf(tiers);
+    }
+
     public boolean isJoinMessageEnabled() {
         return joinMessageEnabled;
     }

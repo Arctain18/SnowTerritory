@@ -19,9 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.regex.Pattern;
 
 /** 按权限解析当前 VIP 档并提供各模块使用的数值。 */
 public class StvipService {
+
+    private static final Pattern DURATION_PATTERN = Pattern.compile("^[1-9]\\d*[shd]$", Pattern.CASE_INSENSITIVE);
 
     private final Main plugin;
     private final StvipConfigManager configManager;
@@ -101,16 +104,43 @@ public class StvipService {
             MessageUtils.sendConfigMessage(sender, "stvip.give-duration-empty", "&c✗ &f时长不能为空，例如: &e7d");
             return false;
         }
+        String normalizedDuration = duration.trim().toLowerCase();
+        if (!DURATION_PATTERN.matcher(normalizedDuration).matches()) {
+            MessageUtils.sendConfigMessage(sender, "stvip.give-duration-invalid",
+                    "&c✗ &f时长格式无效，仅支持 &e<数字><s|h|d>&f，例如: &e30d");
+            return false;
+        }
         String identity = target.getName() != null && !target.getName().isBlank()
                 ? target.getName()
                 : target.getUniqueId().toString();
-        String command = "lp user " + identity + " permission settemp " + tierOpt.get().getPermission() + " true " + duration;
+        String command = "lp user " + identity + " permission settemp " + tierOpt.get().getPermission() + " true " + normalizedDuration;
         boolean success = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
         if (success) {
             MessageUtils.sendConfigMessage(sender, "stvip.give-success", "&a✓ &f已发放 {display} &f给 &e{player} &f时长: &e{duration}",
-                    "display", tierOpt.get().getDisplayName(), "player", identity, "duration", duration);
+                    "display", tierOpt.get().getDisplayName(), "player", identity, "duration", normalizedDuration);
         } else {
             MessageUtils.sendConfigMessage(sender, "stvip.give-lp-failed", "&c✗ &fLuckPerms 执行失败，请检查命令与插件状态");
+        }
+        return success;
+    }
+
+    public boolean revokeVip(CommandSender sender, OfflinePlayer target) {
+        String identity = target.getName() != null && !target.getName().isBlank()
+                ? target.getName()
+                : target.getUniqueId().toString();
+        boolean success = true;
+        for (StvipTier tier : configManager.getTiers()) {
+            String command = "lp user " + identity + " permission unsettemp " + tier.getPermission();
+            if (!Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)) {
+                success = false;
+            }
+        }
+        if (success) {
+            MessageUtils.sendConfigMessage(sender, "stvip.revoke-success",
+                    "&a✓ &f已取消玩家 &e{player} &f的所有 VIP 权限", "player", identity);
+        } else {
+            MessageUtils.sendConfigMessage(sender, "stvip.revoke-lp-failed",
+                    "&c✗ &f取消 VIP 失败，请检查 LuckPerms 状态");
         }
         return success;
     }

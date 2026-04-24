@@ -650,8 +650,8 @@ public class QuestServiceImpl implements QuestService {
                 continue;
             }
             MessageUtils.sendConfigRaw(online, "quest.bounty-vip3-preview",
-                    "&3✦ &f悬赏预告：&e{material} &7x&e{amount} &8(5分钟后刷新)",
-                    "material", preview.getMaterialName(), "amount", String.valueOf(preview.getRequiredAmount()));
+                    "&8*{vip}&7：你夜观天象，冥冥中似乎传来了 &e{material} &7的感应。",
+                    "vip", "VIP3", "material", preview.getMaterialName());
         }
     }
 
