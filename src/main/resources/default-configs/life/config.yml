@@ -1,0 +1,59 @@
+# life 模块配置
+# 路径: plugins/SnowTerritory/life/config.yml
+
+max-level: 50
+
+exp-function:
+  # 升到下一等级所需经验 = base + (当前等级-1) * step
+  base: 100
+  step: 100
+
+gathering:
+  quality1-disabled-level: 16
+  title:
+    fade-in: 300
+    stay: 1000
+    fade-out: 300
+  quality-weights:
+    novice:
+      min-level: 1
+      max-level: 15
+      weights:
+        "1": 60
+        "2": 30
+        "3": 10
+    skilled:
+      min-level: 16
+      max-level: 35
+      weights:
+        "1": 0
+        "2": 60
+        "3": 40
+    master:
+      min-level: 36
+      max-level: 50
+      weights:
+        "1": 0
+        "2": 35
+        "3": 65
+  crops:
+    WHEAT:
+      quality-mmoitems:
+        "1": "MATERIAL:WHEAT_1"
+        "2": "MATERIAL:WHEAT_2"
+        "3": "MATERIAL:WHEAT_3"
+    CARROTS:
+      quality-mmoitems:
+        "1": "MATERIAL:CARROT_1"
+        "2": "MATERIAL:CARROT_2"
+        "3": "MATERIAL:CARROT_3"
+    POTATOES:
+      quality-mmoitems:
+        "1": "MATERIAL:POTATO_1"
+        "2": "MATERIAL:POTATO_2"
+        "3": "MATERIAL:POTATO_3"
+    BEETROOTS:
+      quality-mmoitems:
+        "1": "MATERIAL:BEETROOT_1"
+        "2": "MATERIAL:BEETROOT_2"
+        "3": "MATERIAL:BEETROOT_3"

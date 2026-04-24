@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import top.arctain.snowTerritory.Main;
 import top.arctain.snowTerritory.config.PluginConfig;
 import top.arctain.snowTerritory.enderstorage.EnderStorageModule;
+import top.arctain.snowTerritory.life.LifeModule;
 import top.arctain.snowTerritory.utils.ConfigUtils;
 import top.arctain.snowTerritory.quest.QuestModule;
 import top.arctain.snowTerritory.reinforce.ReinforceModule;
@@ -32,6 +33,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
     private final StocksModule stocksModule;
     private final StfishModule stfishModule;
     private final ArmorModule armorModule;
+    private final LifeModule lifeModule;
 
     public SnowTerritoryCommand(Main plugin, PluginConfig config, ReinforceModule reinforceModule, StfishModule stfishModule, DebugResetConfirmHandler debugResetHandler) {
         this.plugin = plugin;
@@ -44,6 +46,7 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         this.stocksModule = plugin.getStocksModule();
         this.stfishModule = stfishModule;
         this.armorModule = plugin instanceof Main ? ((Main) plugin).getArmorModule() : null;
+        this.lifeModule = plugin instanceof Main ? ((Main) plugin).getLifeModule() : null;
     }
 
     @Override
@@ -76,6 +79,8 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             return handleArmor(sender, args);
         } else if (subCommand.equals("vip")) {
             return handleVip(sender, args);
+        } else if (subCommand.equals("life")) {
+            return handleLife(sender, args);
         } else if (subCommand.equals("debug")) {
             return handleDebug(sender, args);
         } else {
@@ -141,6 +146,9 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         }
         if (plugin.getQolModule() != null) {
             plugin.getQolModule().reload();
+        }
+        if (plugin.getLifeModule() != null) {
+            plugin.getLifeModule().reload();
         }
         MessageUtils.sendSuccess(sender, "command.reload-success", "&a✓ &f插件配置已重载！");
         return true;
@@ -279,9 +287,9 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             String m = args[2].toLowerCase();
             if ("all".equals(m) || "全部".equals(m)) {
                 modules = null; // null 表示删除整个目录
-            } else if (!java.util.Set.of("stvip", "reinforce", "enderstorage", "es", "quest", "stocks", "stfish", "armor", "qol").contains(m)) {
+            } else if (!java.util.Set.of("stvip", "reinforce", "enderstorage", "es", "quest", "stocks", "stfish", "armor", "qol", "life").contains(m)) {
                 MessageUtils.sendConfigMessage(sender, "debug.invalid-module",
-                        "&c✗ &f未知模块: {module}，可选: stvip, reinforce, enderstorage, quest, stocks, stfish, armor, qol, all", "module", m);
+                        "&c✗ &f未知模块: {module}，可选: stvip, reinforce, enderstorage, quest, stocks, stfish, armor, qol, life, all", "module", m);
                 return true;
             } else {
                 modules = "es".equals(m) ? java.util.List.of("enderstorage") : java.util.List.of(m);
@@ -354,6 +362,18 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean handleLife(CommandSender sender, String[] args) {
+        if (lifeModule == null || lifeModule.getLifeCommand() == null) {
+            MessageUtils.sendError(sender, "command.feature-missing", "&c✗ &fLife 功能未启用");
+            return true;
+        }
+        String[] forward = new String[Math.max(0, args.length - 1)];
+        if (args.length > 1) {
+            System.arraycopy(args, 1, forward, 0, args.length - 1);
+        }
+        return lifeModule.getLifeCommand().onCommand(sender, null, "snowterritory life", forward);
+    }
+
     /** 删除整个 SnowTerritory 配置目录（保留 .db 数据库文件），重载所有配置。返回删除的文件数。 */
     private int executeResetAll() {
         File dataFolder = plugin.getDataFolder();
@@ -385,6 +405,8 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
                 case "armor" -> armorModule != null ? doResetModule(armorModule.getConfigManager().getBaseDir(), () -> armorModule.reload()) : 0;
                 case "qol" -> plugin.getQolModule() != null
                         ? doResetModule(plugin.getQolModule().getConfigManager().getBaseDir(), () -> plugin.getQolModule().reload()) : 0;
+                case "life" -> plugin.getLifeModule() != null
+                        ? doResetModule(plugin.getLifeModule().getConfigManager().getBaseDir(), () -> plugin.getLifeModule().reload()) : 0;
                 default -> 0;
             };
         }
@@ -433,6 +455,9 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             if ("vip".startsWith(input)) {
                 completions.add("vip");
             }
+            if ("life".startsWith(input)) {
+                completions.add("life");
+            }
             if ("debug".startsWith(input)) {
                 completions.add("debug");
             }
@@ -468,8 +493,16 @@ public class SnowTerritoryCommand implements CommandExecutor, TabCompleter {
             if ("stfish".startsWith(input)) modules.add("stfish");
             if ("armor".startsWith(input)) modules.add("armor");
             if ("qol".startsWith(input)) modules.add("qol");
+            if ("life".startsWith(input)) modules.add("life");
             if ("all".startsWith(input) || "全部".startsWith(input)) modules.add("all");
             return modules;
+        }
+        if (args.length >= 2 && args[0].equalsIgnoreCase("life")) {
+            if (lifeModule != null && lifeModule.getLifeCommand() != null) {
+                String[] forward = new String[args.length - 1];
+                System.arraycopy(args, 1, forward, 0, args.length - 1);
+                return lifeModule.getLifeCommand().onTabComplete(sender, command, "life", forward);
+            }
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("vip")) {
             List<String> subs = new ArrayList<>();

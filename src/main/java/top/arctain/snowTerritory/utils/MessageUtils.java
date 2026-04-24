@@ -85,6 +85,9 @@ public class MessageUtils {
             } else if (key.startsWith("stvip.")) {
                 prefixKey = "prefix.stvip";
                 defaultPrefix = "&{#4a95ff}ST &{#C9AE59}VIP &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";
+            } else if (key.startsWith("life.")) {
+                prefixKey = "prefix.life";
+                defaultPrefix = "&{#4a95ff}ST &{#7ac943}Life &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";
             } else {
                 prefixKey = "prefix.default";
                 defaultPrefix = "<g:#FFFFFF:#4A95FF>SnowTerritory</g> &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> ";

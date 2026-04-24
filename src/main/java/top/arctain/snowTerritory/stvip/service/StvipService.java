@@ -74,6 +74,12 @@ public class StvipService {
         return resolveTier(player).map(StvipTier::isBountyPreannounce).orElse(false);
     }
 
+    public String resolveTierDisplayName(String tierId, String fallback) {
+        return configManager.getTierById(tierId)
+                .map(StvipTier::getDisplayName)
+                .orElse(fallback);
+    }
+
     /**
      * 读取当前档位权限的剩余天数（仅 LuckPerms 临时权限可用）。
      */

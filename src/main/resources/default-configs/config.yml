@@ -14,6 +14,7 @@ modules:
   stfish: true
   armor: true
   qol: true
+  life: true
 
 # ============================================
 # 消息配置（全局，供 MessageUtils 使用）
@@ -53,6 +54,7 @@ messages:
     quest: "&{#4a95ff}ST &{#FFD700}Quest &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> "
     stfish: "&{#4a95ff}ST &{#5dade2}Fish &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> "
     stocks: "&{#4a95ff}ST &{#26A69A}Stocks &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> "
+    life: "&{#4a95ff}ST &{#7ac943}Life &{#4a95ff}&l>&{#99c2ff}&l>&{#ffffff}&l> "
 
   # 命令相关消息
   command:
@@ -98,6 +100,7 @@ messages:
     checkid: "&e/sn checkID &7- &f查看手中物品的MMOItems ID"
     # 战利品仓库命令帮助
     enderstorage: "&e/sn es &7- &f打开战利品仓库界面"
+    life: "&e/sn life &7- &f查看生活等级与经验"
   
   # 分隔线 (用于美化消息显示)
   separator: "&8&m                                        "
@@ -106,6 +109,6 @@ messages:
   debug:
     usage: "&e用法: /sn debug resetconfig [模块] &7(不指定则删除整个配置目录，保留数据库)"
     confirm-prompt: "&e⚠ &f确定要删除 {module} 的配置并重载吗？&c输入 yes 确认&f，30秒内有效"
-    invalid-module: "&c✗ &f未知模块: {module}，可选: stvip, reinforce, enderstorage, quest, stocks, stfish, armor, qol, all"
+    invalid-module: "&c✗ &f未知模块: {module}，可选: stvip, reinforce, enderstorage, quest, stocks, stfish, armor, qol, life, all"
     resetconfig-success: "&a✓ &f已删除 {module} {count} 个配置文件并重载（数据库已保留）"
 

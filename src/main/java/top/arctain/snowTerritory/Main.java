@@ -3,6 +3,7 @@ package top.arctain.snowTerritory;
 import top.arctain.snowTerritory.commands.DebugResetConfirmHandler;
 import top.arctain.snowTerritory.commands.SnowTerritoryCommand;
 import top.arctain.snowTerritory.config.PluginConfig;
+import top.arctain.snowTerritory.life.LifeModule;
 import top.arctain.snowTerritory.listeners.DebugResetConfirmListener;
 import top.arctain.snowTerritory.listeners.ItemEditListener;
 import top.arctain.snowTerritory.listeners.PlayerJoinListener;
@@ -15,6 +16,7 @@ import top.arctain.snowTerritory.stocks.StocksModule;
 import top.arctain.snowTerritory.qol.QolModule;
 import top.arctain.snowTerritory.stvip.StvipModule;
 import top.arctain.snowTerritory.stvip.service.StvipService;
+import top.arctain.snowTerritory.life.service.LifeService;
 import top.arctain.snowTerritory.utils.MessageUtils;
 import top.arctain.snowTerritory.utils.NBTUtils;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -30,6 +32,7 @@ public class Main extends JavaPlugin {
     private ArmorModule armorModule;
     private QolModule qolModule;
     private StvipModule stvipModule;
+    private LifeModule lifeModule;
 
     @Override
     public void onEnable() {
@@ -116,6 +119,13 @@ public class Main extends JavaPlugin {
         } else {
             MessageUtils.logInfo("QOL 模块已禁用（配置文件中 modules.qol = false）");
         }
+        if (pluginConfig.isModuleEnabled("life")) {
+            this.lifeModule = new LifeModule(this);
+            this.lifeModule.enable();
+            MessageUtils.logSuccess("Life 模块已启用");
+        } else {
+            MessageUtils.logInfo("Life 模块已禁用（配置文件中 modules.life = false）");
+        }
 
         DebugResetConfirmHandler debugResetHandler = new DebugResetConfirmHandler(this);
         getServer().getPluginManager().registerEvents(new DebugResetConfirmListener(debugResetHandler), this);
@@ -162,6 +172,9 @@ public class Main extends JavaPlugin {
         }
         if (qolModule != null) {
             qolModule.disable();
+        }
+        if (lifeModule != null) {
+            lifeModule.disable();
         }
         MessageUtils.sendShutdownBanner(this);
     }
@@ -233,8 +246,16 @@ public class Main extends JavaPlugin {
         return stvipModule;
     }
 
+    public LifeModule getLifeModule() {
+        return lifeModule;
+    }
+
     /** ST VIP 未启用时返回 null。 */
     public StvipService getStvipService() {
         return stvipModule != null ? stvipModule.getService() : null;
+    }
+
+    public LifeService getLifeService() {
+        return lifeModule != null ? lifeModule.getLifeService() : null;
     }
 }

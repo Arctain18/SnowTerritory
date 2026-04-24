@@ -1,0 +1,8 @@
+list-header: "&7========= &f生活经验 &7========="
+list-item: "&7{skill} &8| &fLv.{level} &8| {bar} &8({current}/{need})"
+
+player-only: "&c✗ &f此命令仅限玩家使用"
+quality1-warning: "&8*由于你的采集技能不够熟练，你不小心踩坏了这个农田"
+collect-success-title: "&a采集成功"
+collect-success-subtitle: "&7获得: {crop}"
+collect-inventory-full: "&e⚠ &f背包已满！部分物品已掉落在地上。"

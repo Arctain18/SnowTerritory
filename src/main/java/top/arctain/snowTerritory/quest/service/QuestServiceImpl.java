@@ -239,6 +239,33 @@ public class QuestServiceImpl implements QuestService {
         // 其次更新悬赏任务
         return updateBountyQuestProgress(materialKey, amount);
     }
+
+    @Override
+    public boolean checkCollectQuestProgress(UUID playerId, String materialKey, int amount) {
+        if (!updateQuestProgress(playerId, materialKey, amount)) {
+            return false;
+        }
+        boolean completedBounty = false;
+        synchronized (bountyQuests) {
+            for (Quest quest : bountyQuests) {
+                if (!isActiveAndNotExpired(quest)) {
+                    continue;
+                }
+                if (quest.getType() != QuestType.COLLECT) {
+                    continue;
+                }
+                if (!materialKey.equals(quest.getMaterialKey())) {
+                    continue;
+                }
+                if (quest.isCompleted()) {
+                    quest.setStatus(QuestStatus.COMPLETED);
+                    databaseDao.upsertQuestInstance(quest);
+                    completedBounty = true;
+                }
+            }
+        }
+        return completedBounty;
+    }
     
     private boolean updatePlayerQuestProgress(UUID playerId, String materialKey, int amount) {
         List<Quest> quests = playerQuests.get(playerId);
@@ -651,7 +678,7 @@ public class QuestServiceImpl implements QuestService {
             }
             MessageUtils.sendConfigRaw(online, "quest.bounty-vip3-preview",
                     "&8*{vip}&7：你夜观天象，冥冥中似乎传来了 &e{material} &7的感应。",
-                    "vip", "VIP3", "material", preview.getMaterialName());
+                    "vip", stvipService.resolveTierDisplayName("vip3", "VIP3"), "material", preview.getMaterialName());
         }
     }
 

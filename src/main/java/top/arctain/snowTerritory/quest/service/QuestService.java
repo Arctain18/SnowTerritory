@@ -63,6 +63,11 @@ public interface QuestService {
      * 更新任务进度
      */
     boolean updateQuestProgress(UUID playerId, String materialKey, int amount);
+
+    /**
+     * 采集行为专用进度推进，返回是否存在已完成的采集类悬赏任务。
+     */
+    boolean checkCollectQuestProgress(UUID playerId, String materialKey, int amount);
     
     /**
      * 完成任务并发放奖励
